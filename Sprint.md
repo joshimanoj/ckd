@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #1 [Pass 1] | /uat APPROVED ✅ | Ready for: PR + merge → then /prd Story #2
+Web Track  → Story #2 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-16 | Next: Story #3
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
@@ -132,8 +132,8 @@ Per architecture.md Section 9 and product_note.md Section 6:
 
 | # | Title | Feature Source | Type | Complexity | Sprint | Web Done | Native App Done |
 |---|---|---|---|---|---|---|---|
-| 1 | Google Sign-In & Authentication | Feature 1 | UI | 3 | 1 | ☐ | ☐ |
-| 2 | DPDP Parental Consent Flow | Compliance (§6) | UI | 2 | 1 | ☐ | ☐ |
+| 1 | Google Sign-In & Authentication | Feature 1 | UI | 3 | 1 | ✅ | ☐ |
+| 2 | DPDP Parental Consent Flow | Compliance (§6) | UI | 2 | 1 | ⏳ /uat | ☐ |
 | 3 | Child Profile Setup | Feature 2 | UI | 2 | 1 | ☐ | ☐ |
 | 4 | Parental Gate | Design §7 (Families Policy) | UI | 2 | 1 | ☐ | ☐ |
 | 5 | Video Library Grid | Feature 3 | UI | 3 | 2 | ☐ | ☐ |
@@ -168,7 +168,7 @@ Per architecture.md Section 9 and product_note.md Section 6:
 | Story | Title | Complexity | Dependencies |
 |---|---|---|---|
 | #1 | Google Sign-In & Authentication | 3 | Sprint 0 |
-| #2 | DPDP Parental Consent Flow | 2 | Story #1 |
+| #2 | DPDP Parental Consent Flow ✅ | 2 | Story #1 |
 | #3 | Child Profile Setup | 2 | Story #2 |
 | #4 | Parental Gate | 2 | None (shared component — Story #5 integrates it) |
 

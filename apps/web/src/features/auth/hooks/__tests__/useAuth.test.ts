@@ -72,7 +72,11 @@ describe('useAuth', () => {
 
     expect(result.current.routeTo).toBe('consent')
 
-    // Scenario 3: consentGiven: true, no child profiles → routeTo === 'profile'
+    // Scenario 3: sign out first (resets previousUser), then sign in with consentGiven:true
+    await act(async () => {
+      capturedCallback!(null)
+    })
+
     mockedGetUserDoc.mockResolvedValueOnce({
       uid: 'user1',
       email: 'test@test.com',
@@ -91,7 +95,11 @@ describe('useAuth', () => {
 
     expect(result.current.routeTo).toBe('profile')
 
-    // Scenario 4: consentGiven: true, child profile exists → routeTo === 'library'
+    // Scenario 4: sign out first, then sign in with child profile
+    await act(async () => {
+      capturedCallback!(null)
+    })
+
     mockedGetUserDoc.mockResolvedValueOnce({
       uid: 'user1',
       email: 'test@test.com',

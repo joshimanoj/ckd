@@ -1,0 +1,95 @@
+name: CI
+on: [push]
+# Determine story type from branch name prefix:
+#   backend/...  => skip mobile-e2e and web-playwright
+#   feature/... or ui/... => run all jobs
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run check:types
+      - run: npm run test:unit
+
+  integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+
+  web-playwright:
+    # Skip entirely for backend stories — no UI changes
+    if: ${{ !startsWith(github.ref_name, 'backend/') }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Note: tests guarded by FIREBASE_EMULATOR_RUNNING are skipped in CI.
+      # Only non-emulator tests (renders, responsive) run here.
+      - run: npx playwright test
+
+  mobile-e2e:
+    # Disabled until React Native / Detox is set up (Sprint 4)
+    if: false
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: detox build --configuration ios.sim.release
+      - run: detox test --configuration ios.sim.release
+
+  auto-pr:
+    needs: [unit, integration, web-playwright]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Open PR (backend) or post UAT comment (UI)
+        run: |
+          # Skip if PR already exists for this branch
+          EXISTING=$(gh pr list --head "$GITHUB_REF_NAME" --base main --json number --jq length)
+          if [[ "$EXISTING" -gt 0 ]]; then
+            echo "PR already exists — skipping."
+            exit 0
+          fi
+          if [[ "$GITHUB_REF_NAME" == backend/* ]]; then
+            gh pr create --fill --base main
+          else
+            gh pr create --fill --base main --draft \
+              --body "awaiting /uat before merge enabled"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
