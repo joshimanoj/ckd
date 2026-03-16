@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { AuthGuard } from './shared/components/AuthGuard'
+import { ConsentModal } from './features/auth/components/ConsentModal'
 
 export const router = createBrowserRouter([
   {
@@ -15,7 +16,7 @@ export const router = createBrowserRouter([
     path: '/consent',
     element: (
       <AuthGuard>
-        <div data-testid="consent-modal">Consent (Story 2)</div>
+        <ConsentModal />
       </AuthGuard>
     ),
   },
