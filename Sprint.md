@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #3 [Pass 1] | /check PASSED ✅ | Ready for /uat | Next: Story #4
+Web Track  → Story #3 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-16 | Next: Story #4
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
@@ -134,7 +134,7 @@ Per architecture.md Section 9 and product_note.md Section 6:
 |---|---|---|---|---|---|---|---|
 | 1 | Google Sign-In & Authentication | Feature 1 | UI | 3 | 1 | ✅ | ☐ |
 | 2 | DPDP Parental Consent Flow | Compliance (§6) | UI | 2 | 1 | ⏳ /uat | ☐ |
-| 3 | Child Profile Setup | Feature 2 | UI | 2 | 1 | ⏳ /uat | ☐ |
+| 3 | Child Profile Setup | Feature 2 | UI | 2 | 1 | ✅ | ☐ |
 | 4 | Parental Gate | Design §7 (Families Policy) | UI | 2 | 1 | ☐ | ☐ |
 | 5 | Video Library Grid | Feature 3 | UI | 3 | 2 | ☐ | ☐ |
 | 6 | Admin Panel — Video Management | Design Flow 5 | UI | 3 | 2 | ☐ | Web Only |
