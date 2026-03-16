@@ -89,7 +89,7 @@ export function AddChildScreen({
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '32px',
+            marginBottom: '8px',
           }}
         >
           <img
@@ -106,9 +106,19 @@ export function AddChildScreen({
               margin: 0,
             }}
           >
-            Who&apos;s watching?
+            Add your child&apos;s profile
           </h1>
         </div>
+        <p
+          style={{
+            fontFamily: 'Nunito, sans-serif',
+            fontSize: '14px',
+            color: '#6B7280',
+            margin: '0 0 32px 0',
+          }}
+        >
+          We&apos;ll personalise the experience for them
+        </p>
 
         <form onSubmit={handleSubmit}>
           {/* Name input */}
