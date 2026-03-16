@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LibraryPage } from '../LibraryPage'
 
 const mockShowGate = vi.fn()
@@ -69,5 +70,24 @@ describe('LibraryPage', () => {
     fireEvent.click(screen.getByTestId('gate-dismiss-btn'))
     expect(mockHideGate).toHaveBeenCalledTimes(1)
     expect(screen.queryByTestId('parent-panel')).not.toBeInTheDocument()
+  })
+})
+
+describe('LibraryPage routing smoke', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(useParentalGate).mockReturnValue(defaultHookReturn)
+  })
+
+  it('renders library-screen at /library route (no placeholder text)', () => {
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <Routes>
+          <Route path="/library" element={<LibraryPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    expect(screen.getByTestId('library-screen')).toBeInTheDocument()
+    expect(screen.queryByText('Library (Story 5)')).not.toBeInTheDocument()
   })
 })
