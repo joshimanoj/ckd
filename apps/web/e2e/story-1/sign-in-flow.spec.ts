@@ -1,48 +1,54 @@
 import { test, expect } from '@playwright/test'
+import {
+  clearEmulatorData,
+  createEmulatorUser,
+  signInViaTestHelper,
+} from '../support/emulator'
 
 /**
- * FT-2: Google Sign-In popup flow + Firestore user document created
+ * FT-2: Google Sign-In flow + Firestore user document created
  * Requires: Firebase Auth + Firestore emulators running
  */
-test.describe('FT-2: Google Sign-In popup flow + Firestore user doc', () => {
+test.describe('FT-2: Google Sign-In flow + Firestore user doc', () => {
   test.skip(
     !process.env['FIREBASE_EMULATOR_RUNNING'],
-    'Requires Firebase emulator — run: firebase emulators:start'
+    'Requires Firebase emulator — run: FIREBASE_EMULATOR_RUNNING=1 npx playwright test',
   )
 
-  test('should create Firestore user doc with correct defaults after sign-in', async ({ page }) => {
+  test.beforeEach(async ({ request }) => {
+    await clearEmulatorData(request)
+  })
+
+  test('should create Firestore user doc with correct defaults after sign-in', async ({
+    page,
+    request,
+  }) => {
+    const email = 'newuser@example.com'
+    const password = 'password123'
+    const uid = await createEmulatorUser(request, email, password)
+
     await page.goto('/')
     await expect(page.getByTestId('sign-in-screen')).toBeVisible({ timeout: 10000 })
 
-    // Simulate Google Sign-In via emulator REST API
-    const response = await page.request.post(
-      'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=test-key',
-      {
-        data: {
-          postBody: 'providerId=google.com&id_token=test-token',
-          requestUri: 'http://localhost',
-          returnSecureToken: true,
-          returnIdpCredential: true,
-        },
-      }
+    await signInViaTestHelper(page, email, password)
+
+    // App should redirect to /consent (first-time user, consentGiven: false)
+    await expect(page).toHaveURL('/consent', { timeout: 10000 })
+
+    // Verify Firestore user doc was created with correct defaults
+    const docRes = await request.get(
+      `http://127.0.0.1:8080/v1/projects/ckd-test/databases/(default)/documents/users/${uid}`,
     )
-    expect(response.ok()).toBeTruthy()
-
-    const body = await response.json()
-    const uid = body.localId as string
-
-    // App should redirect away from /
-    await expect(page).not.toHaveURL('/', { timeout: 5000 })
-
-    // Verify Firestore user doc
-    const docResponse = await page.request.get(
-      `http://127.0.0.1:8080/v1/projects/ckd-test/databases/(default)/documents/users/${uid}`
-    )
-    expect(docResponse.ok()).toBeTruthy()
-    const doc = await docResponse.json()
-    const fields = doc.fields as Record<string, { booleanValue?: boolean; nullValue?: string }>
-    expect(fields['consentGiven']?.booleanValue).toBe(false)
-    expect(fields['notificationsEnabled']?.booleanValue).toBe(false)
-    expect(fields['fcmToken']?.nullValue).toBe('NULL_VALUE')
+    expect(docRes.ok()).toBeTruthy()
+    const doc = (await docRes.json()) as {
+      fields: Record<
+        string,
+        { booleanValue?: boolean; nullValue?: string; stringValue?: string }
+      >
+    }
+    expect(doc.fields['consentGiven']?.booleanValue).toBe(false)
+    expect(doc.fields['notificationsEnabled']?.booleanValue).toBe(false)
+    expect(doc.fields['fcmToken']?.nullValue).toBe(null)
+    expect(doc.fields['uid']?.stringValue).toBe(uid)
   })
 })

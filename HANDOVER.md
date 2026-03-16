@@ -41,3 +41,15 @@ Story complete: Full auth flow implemented for web — OnboardingPage, GoogleSig
 - Branch: `feature/story-1-auth-web` pushed to https://github.com/joshimanoj/ckd
 
 **Next:** Story #1 — run `/uat` for human visual sign-off before merging. Story #2 (DPDP Consent Flow) begins after UAT passes.
+
+---
+
+## Checkpoint: Story #1 Google Sign-In & Authentication | 2026-03-16 | /uat APPROVED
+
+UAT sign-off by Manoj. All 8 flows verified manually in Chrome (iPhone XR viewport, Firebase emulator).
+
+**UAT fixes applied this session:**
+- `apps/web/src/index.css` — added missing `@keyframes spin`; removed Vite boilerplate from `#root` (`width: 1126px`, `border-inline`, `text-align`, `margin: 0 auto`) that was breaking mobile-first layout
+- `apps/web/src/shared/components/LoadingSpinner.tsx` — added brand gradient background + white ring so spinner is visible during auth resolution
+
+**Next:** Story #2 DPDP Parental Consent Flow | Ready for: `/prd`

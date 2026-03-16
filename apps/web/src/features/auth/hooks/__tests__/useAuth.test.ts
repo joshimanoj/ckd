@@ -6,6 +6,7 @@ import type { User as FirebaseUser } from 'firebase/auth'
 vi.mock('../../services/authService', () => ({
   subscribeToAuthState: vi.fn(),
   getUserDoc: vi.fn(),
+  createUserDoc: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock firebase/firestore for childProfiles query

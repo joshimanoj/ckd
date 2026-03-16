@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const useEmulator = process.env['FIREBASE_EMULATOR_RUNNING'] === '1'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -18,7 +20,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'node node_modules/.bin/vite --mode test',
+    command: useEmulator
+      ? 'VITE_USE_EMULATOR=true node node_modules/.bin/vite --mode test'
+      : 'node node_modules/.bin/vite --mode test',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env['CI'],
     timeout: 30000,

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, query, limit, getDocs } from 'firebase/firestore'
 import { db } from '@ckd/shared/firebase/config'
 import { useAuthStore } from '../../../shared/store/authStore'
-import { subscribeToAuthState, getUserDoc } from '../services/authService'
+import { subscribeToAuthState, getUserDoc, createUserDoc } from '../services/authService'
 import type { User as FirebaseUser } from 'firebase/auth'
 
 type RouteTo = 'sign-in' | 'consent' | 'profile' | 'library'
@@ -35,6 +35,7 @@ export function useAuth(): AuthResult {
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthState(async (firebaseUser) => {
+      if (firebaseUser) await createUserDoc(firebaseUser)
       const route = await resolveRouteTo(firebaseUser)
       setUser(firebaseUser)
       setLoading(false)
