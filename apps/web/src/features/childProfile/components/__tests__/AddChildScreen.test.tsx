@@ -12,7 +12,8 @@ describe('AddChildScreen', () => {
   it('renders heading, input, pills and CTA', () => {
     render(<AddChildScreen />)
     expect(screen.getByTestId('child-profile-screen')).toBeInTheDocument()
-    expect(screen.getByText("Who's watching?")).toBeInTheDocument()
+    expect(screen.getByText("Add your child's profile")).toBeInTheDocument()
+    expect(screen.getByText("We'll personalise the experience for them")).toBeInTheDocument()
     expect(screen.getByTestId('name-input')).toBeInTheDocument()
     expect(screen.getByTestId('pill-under-3')).toBeInTheDocument()
     expect(screen.getByTestId('pill-3-4')).toBeInTheDocument()
