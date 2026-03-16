@@ -87,3 +87,38 @@ Story complete: Non-dismissable ConsentModal with DPDP-compliant unchecked check
 - Branch: `feature/story-2-consent-web` pushed to https://github.com/joshimanoj/ckd
 
 **Next:** Story #2 — run `/uat` for human visual sign-off. After UAT: merge to main, then `/prd` Story #3 (Child Profile Setup).
+
+---
+
+## Checkpoint: Story #3 Child Profile Setup | 2026-03-16 | /check PASSED
+
+Story complete: AddChildScreen with name input + age-range pill selector; childProfileService writes to Firestore sub-collection `users/{uid}/childProfiles`; useChildProfile hook sets Zustand store + navigates to `/library` on success; error toast on failure. Returning users (profile exists) routed directly to `/library` by existing useAuth logic.
+
+**Files changed:**
+- `packages/shared/src/types/user.ts` — added `ChildProfile` interface + `isChildProfile` type guard
+- `packages/shared/src/utils/ageRange.ts` — `dobFromAgeRange` utility (under-3→18mo, 3-4→42mo, 5-6→66mo)
+- `packages/shared/src/firebase/collections.ts` — `childProfileConverter` + `childProfilesCollection(db, uid)`
+- `apps/web/src/shared/store/childProfileStore.ts` — Zustand store (activeProfile, setActiveProfile, clearActiveProfile)
+- `apps/web/src/features/childProfile/services/childProfileService.ts` — createChildProfile + getChildProfiles; `window.__TEST_FAIL_PROFILE_WRITE` test flag for FT-8
+- `apps/web/src/features/childProfile/hooks/useChildProfile.ts` — saving/error state + saveProfile action
+- `apps/web/src/features/childProfile/components/AddChildScreen.tsx` — pure presentational; data-testid attributes for E2E
+- `apps/web/src/pages/ChildProfilePage.tsx` — thin connected wrapper (useAuth + useChildProfile → AddChildScreen)
+- `apps/web/src/router.tsx` — `/profile` route wired to `<ChildProfilePage />`
+- `apps/web/e2e/story-3/` — 8 Playwright E2E specs (FT-1 through FT-8, emulator-gated)
+
+**Test results (CI):**
+- Unit + integration: ✅ all passing
+- web-playwright: ✅ passing (emulator-gated specs skipped in CI — require `FIREBASE_EMULATOR_RUNNING=1`)
+- Type check: ✅ 0 errors | Lint: ✅ 0 errors
+
+**Decisions made:**
+- `AddChildScreen` is pure presentational (props-only) — no hooks/router mocks needed in unit tests; `ChildProfilePage` is the connected wrapper.
+- `childProfileService` uses `_setDbForTesting(db)` injection for emulator integration tests.
+- `window.__TEST_FAIL_PROFILE_WRITE` flag in service enables FT-8 (Firestore failure) without network interception.
+- Branch history fix: Story 2 PR had merged into `origin/feature/story-1-auth-web` instead of `origin/main`. Fixed by merging Story 2 branch into local main and pushing, then rebasing feature-3 onto updated main.
+
+**Warnings / debt:**
+- All 8 Playwright E2E specs are gated behind `FIREBASE_EMULATOR_RUNNING=1` — never run in CI; require local emulator for full green.
+- `window.__TEST_FAIL_PROFILE_WRITE` is a test-only global on `window` — acceptable for dev but must never reach production build (no tree-shaking guard currently).
+
+**Next:** Story #3 — run `/uat` for human visual sign-off. After UAT: merge to main, then `/prd` Story #4 (Parental Gate).
