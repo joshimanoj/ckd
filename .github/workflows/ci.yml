@@ -69,6 +69,7 @@ jobs:
   auto-pr:
     needs: [unit, integration, web-playwright]
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       contents: read
       pull-requests: write
