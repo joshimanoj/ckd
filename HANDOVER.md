@@ -53,3 +53,37 @@ UAT sign-off by Manoj. All 8 flows verified manually in Chrome (iPhone XR viewpo
 - `apps/web/src/shared/components/LoadingSpinner.tsx` — added brand gradient background + white ring so spinner is visible during auth resolution
 
 **Next:** Story #2 DPDP Parental Consent Flow | Ready for: `/prd`
+
+---
+
+## Checkpoint: Story #2 DPDP Parental Consent Flow | 2026-03-16 17:42 | /check PASSED
+
+Story complete: Non-dismissable ConsentModal with DPDP-compliant unchecked checkbox, `serverTimestamp()` Firestore write, error toast on failure, and browser back-button lock. Router wired at `/consent`.
+
+**Files changed:**
+- `apps/web/src/shared/store/authStore.ts` — added `RouteTo` type + `routeTo` + `setRouteTo` to Zustand (persists route across component mounts)
+- `apps/web/src/features/auth/hooks/useAuth.ts` — reads `routeTo` from Zustand; skips Firestore re-resolution when same user re-subscribes (prevents stale cache redirect loop)
+- `apps/web/src/features/auth/services/authService.ts` — added `recordConsent(uid)` using `updateDoc` + `serverTimestamp()`
+- `apps/web/src/features/auth/components/ConsentModal.tsx` — full modal: checkbox gate, popstate back-button blocker, submit handler, error toast
+- `apps/web/src/router.tsx` — `/consent` route wired to `<ConsentModal />`
+- `apps/web/e2e/story-2/` — 7 Playwright E2E specs (FT-1 through FT-7)
+
+**Test results:**
+- Unit tests: ✅ 19/19 passing
+- E2E Story 2: ✅ 9/9 passing
+- E2E Story 1 regression: ✅ 14/14 passing
+- Type check: ✅ 0 errors | Lint: ✅ 0 errors
+
+**Decisions made:**
+- `routeTo` moved to Zustand to survive component remounts. Key fix: subscriber skips `resolveRouteTo` when `previousUser.uid === firebaseUser.uid` — prevents Firestore stale-cache reads from overwriting an explicitly-set routeTo after consent is recorded.
+- `ConsentModal` calls `setRouteTo('profile')` + `navigate('/profile')` after consent — Zustand ensures AuthGuard on `/profile` sees the correct value immediately.
+- FT-6 error-state test: uses doc-deletion via emulator REST API (not network interception) because Firebase SDK resolves `updateDoc` optimistically via WebChannel — `NOT_FOUND` on a deleted doc is the only reliable way to trigger a Promise rejection.
+- Back-button lock: `window.history.pushState` on ConsentModal mount + `popstate → navigate('/consent', { replace: true })`.
+
+**Warnings / debt:**
+- `ci.yml` not yet set up (Sprint 0 item); push to CI is a no-op until configured.
+- Swipe-gesture dismissal is N/A for web (web has no swipe-to-dismiss built-in).
+- Privacy Policy link (`href="#"`) is a placeholder — must be replaced with live URL before Play Store submission (Story #10).
+- Branch: `feature/story-2-consent-web` pushed to https://github.com/joshimanoj/ckd
+
+**Next:** Story #2 — run `/uat` for human visual sign-off. After UAT: merge to main, then `/prd` Story #3 (Child Profile Setup).

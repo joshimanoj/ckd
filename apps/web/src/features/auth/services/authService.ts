@@ -7,7 +7,7 @@ import {
   type UserCredential,
   type Unsubscribe,
 } from 'firebase/auth'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '@ckd/shared/firebase/config'
 import { userDoc } from '@ckd/shared/firebase/collections'
 import type { User } from '@ckd/shared/types/user'
@@ -46,6 +46,13 @@ export async function getUserDoc(uid: string): Promise<User | null> {
   const snapshot = await getDoc(ref)
   if (!snapshot.exists()) return null
   return snapshot.data()
+}
+
+export async function recordConsent(uid: string): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), {
+    consentGiven: true,
+    consentTimestamp: serverTimestamp(),
+  })
 }
 
 export function subscribeToAuthState(
