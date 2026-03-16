@@ -122,3 +122,13 @@ Story complete: AddChildScreen with name input + age-range pill selector; childP
 - `window.__TEST_FAIL_PROFILE_WRITE` is a test-only global on `window` — acceptable for dev but must never reach production build (no tree-shaking guard currently).
 
 **Next:** Story #3 — run `/uat` for human visual sign-off. After UAT: merge to main, then `/prd` Story #4 (Parental Gate).
+
+---
+
+## Checkpoint: Story #3 Child Profile Setup | 2026-03-16 | MERGED ✅
+
+Story complete: Child profile setup screen shipped to main — name input + age-range pill selector writes to Firestore `users/{uid}/childProfiles`, sets Zustand store, navigates to `/library`.
+
+UAT fixes applied: Header copy changed from "Who's watching?" to "Add your child's profile" + subtitle "We'll personalise the experience for them" to match prototype; unit test updated to match.
+
+Next: Story #4 Parental Gate | Ready for: /prd
