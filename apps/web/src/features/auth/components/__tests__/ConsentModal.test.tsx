@@ -12,8 +12,9 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 // Mock authStore
+const mockSetRouteTo = vi.fn()
 vi.mock('../../../../shared/store/authStore', () => ({
-  useAuthStore: () => ({ user: { uid: 'test-uid' } }),
+  useAuthStore: () => ({ user: { uid: 'test-uid' }, setRouteTo: mockSetRouteTo }),
 }))
 
 // Mock authService — recordConsent as a vi.fn() accessible via import

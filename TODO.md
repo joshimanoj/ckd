@@ -29,7 +29,7 @@ Generated: 2026-03-16 | Spec: prd-2-web.md | UI Context: story-2-ui-context.md |
 ## Integration Check
 
 - [x] Full unit test suite passing (`vitest run`)
-- [ ] All FT tasks GREEN (`FIREBASE_EMULATOR_RUNNING=1 npx playwright test apps/web/e2e/story-2/`)
+- [x] All FT tasks GREEN (`FIREBASE_EMULATOR_RUNNING=1 npx playwright test apps/web/e2e/story-2/`)
 - [ ] All acceptance criteria verified against story-2.md
 
 ## Story Acceptance

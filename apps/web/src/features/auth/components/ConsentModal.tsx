@@ -1,14 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../../shared/store/authStore'
 import { recordConsent } from '../services/authService'
 
 export function ConsentModal() {
-  const { user } = useAuthStore()
+  const { user, setRouteTo } = useAuthStore()
   const navigate = useNavigate()
   const [checked, setChecked] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    window.history.pushState(null, '', '/consent')
+    const handlePopState = () => {
+      navigate('/consent', { replace: true })
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [navigate])
 
   async function handleSubmit() {
     if (!user || !checked || submitting) return
@@ -16,6 +25,7 @@ export function ConsentModal() {
     setError(null)
     try {
       await recordConsent(user.uid)
+      setRouteTo('profile')
       navigate('/profile')
     } catch {
       setError('Something went wrong. Please try again.')
