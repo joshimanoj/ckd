@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #2 [Pass 1] | /check PASSED ✅ | Ready for: /uat
+Web Track  → Story #2 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-16 | Next: Story #3
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
@@ -168,7 +168,7 @@ Per architecture.md Section 9 and product_note.md Section 6:
 | Story | Title | Complexity | Dependencies |
 |---|---|---|---|
 | #1 | Google Sign-In & Authentication | 3 | Sprint 0 |
-| #2 | DPDP Parental Consent Flow | 2 | Story #1 |
+| #2 | DPDP Parental Consent Flow ✅ | 2 | Story #1 |
 | #3 | Child Profile Setup | 2 | Story #2 |
 | #4 | Parental Gate | 2 | None (shared component — Story #5 integrates it) |
 
