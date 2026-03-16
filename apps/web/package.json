@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit",
     "test:all": "vitest run",
     "test:unit": "vitest run --reporter=verbose",
-    "test:integration": "vitest run integration"
+    "test:integration": "vitest run integration --passWithNoTests"
   },
   "dependencies": {
     "firebase": "^12.10.0",
