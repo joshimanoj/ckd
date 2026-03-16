@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isUser } from '../user'
+import { isUser, isChildProfile } from '../user'
 import { Timestamp } from 'firebase/firestore'
 
 describe('isUser', () => {
@@ -28,5 +28,39 @@ describe('isUser', () => {
     }
 
     expect(isUser(missingConsentGiven)).toBe(false)
+  })
+})
+
+describe('isChildProfile', () => {
+  it('should return true for a valid ChildProfile', () => {
+    expect(
+      isChildProfile({
+        name: 'Arjun',
+        dateOfBirth: Timestamp.now(),
+        createdAt: Timestamp.now(),
+      }),
+    ).toBe(true)
+  })
+
+  it('should return false when name is missing', () => {
+    expect(isChildProfile({ dateOfBirth: Timestamp.now(), createdAt: Timestamp.now() })).toBe(false)
+  })
+
+  it('should return false when name is empty string', () => {
+    expect(
+      isChildProfile({ name: '', dateOfBirth: Timestamp.now(), createdAt: Timestamp.now() }),
+    ).toBe(false)
+  })
+
+  it('should return false when dateOfBirth is missing', () => {
+    expect(isChildProfile({ name: 'Arjun', createdAt: Timestamp.now() })).toBe(false)
+  })
+
+  it('should return false when createdAt is missing', () => {
+    expect(isChildProfile({ name: 'Arjun', dateOfBirth: Timestamp.now() })).toBe(false)
+  })
+
+  it('should return false for null', () => {
+    expect(isChildProfile(null)).toBe(false)
   })
 })
