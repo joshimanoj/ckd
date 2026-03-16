@@ -71,8 +71,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Open PR (backend) or post UAT comment (UI)
         run: |
+          # Skip if PR already exists for this branch
+          EXISTING=$(gh pr list --head "$GITHUB_REF_NAME" --base main --json number --jq length)
+          if [[ "$EXISTING" -gt 0 ]]; then
+            echo "PR already exists — skipping."
+            exit 0
+          fi
           if [[ "$GITHUB_REF_NAME" == backend/* ]]; then
             gh pr create --fill --base main
           else
