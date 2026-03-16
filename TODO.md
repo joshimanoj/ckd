@@ -19,7 +19,7 @@
 - [x] Task 2: `useParentalGate` hook + unit tests — `apps/web/src/shared/hooks/useParentalGate.ts` — 10 min
 - [x] Task 3: `ParentalGate` component base UI — `apps/web/src/features/parentalGate/components/ParentalGate.tsx` — 10 min
 - [x] Task 4: Shake animation + wrong-answer state in `ParentalGate` — extend Task 3 files — 7 min
-- [ ] Task 5: `LibraryPage` stub + gate wiring — `apps/web/src/pages/LibraryPage.tsx` — 10 min
+- [x] Task 5: `LibraryPage` stub + gate wiring — `apps/web/src/pages/LibraryPage.tsx` — 10 min
 - [ ] Task 6: Router update — wire `LibraryPage` at `/library` — `apps/web/src/router.tsx` — 5 min
 
 ---
