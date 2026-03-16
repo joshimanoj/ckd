@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #1 [Pass 1] | Ready for: /prd → outputs prd-1-web.md
+Web Track  → Story #1 [Pass 1] | /check PASSED ✅ | Ready for: /uat
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
