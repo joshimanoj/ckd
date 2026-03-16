@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface ParentalGateProps {
   visible: boolean
@@ -10,10 +10,13 @@ interface ParentalGateProps {
 
 export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking }: ParentalGateProps) {
   const [answer, setAnswer] = useState('')
+  const [prevQuestion, setPrevQuestion] = useState(question)
 
-  useEffect(() => {
+  // Reset answer field when question changes (render-time derived state, avoids effect)
+  if (prevQuestion !== question) {
+    setPrevQuestion(question)
     setAnswer('')
-  }, [question])
+  }
 
   if (!visible) return null
 
