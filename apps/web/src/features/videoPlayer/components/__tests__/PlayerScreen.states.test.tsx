@@ -8,7 +8,6 @@ vi.mock('../../services/watchSessionService', () => ({
 }))
 
 describe('PlayerScreen — states', () => {
-  const mockRef = { current: { getCurrentTime: vi.fn(() => 0) } }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -20,7 +19,6 @@ describe('PlayerScreen — states', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />
@@ -35,7 +33,6 @@ describe('PlayerScreen — states', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />
@@ -54,7 +51,6 @@ describe('PlayerScreen — states', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />
@@ -74,7 +70,6 @@ describe('PlayerScreen — states', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />

@@ -10,12 +10,10 @@ vi.mock('../../services/watchSessionService', () => ({
 describe('PlayerScreen — embed params', () => {
   it('renders player-screen container', async () => {
     const { PlayerScreen } = await import('../PlayerScreen')
-    const mockRef = { current: { getCurrentTime: vi.fn(() => 0) } }
     render(
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />
@@ -26,12 +24,10 @@ describe('PlayerScreen — embed params', () => {
 
   it('iframe src contains required YouTube params', async () => {
     const { PlayerScreen } = await import('../PlayerScreen')
-    const mockRef = { current: { getCurrentTime: vi.fn(() => 0) } }
     render(
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />
@@ -47,12 +43,10 @@ describe('PlayerScreen — embed params', () => {
 
   it('no bottom nav rendered inside PlayerScreen', async () => {
     const { PlayerScreen } = await import('../PlayerScreen')
-    const mockRef = { current: { getCurrentTime: vi.fn(() => 0) } }
     render(
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="dQw4w9WgXcQ"
-          playerRef={mockRef as never}
           flushSession={vi.fn()}
           onBack={vi.fn()}
         />

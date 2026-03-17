@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef, type RefObject } from 'react'
-import type { YouTubePlayerRef } from '../hooks/useWatchSession'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Video } from '@ckd/shared/types/video'
 
 function toMMSS(seconds: number): string {
@@ -11,31 +10,32 @@ function toMMSS(seconds: number): string {
 
 interface PlayerScreenProps {
   youtubeVideoId: string
-  videoTitle: string
-  videoDuration: number
-  videos: Video[]
-  currentVideoId: string
-  playerRef: RefObject<YouTubePlayerRef | null>
+  videoTitle?: string
+  videoDuration?: number
+  videos?: Video[]
+  currentVideoId?: string
   flushSession: () => Promise<void>
   onBack: () => void
   onVideoEnd?: () => void
   onPrevVideo?: () => void
   onNextVideo?: () => void
   onTimeUpdate?: (currentTime: number) => void
+  onDurationUpdate?: (duration: number) => void
 }
 
 export function PlayerScreen({
   youtubeVideoId,
-  videoTitle,
-  videoDuration,
-  videos,
-  currentVideoId,
+  videoTitle = '',
+  videoDuration = 0,
+  videos = [],
+  currentVideoId = '',
   flushSession,
   onBack,
   onVideoEnd,
   onPrevVideo,
   onNextVideo,
   onTimeUpdate,
+  onDurationUpdate,
 }: PlayerScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -90,7 +90,10 @@ export function PlayerScreen({
           setDisplaySeconds(info.currentTime)
           onTimeUpdate?.(info.currentTime)
         }
-        if (typeof info.duration === 'number' && info.duration > 0) setYtDuration(info.duration)
+        if (typeof info.duration === 'number' && info.duration > 0) {
+          setYtDuration(info.duration)
+          onDurationUpdate?.(info.duration)
+        }
         if (typeof info.playerState === 'number') {
           // 3 = buffering (show spinner but don't touch isPlaying — that's user intent)
           setIsBuffering(info.playerState === 3)
@@ -107,7 +110,7 @@ export function PlayerScreen({
 
     window.addEventListener('message', handleYTMessage)
     return () => window.removeEventListener('message', handleYTMessage)
-  }, [isLoading, onVideoEnd, onTimeUpdate])
+  }, [isLoading, onVideoEnd, onTimeUpdate, onDurationUpdate])
 
   // Sync fullscreen state when user presses Esc
   useEffect(() => {
@@ -139,14 +142,14 @@ export function PlayerScreen({
     }
   }, [])
 
-  const handleScrub = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScrub = (e: React.ChangeEvent<HTMLInputElement>) => {
     const seconds = Number(e.target.value)
     setDisplaySeconds(seconds)
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
       '*',
     )
-  }, [])
+  }
 
   // Expose test hooks
   useEffect(() => {

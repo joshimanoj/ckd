@@ -10,10 +10,6 @@ vi.mock('../../services/watchSessionService', () => ({
 vi.mock('@ckd/shared/firebase/config', () => ({ db: {} }))
 
 describe('useWatchSession — init', () => {
-  const mockPlayerRef = {
-    current: { getCurrentTime: vi.fn(() => 0) },
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
     useWatchSessionStore.getState().resetSession()
@@ -27,7 +23,6 @@ describe('useWatchSession — init', () => {
         videoId: 'dQw4w9WgXcQ',
         childProfileId: 'child-1',
         videoDuration: 180,
-        playerRef: mockPlayerRef as never,
         userId: 'user-1',
       }),
     )

@@ -14,7 +14,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 describe('PlayerScreen — auto-advance', () => {
-  const mockRef = { current: { getCurrentTime: vi.fn(() => 0) } }
   const videos = [
     { videoId: 'v1', youtubeVideoId: 'yt1' },
     { videoId: 'v2', youtubeVideoId: 'yt2' },
@@ -31,7 +30,6 @@ describe('PlayerScreen — auto-advance', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="yt1"
-          playerRef={mockRef as never}
           flushSession={vi.fn().mockResolvedValue(undefined)}
           onBack={vi.fn()}
           onVideoEnd={() => {
@@ -56,7 +54,6 @@ describe('PlayerScreen — auto-advance', () => {
       <MemoryRouter>
         <PlayerScreen
           youtubeVideoId="yt3"
-          playerRef={mockRef as never}
           flushSession={vi.fn().mockResolvedValue(undefined)}
           onBack={vi.fn()}
           onVideoEnd={() => {
