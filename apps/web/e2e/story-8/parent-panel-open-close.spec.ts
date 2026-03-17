@@ -45,7 +45,8 @@ test.describe('Story 8 — FT-7: Parent panel side drawer opens and closes', () 
     await setup(page, request, 'ft7a-s8')
     await openPanel(page)
     await expect(page.getByTestId('parent-panel')).toBeVisible()
-    await expect(page.getByTestId('dashboard-screen')).toBeVisible()
+    // No sessions seeded → DashboardScreen renders empty state (confirms dashboard loaded)
+    await expect(page.getByTestId('dashboard-empty-state')).toBeVisible({ timeout: 8000 })
   })
 
   test('FT-7b: close button hides the panel', async ({ page, request }) => {

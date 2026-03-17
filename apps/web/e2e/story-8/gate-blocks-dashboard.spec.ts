@@ -67,6 +67,7 @@ test.describe('Story 8 — FT-1: Dashboard accessible only after Parental Gate',
     await solveGate(page)
     await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).toBeVisible({ timeout: 5000 })
-    await expect(page.getByTestId('dashboard-screen')).toBeVisible()
+    // No sessions seeded → DashboardScreen renders empty state (still confirms dashboard loaded)
+    await expect(page.getByTestId('dashboard-empty-state')).toBeVisible({ timeout: 8000 })
   })
 })

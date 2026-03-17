@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const useEmulator = process.env['FIREBASE_EMULATOR_RUNNING'] === '1'
+// Use a dedicated port for emulator runs so the normal dev server (5173) is not reused
+const devServerPort = useEmulator ? 5174 : 5173
 
 export default defineConfig({
   testDir: './e2e',
@@ -10,7 +12,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: `http://localhost:${devServerPort}`,
     trace: 'on-first-retry',
   },
   projects: [
@@ -21,9 +23,9 @@ export default defineConfig({
   ],
   webServer: {
     command: useEmulator
-      ? 'VITE_USE_EMULATOR=true node node_modules/.bin/vite --mode test'
+      ? `VITE_USE_EMULATOR=true node node_modules/.bin/vite --mode test --port ${devServerPort}`
       : 'node node_modules/.bin/vite --mode test',
-    url: 'http://localhost:5173',
+    url: `http://localhost:${devServerPort}`,
     reuseExistingServer: !process.env['CI'],
     timeout: 30000,
   },
