@@ -42,6 +42,8 @@ export function useWatchSession({
     const state = useWatchSessionStore.getState()
     if (state.hasWritten) return
     if (!state.youtubeVideoId || !state.childProfileId || !state.startTime) return
+    // Skip if YouTube hasn't sent a single time update yet (StrictMode phantom unmount, instant back)
+    if (state.currentYTTime === 0 && state.watchedSeconds === 0) return
 
     // Capture final delta from last known time to now
     const currentTime = state.currentYTTime
