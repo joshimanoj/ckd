@@ -123,6 +123,68 @@ export async function seedVideos(request: APIRequestContext, videos: SeedVideoIn
   await Promise.all(videos.map((v) => seedVideo(request, v)))
 }
 
+export async function seedChildProfileWithId(
+  request: APIRequestContext,
+  uid: string,
+  childProfileId: string,
+  name: string = 'Test Child',
+) {
+  await request.patch(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/users/${uid}/childProfiles/${childProfileId}`,
+    {
+      data: {
+        fields: {
+          childProfileId: { stringValue: childProfileId },
+          name: { stringValue: name },
+          createdAt: { timestampValue: '2026-01-01T00:00:00Z' },
+        },
+      },
+    },
+  )
+}
+
+export interface SeedWatchSessionInput {
+  sessionId: string
+  youtubeVideoId?: string
+  videoDurationSeconds?: number
+  watchedSeconds: number
+  startTime: string // ISO string
+  deviceType?: 'web' | 'android'
+}
+
+export async function seedWatchSession(
+  request: APIRequestContext,
+  uid: string,
+  childProfileId: string,
+  session: SeedWatchSessionInput,
+) {
+  const {
+    sessionId,
+    youtubeVideoId = 'dQw4w9WgXcQ',
+    videoDurationSeconds = 180,
+    watchedSeconds,
+    startTime,
+    deviceType = 'web',
+  } = session
+  await request.patch(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/users/${uid}/childProfiles/${childProfileId}/watchSessions/${sessionId}`,
+    {
+      data: {
+        fields: {
+          sessionId: { stringValue: sessionId },
+          youtubeVideoId: { stringValue: youtubeVideoId },
+          videoDurationSeconds: { integerValue: String(videoDurationSeconds) },
+          watchedSeconds: { integerValue: String(watchedSeconds) },
+          startTime: { timestampValue: startTime },
+          endTime: { nullValue: 'NULL_VALUE' },
+          deviceType: { stringValue: deviceType },
+          createdAt: { timestampValue: startTime },
+        },
+      },
+    },
+  )
+}
+
 export async function setAdminClaim(request: APIRequestContext, uid: string): Promise<void> {
   await request.post(
     `${AUTH}/identitytoolkit.googleapis.com/v1/accounts:update`,

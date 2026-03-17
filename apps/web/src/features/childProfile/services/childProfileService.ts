@@ -36,5 +36,5 @@ export async function createChildProfile(
 
 export async function getChildProfiles(uid: string): Promise<ChildProfile[]> {
   const snap = await getDocs(childProfilesCollection(_db, uid))
-  return snap.docs.map((d) => d.data())
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id }))
 }

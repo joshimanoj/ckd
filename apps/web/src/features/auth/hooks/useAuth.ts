@@ -1,16 +1,10 @@
 import { useEffect } from 'react'
-import { collection, query, limit, getDocs } from 'firebase/firestore'
-import { db } from '@ckd/shared/firebase/config'
 import { useAuthStore } from '../../../shared/store/authStore'
+import { useChildProfileStore } from '../../../shared/store/childProfileStore'
 import type { RouteTo } from '../../../shared/store/authStore'
 import { subscribeToAuthState, getUserDoc, createUserDoc } from '../services/authService'
+import { getChildProfiles } from '../../childProfile/services/childProfileService'
 import type { User as FirebaseUser } from 'firebase/auth'
-
-async function checkChildProfileExists(uid: string): Promise<boolean> {
-  const q = query(collection(db, 'users', uid, 'childProfiles'), limit(1))
-  const snap = await getDocs(q)
-  return !snap.empty
-}
 
 async function resolveRouteTo(user: FirebaseUser | null): Promise<RouteTo> {
   if (!user) return 'sign-in'
@@ -18,8 +12,13 @@ async function resolveRouteTo(user: FirebaseUser | null): Promise<RouteTo> {
   const userDoc = await getUserDoc(user.uid)
   if (!userDoc || !userDoc.consentGiven) return 'consent'
 
-  const hasProfile = await checkChildProfileExists(user.uid)
-  return hasProfile ? 'library' : 'profile'
+  const profiles = await getChildProfiles(user.uid)
+  if (profiles.length > 0) {
+    // Hydrate the active profile so WatchPage can write watch sessions
+    useChildProfileStore.getState().setActiveProfile(profiles[0])
+    return 'library'
+  }
+  return 'profile'
 }
 
 interface AuthResult {
