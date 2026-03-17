@@ -13,6 +13,8 @@ if (import.meta.env['VITE_USE_EMULATOR'] === 'true') {
     w['__testSignIn'] = (email: string, password: string) =>
       signInWithEmailAndPassword(auth, email, password)
     w['__signOut'] = signOutUser
+    // Test hook: set an artificial delay (ms) on the next video fetch
+    w['__testVideoFetchDelayMs'] = 0
   })
 }
 

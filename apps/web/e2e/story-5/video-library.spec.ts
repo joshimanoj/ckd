@@ -237,20 +237,24 @@ test.describe('Story 5 — Video Library Grid', () => {
     await setupUser(page, request, 'ft10-lib')
     await seedVideo(request, { id: 'v1', title: 'Loading Test', publishedAt: '2026-01-01T00:00:00Z' })
 
-    // Intercept Firestore videos request and delay it
-    await page.route('**/documents/videos**', async (route) => {
-      await new Promise((r) => setTimeout(r, 600))
-      await route.continue()
+    await page.goto('/')
+    // Wait for main.tsx test hooks to initialise (same callback sets __testSignIn and __testVideoFetchDelayMs)
+    await page.waitForFunction(
+      () => typeof (window as unknown as Record<string, unknown>)['__testSignIn'] === 'function',
+      { timeout: 5000 },
+    )
+    // Set delay AFTER initialisation so main.tsx doesn't overwrite it back to 0.
+    // fetchActiveVideos (emulator-only) reads this flag and waits before querying Firestore.
+    await page.evaluate(() => {
+      ;(window as unknown as Record<string, number>)['__testVideoFetchDelayMs'] = 800
     })
-
-    await page.goto('/library')
     await signInViaTestHelper(page, email, 'password123')
 
-    // Skeleton should be visible during the delayed fetch
-    await expect(page.locator('[data-testid="skeleton-grid"]')).toBeVisible({ timeout: 5000 })
+    // Skeleton should be visible during the 800 ms artificial delay
+    await expect(page.locator('[data-testid="skeleton-grid"]')).toBeVisible({ timeout: 8000 })
 
     // After fetch completes, skeleton gone and grid present
-    await expect(page.locator('[data-testid="video-grid"]')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('[data-testid="video-grid"]')).toBeVisible({ timeout: 8000 })
     await expect(page.locator('[data-testid="skeleton-grid"]')).not.toBeVisible()
   })
 })
