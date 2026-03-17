@@ -103,7 +103,7 @@ test.describe('Story 9 — FT-5: Settings notification toggle with Parental Gate
 
     // Read the math question and calculate the answer
     const questionText = await page.locator('[data-testid="gate-question"]').textContent()
-    const match = questionText?.match(/(\d+)\s*([+\-])\s*(\d+)/)
+    const match = questionText?.match(/(\d+)\s*([+-])\s*(\d+)/)
     if (!match) throw new Error(`Could not parse gate question: ${questionText}`)
     const a = parseInt(match[1]!)
     const op = match[2]!
