@@ -4,7 +4,9 @@ import { ChildProfilePage } from './pages/ChildProfilePage'
 import { LibraryPage } from './pages/LibraryPage'
 import { WatchPage } from './pages/WatchPage'
 import { AuthGuard } from './shared/components/AuthGuard'
+import { AdminGuard } from './shared/components/AdminGuard'
 import { ConsentModal } from './features/auth/components/ConsentModal'
+import { AdminPage } from './pages/admin/AdminPage'
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +47,14 @@ export const router = createBrowserRouter([
       <AuthGuard>
         <WatchPage />
       </AuthGuard>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminGuard>
+        <AdminPage />
+      </AdminGuard>
     ),
   },
 ])
