@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore'
 import type { User, ChildProfile } from '../types/user'
 import type { Video } from '../types/video'
+import type { Notification } from '../types/notification'
 
 const userConverter: FirestoreDataConverter<User> = {
   toFirestore(user: User) {
@@ -60,4 +61,19 @@ export const videoConverter: FirestoreDataConverter<Video> = {
 
 export function videosCollection(db: Firestore): CollectionReference<Video> {
   return collection(db, 'videos').withConverter(videoConverter)
+}
+
+const notificationConverter: FirestoreDataConverter<Notification> = {
+  toFirestore(n: Notification) {
+    const { notificationId: _id, ...rest } = n
+    return rest
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Notification {
+    const data = snapshot.data(options)
+    return { notificationId: snapshot.id, ...data } as Notification
+  },
+}
+
+export function notificationsCollection(db: Firestore): CollectionReference<Notification> {
+  return collection(db, 'notifications').withConverter(notificationConverter)
 }
