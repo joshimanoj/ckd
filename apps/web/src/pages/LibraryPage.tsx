@@ -1,11 +1,21 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useParentalGate } from '../shared/hooks/useParentalGate'
 import { ParentalGate } from '../features/parentalGate/components/ParentalGate'
+import { useVideoLibrary } from '../features/videoLibrary/hooks/useVideoLibrary'
+import { VideoGrid } from '../features/videoLibrary/components/VideoGrid'
+import { db } from '@ckd/shared/firebase/config'
 
 export function LibraryPage() {
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
+  const { videos, allVideos, loading, error, selectedCategory, selectCategory, refresh } = useVideoLibrary(db)
+  const navigate = useNavigate()
   const [panelVisible, setPanelVisible] = useState(false)
   const [shaking, setShaking] = useState(false)
+
+  function handleVideoTap(videoId: string) {
+    navigate(`/watch/${videoId}`)
+  }
 
   function handleConfirm(answer: string) {
     const correct = checkAnswer(answer)
@@ -23,23 +33,31 @@ export function LibraryPage() {
       data-testid="library-screen"
       style={{ minHeight: '100vh', background: '#F3E8FF', maxWidth: '100vw', overflowX: 'hidden' }}
     >
-      <nav
+      <header
         data-testid="top-nav"
         style={{
-          background: '#fff',
-          height: 56,
+          background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)',
+          height: 64,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          padding: '0 16px',
           position: 'relative',
         }}
       >
+        <img
+          data-testid="creator-avatar"
+          src="/src/assets/creator-photo.jpg"
+          alt="Creator"
+          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', marginRight: 12 }}
+        />
         <span
+          data-testid="app-title"
           style={{
             fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 600,
+            fontWeight: 700,
             fontSize: 18,
-            color: '#9333EA',
+            color: '#fff',
+            flex: 1,
           }}
         >
           Choti Ki Duniya
@@ -48,26 +66,32 @@ export function LibraryPage() {
           data-testid="parent-icon-btn"
           onClick={showGate}
           style={{
-            position: 'absolute',
-            right: 8,
-            top: 6,
             width: 44,
             height: 44,
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            fontSize: 20,
+            color: '#fff',
+            fontSize: 22,
+            borderRadius: '50%',
           }}
         >
           🔒
         </button>
-      </nav>
+      </header>
 
-      <div data-testid="video-grid-placeholder" style={{ flex: 1 }} />
+      <VideoGrid
+        videos={videos}
+        allVideos={allVideos}
+        loading={loading}
+        error={error}
+        onVideoTap={handleVideoTap}
+        selectedCategory={selectedCategory}
+        onCategorySelect={selectCategory}
+        onRefresh={refresh}
+      />
 
-      {panelVisible && (
-        <div data-testid="parent-panel">Parent Panel (Story 8)</div>
-      )}
+      {panelVisible && <div data-testid="parent-panel">Parent Panel (Story 8)</div>}
 
       <ParentalGate
         visible={isVisible}
