@@ -39,4 +39,32 @@ describe('formatSeconds', () => {
   it('formats 30s as "< 1 min"', () => {
     expect(formatSeconds(30)).toBe('< 1 min')
   })
+
+  it('formats 0s as "< 1 min"', () => {
+    expect(formatSeconds(0)).toBe('< 1 min')
+  })
+
+  it('formats 60s as "1 min"', () => {
+    expect(formatSeconds(60)).toBe('1 min')
+  })
+
+  it('formats 2700s as "45 min"', () => {
+    expect(formatSeconds(2700)).toBe('45 min')
+  })
+
+  it('formats 3600s as "1 hr" (not "1 hr 0 min")', () => {
+    expect(formatSeconds(3600)).toBe('1 hr')
+  })
+
+  it('formats 3660s as "1 hr 1 min"', () => {
+    expect(formatSeconds(3660)).toBe('1 hr 1 min')
+  })
+
+  it('formats 7200s as "2 hr" (not "2 hr 0 min")', () => {
+    expect(formatSeconds(7200)).toBe('2 hr')
+  })
+
+  it('formats 8100s as "2 hr 15 min"', () => {
+    expect(formatSeconds(8100)).toBe('2 hr 15 min')
+  })
 })
