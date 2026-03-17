@@ -229,7 +229,7 @@ test.describe('Story 6 — Admin Panel', () => {
     expect(notifDoc.fields.body.stringValue).toBe('Check it out')
     expect(notifDoc.fields.youtubeVideoId.stringValue).toBe('abc123')
     expect(notifDoc.fields.status.stringValue).toBe('pending')
-    expect(notifDoc.fields.sentAt.nullValue).toBe('NULL_VALUE')
+    expect(notifDoc.fields.sentAt.nullValue).toBeNull()
   })
 
   // FT-8: Notification status updates in real-time

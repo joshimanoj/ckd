@@ -64,7 +64,6 @@ export function VideoForm({ open, onClose, onPublish, onError }: Props) {
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
-  const formRef = useRef<HTMLDivElement>(null)
 
   if (!open) return null
 
@@ -124,7 +123,6 @@ export function VideoForm({ open, onClose, onPublish, onError }: Props) {
   return (
     <div
       data-testid="video-form-panel"
-      ref={formRef}
       style={{
         position: 'fixed',
         top: 0,
