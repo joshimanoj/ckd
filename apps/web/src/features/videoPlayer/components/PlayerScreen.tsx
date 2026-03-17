@@ -38,7 +38,8 @@ export function PlayerScreen({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [playerKey, setPlayerKey] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(true)   // user intent only
+  const [isBuffering, setIsBuffering] = useState(false) // YouTube buffering state
   const [displaySeconds, setDisplaySeconds] = useState(0)
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -86,8 +87,9 @@ export function PlayerScreen({
         if (typeof info.currentTime === 'number') setDisplaySeconds(info.currentTime)
         if (typeof info.duration === 'number' && info.duration > 0) setYtDuration(info.duration)
         if (typeof info.playerState === 'number') {
-          // 1 = playing, 2 = paused, 3 = buffering, 0 = ended
-          setIsPlaying(info.playerState === 1)
+          // 3 = buffering (show spinner but don't touch isPlaying — that's user intent)
+          setIsBuffering(info.playerState === 3)
+          // 0 = ended
           if (info.playerState === 0 && !videoEndedRef.current) {
             videoEndedRef.current = true
             onVideoEnd?.()
@@ -379,7 +381,7 @@ export function PlayerScreen({
             onClick={handlePlayPause}
             style={btnStyle(true, true)}
           >
-            {isPlaying ? '⏸' : '▶'}
+            {isBuffering ? <span className="player-spinner" style={{ width: 20, height: 20 }} /> : isPlaying ? '⏸' : '▶'}
           </button>
           <button style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>⏭</button>
           <button style={btnStyle()} aria-label="Fullscreen" onClick={handleFullscreen}>
