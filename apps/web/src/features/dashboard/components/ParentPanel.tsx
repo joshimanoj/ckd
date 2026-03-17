@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Firestore } from 'firebase/firestore'
 import { DashboardScreen } from './DashboardScreen'
+import { SettingsScreen } from '../../notifications/components/SettingsScreen'
 
 interface ParentPanelProps {
   db: Firestore
@@ -10,29 +11,6 @@ interface ParentPanelProps {
 }
 
 type Tab = 'dashboard' | 'settings'
-
-function SettingsPlaceholder() {
-  return (
-    <div style={{
-      padding: 32,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 12,
-    }}>
-      <span style={{ fontSize: 40 }}>⚙️</span>
-      <p style={{
-        fontFamily: "'Nunito', sans-serif",
-        fontSize: 15,
-        color: '#6B7280',
-        textAlign: 'center',
-        margin: 0,
-      }}>
-        Settings coming in the next update.
-      </p>
-    </div>
-  )
-}
 
 export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
@@ -158,7 +136,7 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
         {/* Tab content */}
         {activeTab === 'dashboard'
           ? <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
-          : <SettingsPlaceholder />
+          : <SettingsScreen uid={uid} />
         }
       </div>
     </>
