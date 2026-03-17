@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useVideoStore } from '../shared/store/videoStore'
 import { useAuthStore } from '../shared/store/authStore'
@@ -13,7 +13,8 @@ export function WatchPage() {
   const { activeProfile } = useChildProfileStore()
   const videos = useVideoStore((s) => s.videos)
   const video = videos.find((v) => v.videoId === videoId)
-  const playerRef = useRef<YouTubePlayerRef | null>(null)
+  const currentTimeRef = useRef(0)
+  const playerRef = useRef<YouTubePlayerRef>({ getCurrentTime: () => currentTimeRef.current })
 
   const { flushSession } = useWatchSession({
     videoId: video?.youtubeVideoId ?? '',
@@ -32,6 +33,8 @@ export function WatchPage() {
       navigate('/library', { replace: true })
     }
   }, [user, video, navigate])
+
+  const handleTimeUpdate = useCallback((t: number) => { currentTimeRef.current = t }, [])
 
   // Flush on tab close / browser close (best-effort — no await in beforeunload)
   useEffect(() => {
@@ -82,6 +85,7 @@ export function WatchPage() {
       onVideoEnd={handleVideoEnd}
       onNextVideo={handleNextVideo}
       onPrevVideo={handlePrevVideo}
+      onTimeUpdate={handleTimeUpdate}
     />
   )
 }

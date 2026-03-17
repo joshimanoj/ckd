@@ -21,6 +21,7 @@ interface PlayerScreenProps {
   onVideoEnd?: () => void
   onPrevVideo?: () => void
   onNextVideo?: () => void
+  onTimeUpdate?: (currentTime: number) => void
 }
 
 export function PlayerScreen({
@@ -34,6 +35,7 @@ export function PlayerScreen({
   onVideoEnd,
   onPrevVideo,
   onNextVideo,
+  onTimeUpdate,
 }: PlayerScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -84,7 +86,10 @@ export function PlayerScreen({
         if (data?.event !== 'infoDelivery' || !data.info) return
         const info = data.info as Record<string, unknown>
 
-        if (typeof info.currentTime === 'number') setDisplaySeconds(info.currentTime)
+        if (typeof info.currentTime === 'number') {
+          setDisplaySeconds(info.currentTime)
+          onTimeUpdate?.(info.currentTime)
+        }
         if (typeof info.duration === 'number' && info.duration > 0) setYtDuration(info.duration)
         if (typeof info.playerState === 'number') {
           // 3 = buffering (show spinner but don't touch isPlaying — that's user intent)
@@ -102,7 +107,7 @@ export function PlayerScreen({
 
     window.addEventListener('message', handleYTMessage)
     return () => window.removeEventListener('message', handleYTMessage)
-  }, [isLoading, onVideoEnd])
+  }, [isLoading, onVideoEnd, onTimeUpdate])
 
   // Sync fullscreen state when user presses Esc
   useEffect(() => {
