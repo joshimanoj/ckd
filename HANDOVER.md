@@ -132,3 +132,15 @@ Story complete: Child profile setup screen shipped to main — name input + age-
 UAT fixes applied: Header copy changed from "Who's watching?" to "Add your child's profile" + subtitle "We'll personalise the experience for them" to match prototype; unit test updated to match.
 
 Next: Story #4 Parental Gate | Ready for: /prd
+
+---
+
+## Checkpoint: Story #4 Parental Gate | 2026-03-17 | MERGED ✅
+
+Story complete: Parental gate shipped to main — math challenge modal (`ParentalGate` component + `useParentalGate` hook) wired into `LibraryPage`; correct answer reveals parent panel, wrong answer shakes + regenerates question, X dismisses without granting access.
+
+UAT fixes applied: none.
+
+Infrastructure shipped alongside: Firebase emulator wired into `web-playwright` CI job — all future E2E tests with `FIREBASE_EMULATOR_RUNNING` guard now run automatically in CI from Story 5 onwards.
+
+Next: Story #5 Video Library Grid | Ready for: /prd
