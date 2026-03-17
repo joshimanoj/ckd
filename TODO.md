@@ -41,8 +41,8 @@ Generated: 2026-03-17
 
 - [x] Full unit test suite passing (`npm run test:unit` in `apps/web`) — 114 passed
 - [x] Shared package tests passing (`npm run test:unit` in `packages/shared`)
-- [ ] All 10 FT tasks GREEN (`FIREBASE_EMULATOR_RUNNING=1 npx playwright test e2e/story-5/`) — pending emulator
-- [ ] Story #4 FT suite still GREEN (regression check: `FIREBASE_EMULATOR_RUNNING=1 npx playwright test e2e/story-4/`) — pending emulator
+- [x] All 10 FT tasks GREEN (`FIREBASE_EMULATOR_RUNNING=1 npx playwright test e2e/story-5/`) — 10 passed (11.2s)
+- [x] Story #4 FT suite still GREEN (regression check: `FIREBASE_EMULATOR_RUNNING=1 npx playwright test e2e/story-4/`) — 6 passed (5.4s)
 - [x] No TypeScript errors (`npm run check:types`)
 - [x] No lint errors (`npm run lint`)
 - [x] All acceptance criteria verified against story-5.md
@@ -51,4 +51,4 @@ Generated: 2026-03-17
 
 ## Story Acceptance
 
-- [ ] Ready for /check
+- [x] Ready for /check
