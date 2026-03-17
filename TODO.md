@@ -36,6 +36,12 @@
 
 ---
 
+## Fix Tasks (Phase 5b)
+
+- [x] Fix-1: AuthGuard blocks /watch/:videoId — allow authenticated users to navigate freely beyond /library — `apps/web/src/shared/components/AuthGuard.tsx`
+
+---
+
 ## Integration Check
 
 - [x] Full unit test suite passing (`npm run test:unit` in apps/web and packages/shared)
