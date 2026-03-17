@@ -63,11 +63,9 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ runner.os }}-v1
 
-      - name: Pre-install emulator JARs (fast if cache hit)
+      - name: Pre-install Firestore emulator JAR (fast if cache hit)
         working-directory: ${{ github.workspace }}
-        run: |
-          firebase setup:emulators:firestore
-          firebase setup:emulators:auth
+        run: firebase setup:emulators:firestore
 
       - name: Start Firebase emulators (auth + firestore)
         working-directory: ${{ github.workspace }}
