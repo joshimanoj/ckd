@@ -24,7 +24,7 @@ export default defineConfig({
       ? 'VITE_USE_EMULATOR=true node node_modules/.bin/vite --mode test'
       : 'node node_modules/.bin/vite --mode test',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env['CI'] && !useEmulator,
+    reuseExistingServer: !process.env['CI'],
     timeout: 30000,
   },
 })
