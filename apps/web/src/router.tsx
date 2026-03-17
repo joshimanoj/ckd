@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { ChildProfilePage } from './pages/ChildProfilePage'
+import { LibraryPage } from './pages/LibraryPage'
 import { AuthGuard } from './shared/components/AuthGuard'
 import { ConsentModal } from './features/auth/components/ConsentModal'
 
@@ -33,7 +34,7 @@ export const router = createBrowserRouter([
     path: '/library',
     element: (
       <AuthGuard>
-        <div data-testid="library-screen">Library (Story 5)</div>
+        <LibraryPage />
       </AuthGuard>
     ),
   },
