@@ -123,6 +123,52 @@ export async function seedVideos(request: APIRequestContext, videos: SeedVideoIn
   await Promise.all(videos.map((v) => seedVideo(request, v)))
 }
 
+export async function setAdminClaim(request: APIRequestContext, uid: string): Promise<void> {
+  await request.post(
+    `${AUTH}/identitytoolkit.googleapis.com/v1/accounts:update`,
+    {
+      headers: { Authorization: 'Bearer owner' },
+      data: { localId: uid, customAttributes: JSON.stringify({ admin: true }) },
+    },
+  )
+}
+
+export async function getFirestoreDocument(
+  request: APIRequestContext,
+  collection: string,
+  docId: string,
+): Promise<{ fields: Record<string, Record<string, unknown>> }> {
+  const res = await request.get(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/${collection}/${docId}`,
+  )
+  return (await res.json()) as { fields: Record<string, Record<string, unknown>> }
+}
+
+export async function listFirestoreCollection(
+  request: APIRequestContext,
+  collection: string,
+): Promise<Array<{ name: string; fields: Record<string, Record<string, unknown>> }>> {
+  const res = await request.get(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/${collection}`,
+  )
+  const body = (await res.json()) as {
+    documents?: Array<{ name: string; fields: Record<string, Record<string, unknown>> }>
+  }
+  return body.documents ?? []
+}
+
+export async function patchFirestoreDocument(
+  request: APIRequestContext,
+  collection: string,
+  docId: string,
+  fields: Record<string, unknown>,
+): Promise<void> {
+  await request.patch(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/${collection}/${docId}`,
+    { data: { fields } },
+  )
+}
+
 export async function signInViaTestHelper(page: Page, email: string, password: string) {
   await page.waitForFunction(
     () =>

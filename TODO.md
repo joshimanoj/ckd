@@ -1,3 +1,2 @@
 # TODO
-
-_Ready for Story #6: Admin Panel — Video Management — run /prd to generate task list._
+_Ready for Story #7: Video Player & Watch Session Tracking — run /prd to generate task list._

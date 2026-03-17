@@ -137,7 +137,7 @@ Per architecture.md Section 9 and product_note.md Section 6:
 | 3 | Child Profile Setup | Feature 2 | UI | 2 | 1 | ✅ | ☐ |
 | 4 | Parental Gate | Design §7 (Families Policy) | UI | 2 | 1 | ✅ | ☐ |
 | 5 | Video Library Grid | Feature 3 | UI | 3 | 2 | ✅ | ☐ |
-| 6 | Admin Panel — Video Management | Design Flow 5 | UI | 3 | 2 | ☐ | Web Only |
+| 6 | Admin Panel — Video Management | Design Flow 5 | UI | 3 | 2 | ✅ | Web Only |
 | 7 | Video Player & Watch Session Tracking | Feature 3 + 4 | UI | 4 | 2 | ☐ | ☐ |
 | 8 | Watch Time Dashboard | Feature 4 | UI | 3 | 3 | ☐ | ☐ |
 | 9 | Push Notifications | Feature 5 | UI | 3 | 3 | ☐ | ☐ |
