@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useReducer, useEffect, useCallback } from 'react'
 import type { Firestore } from 'firebase/firestore'
 import { startOfToday, startOfWeek, startOfMonth } from '@ckd/shared/utils/dateRanges'
 import { fetchSessionsSince } from '../services/dashboardService'
@@ -13,29 +13,72 @@ export interface DashboardData {
   refetch: () => void
 }
 
+interface State {
+  todaySeconds: number
+  weekDayTotals: number[]
+  monthSeconds: number
+  loading: boolean
+  error: Error | null
+  isEmpty: boolean
+}
+
+type Action =
+  | { type: 'FETCH_START' }
+  | {
+      type: 'FETCH_SUCCESS'
+      todaySeconds: number
+      weekDayTotals: number[]
+      monthSeconds: number
+      isEmpty: boolean
+    }
+  | { type: 'FETCH_ERROR'; error: Error }
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { ...state, loading: true, error: null }
+    case 'FETCH_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        todaySeconds: action.todaySeconds,
+        weekDayTotals: action.weekDayTotals,
+        monthSeconds: action.monthSeconds,
+        isEmpty: action.isEmpty,
+      }
+    case 'FETCH_ERROR':
+      return { ...state, loading: false, error: action.error }
+  }
+}
+
+const initialState: State = {
+  todaySeconds: 0,
+  weekDayTotals: [0, 0, 0, 0, 0, 0, 0],
+  monthSeconds: 0,
+  loading: false,
+  error: null,
+  isEmpty: false,
+}
+
 export function useDashboard(
   db: Firestore,
   uid: string,
   childProfileId: string,
 ): DashboardData {
-  const [todaySeconds, setTodaySeconds] = useState(0)
-  const [weekDayTotals, setWeekDayTotals] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
-  const [monthSeconds, setMonthSeconds] = useState(0)
-  const [isEmpty, setIsEmpty] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [tick, setTick] = useState(0)
+  const [state, dispatch] = useReducer(reducer, initialState, (init) => ({
+    ...init,
+    loading: Boolean(uid && childProfileId),
+  }))
+  const [tick, setTick] = useReducer((t: number) => t + 1, 0)
 
-  const refetch = useCallback(() => setTick((t) => t + 1), [])
+  const refetch = useCallback(() => setTick(), [])
 
   useEffect(() => {
     if (!uid || !childProfileId) {
-      setLoading(false)
       return
     }
 
-    setLoading(true)
-    setError(null)
+    dispatch({ type: 'FETCH_START' })
 
     const today = startOfToday()
     const weekStart = startOfWeek()
@@ -49,7 +92,6 @@ export function useDashboard(
       .then(([todaySessions, weekSessions, monthSessions]) => {
         // Today total
         const todayTotal = todaySessions.reduce((sum, s) => sum + s.watchedSeconds, 0)
-        setTodaySeconds(todayTotal)
 
         // Week day buckets: (getDay() + 6) % 7 → Mon=0…Sun=6
         const buckets = [0, 0, 0, 0, 0, 0, 0]
@@ -57,26 +99,28 @@ export function useDashboard(
           const dayIdx = (s.startTime.toDate().getDay() + 6) % 7
           buckets[dayIdx] += s.watchedSeconds
         }
-        setWeekDayTotals(buckets)
 
         // Month total
         const monthTotal = monthSessions.reduce((sum, s) => sum + s.watchedSeconds, 0)
-        setMonthSeconds(monthTotal)
 
-        // isEmpty: no sessions at all across all ranges
-        setIsEmpty(
-          todaySessions.length === 0 &&
+        dispatch({
+          type: 'FETCH_SUCCESS',
+          todaySeconds: todayTotal,
+          weekDayTotals: buckets,
+          monthSeconds: monthTotal,
+          isEmpty:
+            todaySessions.length === 0 &&
             weekSessions.length === 0 &&
             monthSessions.length === 0,
-        )
-
-        setLoading(false)
+        })
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err : new Error(String(err)))
-        setLoading(false)
+        dispatch({
+          type: 'FETCH_ERROR',
+          error: err instanceof Error ? err : new Error(String(err)),
+        })
       })
   }, [db, uid, childProfileId, tick])
 
-  return { todaySeconds, weekDayTotals, monthSeconds, loading, error, isEmpty, refetch }
+  return { ...state, refetch }
 }
