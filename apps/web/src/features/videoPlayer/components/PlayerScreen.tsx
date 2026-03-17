@@ -40,9 +40,11 @@ export function PlayerScreen({
   const [playerKey, setPlayerKey] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [displaySeconds, setDisplaySeconds] = useState(0)
+  const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const videoEndedRef = useRef(false)
 
   // Send play/pause command to YouTube iframe via postMessage
   useEffect(() => {
@@ -59,12 +61,46 @@ export function PlayerScreen({
     )
   }, [isPlaying, isLoading])
 
-  // Local 1-second timer for progress display
+  // Subscribe to YouTube infoDelivery events — drives scrubber, buffering pause, and auto-advance
   useEffect(() => {
-    if (!isPlaying || isLoading) return
-    const id = setInterval(() => setDisplaySeconds((s) => s + 1), 1000)
-    return () => clearInterval(id)
-  }, [isPlaying, isLoading])
+    if (isLoading) return
+    const iframe = iframeRef.current
+    if (!iframe?.contentWindow) return
+
+    // Ask YouTube to start sending infoDelivery messages
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }),
+      '*',
+    )
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
+      '*',
+    )
+
+    const handleYTMessage = (e: MessageEvent) => {
+      try {
+        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+        if (data?.event !== 'infoDelivery' || !data.info) return
+        const info = data.info as Record<string, unknown>
+
+        if (typeof info.currentTime === 'number') setDisplaySeconds(info.currentTime)
+        if (typeof info.duration === 'number' && info.duration > 0) setYtDuration(info.duration)
+        if (typeof info.playerState === 'number') {
+          // 1 = playing, 2 = paused, 3 = buffering, 0 = ended
+          setIsPlaying(info.playerState === 1)
+          if (info.playerState === 0 && !videoEndedRef.current) {
+            videoEndedRef.current = true
+            onVideoEnd?.()
+          }
+        }
+      } catch {
+        // ignore non-YouTube messages
+      }
+    }
+
+    window.addEventListener('message', handleYTMessage)
+    return () => window.removeEventListener('message', handleYTMessage)
+  }, [isLoading, onVideoEnd])
 
   // Sync fullscreen state when user presses Esc
   useEffect(() => {
@@ -126,7 +162,17 @@ export function PlayerScreen({
   const currentIdx = videos.findIndex((v) => v.videoId === currentVideoId)
   const upNext = [...videos.slice(currentIdx + 1), ...videos.slice(0, currentIdx)].slice(0, 4)
 
-  const progressPct = videoDuration > 0 ? Math.min(100, (displaySeconds / videoDuration) * 100) : 0
+  // Reset when video changes — wrap in setTimeout to avoid setState-during-render lint error
+  useEffect(() => {
+    const t = setTimeout(() => {
+      videoEndedRef.current = false
+      setDisplaySeconds(0)
+      setYtDuration(videoDuration)
+    }, 0)
+    return () => clearTimeout(t)
+  }, [youtubeVideoId, videoDuration])
+
+  const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
 
   const btnStyle = (large = false, primary = false): React.CSSProperties => ({
     width: large ? '64px' : '48px',
@@ -299,7 +345,7 @@ export function PlayerScreen({
           <input
             type="range"
             min={0}
-            max={videoDuration || 100}
+            max={ytDuration || 100}
             value={displaySeconds}
             onChange={handleScrub}
             style={{
@@ -318,7 +364,7 @@ export function PlayerScreen({
               {toMMSS(displaySeconds)}
             </span>
             <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Nunito', fontSize: '12px' }}>
-              {toMMSS(videoDuration)}
+              {toMMSS(ytDuration)}
             </span>
           </div>
         </div>
