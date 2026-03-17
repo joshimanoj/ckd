@@ -4,6 +4,9 @@ import { useParentalGate } from '../shared/hooks/useParentalGate'
 import { ParentalGate } from '../features/parentalGate/components/ParentalGate'
 import { useVideoLibrary } from '../features/videoLibrary/hooks/useVideoLibrary'
 import { VideoGrid } from '../features/videoLibrary/components/VideoGrid'
+import { ParentPanel } from '../features/dashboard/components/ParentPanel'
+import { useAuthStore } from '../shared/store/authStore'
+import { useChildProfileStore } from '../shared/store/childProfileStore'
 import { db } from '@ckd/shared/firebase/config'
 
 export function LibraryPage() {
@@ -11,6 +14,8 @@ export function LibraryPage() {
   const { videos, allVideos, loading, error, selectedCategory, selectCategory, refresh } = useVideoLibrary(db)
   const navigate = useNavigate()
   const [panelVisible, setPanelVisible] = useState(false)
+  const user = useAuthStore((s) => s.user)
+  const activeProfile = useChildProfileStore((s) => s.activeProfile)
   const [shaking, setShaking] = useState(false)
 
   function handleVideoTap(videoId: string) {
@@ -91,7 +96,14 @@ export function LibraryPage() {
         onRefresh={refresh}
       />
 
-      {panelVisible && <div data-testid="parent-panel">Parent Panel (Story 8)</div>}
+      {panelVisible && user && activeProfile && (
+        <ParentPanel
+          db={db}
+          uid={user.uid}
+          childProfileId={activeProfile.id}
+          onClose={() => setPanelVisible(false)}
+        />
+      )}
 
       <ParentalGate
         visible={isVisible}

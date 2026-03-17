@@ -39,6 +39,23 @@ vi.mock('@ckd/shared/firebase/config', () => ({
   auth: {},
 }))
 
+vi.mock('../../shared/store/authStore', () => ({
+  useAuthStore: vi.fn((selector: (s: { user: { uid: string } | null }) => unknown) =>
+    selector({ user: { uid: 'test-uid' } }),
+  ),
+}))
+
+vi.mock('../../shared/store/childProfileStore', () => ({
+  useChildProfileStore: vi.fn(
+    (selector: (s: { activeProfile: { id: string; name: string } | null }) => unknown) =>
+      selector({ activeProfile: { id: 'child-1', name: 'Test Child' } }),
+  ),
+}))
+
+vi.mock('../../features/dashboard/components/ParentPanel', () => ({
+  ParentPanel: () => <div data-testid="parent-panel" />,
+}))
+
 import { useParentalGate } from '../../shared/hooks/useParentalGate'
 import { useVideoLibrary } from '../../features/videoLibrary/hooks/useVideoLibrary'
 const mockUseParentalGate = vi.mocked(useParentalGate)

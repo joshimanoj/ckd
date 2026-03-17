@@ -1,54 +1,41 @@
-# Story #7: Video Player & Watch Session Tracking | Type: UI | Pass: Web
+# Story #8: Watch Time Dashboard | Type: UI | Pass: 1 — Web
+
+Branch: feature/story-8-watch-time-dashboard-web
 
 ---
 
-## Track B — Functional Tests (write FIRST, start RED)
+## Track B — Functional Tests (write first, start RED)
 
-- [ ] FT-1: Full-screen player, no bottom nav — `apps/web/e2e/story-7/player-fullscreen.spec.ts` — 6 min
-- [ ] FT-2: YouTube iframe embed params (rel=0, modestbranding=1, controls=0, autoplay=1) — `apps/web/e2e/story-7/youtube-embed-params.spec.ts` — 5 min
-- [ ] FT-3: Play/pause button visible, 56×56px min, toggles on click — `apps/web/e2e/story-7/player-controls.spec.ts` — 6 min
-- [ ] FT-4: Back button navigates to /library, 44×44px min — `apps/web/e2e/story-7/back-to-library.spec.ts` — 5 min
-- [x] FT-5: Watch session initialized on video start (Vitest integration) — `apps/web/src/features/videoPlayer/hooks/__tests__/useWatchSession.init.test.ts`
-- [x] FT-6: Single Firestore write on pause/back, no duplicates (Vitest) — `apps/web/src/features/videoPlayer/services/__tests__/watchSessionService.test.ts`
-- [x] FT-7: calcCompletionPercent correct + divide-by-zero guard (Vitest unit) — `packages/shared/src/utils/__tests__/watchTime.test.ts`
-- [ ] FT-8: Auto-advance to next video on end; wraps to first at end of library — `apps/web/e2e/story-7/auto-advance.spec.ts` — 8 min
-- [ ] FT-9: Error state visible on failure; retry reinitializes player — `apps/web/e2e/story-7/error-state.spec.ts` — 7 min
-- [ ] FT-10: Responsive 480–768px, no horizontal scroll < 480px — `apps/web/e2e/story-7/responsive.spec.ts` — 6 min
+- [ ] FT-1: Dashboard gated by Parental Gate — `apps/web/e2e/story-8/gate-blocks-dashboard.spec.ts` — 8 min
+- [ ] FT-2: Happy path — today total + chart + monthly total — `apps/web/e2e/story-8/dashboard-happy-path.spec.ts` — 9 min
+- [ ] FT-3: Empty state (no sessions) — `apps/web/e2e/story-8/dashboard-empty-state.spec.ts` — 7 min
+- [ ] FT-4: Shimmer during load (unit) — `apps/web/src/features/dashboard/components/__tests__/DashboardScreen.test.tsx` — 6 min
+- [ ] FT-5: Error state + retry (unit) — `apps/web/src/features/dashboard/components/__tests__/DashboardScreen.test.tsx` — 5 min
+- [ ] FT-6: Chart bar highlighting + proportional heights (unit) — `apps/web/src/features/dashboard/components/__tests__/WatchTimeChart.test.tsx` — 6 min
+- [ ] FT-7: Parent panel open/close — `apps/web/e2e/story-8/parent-panel-open-close.spec.ts` — 7 min
 
 ---
 
 ## Track A — Implementation Tasks
 
-- [x] Task 1: WatchSession shared type — `packages/shared/src/types/watchSession.ts`
-- [x] Task 2: watchTime utilities (calcCompletionPercent, formatSeconds) — `packages/shared/src/utils/watchTime.ts`
-- [x] Task 3: watchSessionStore (Zustand) — `apps/web/src/shared/store/watchSessionStore.ts`
-- [x] Task 4: watchSessionService — Firestore addDoc write — `apps/web/src/features/videoPlayer/services/watchSessionService.ts`
-- [x] Task 5: useWatchSession hook — session init on mount — `apps/web/src/features/videoPlayer/hooks/useWatchSession.ts`
-- [x] Task 6: useWatchSession hook — 10-second polling + cleanup + flushSession — `apps/web/src/features/videoPlayer/hooks/useWatchSession.ts`
-- [x] Task 7: PlayerScreen — full-screen layout + YouTube iframe + embed params — `apps/web/src/features/videoPlayer/components/PlayerScreen.tsx`
-- [x] Task 8: PlayerControls — play/pause button (56dp) — `apps/web/src/features/videoPlayer/components/PlayerControls.tsx`
-- [x] Task 9: PlayerControls — back button (44×44dp) — `apps/web/src/features/videoPlayer/components/PlayerControls.tsx`
-- [x] Task 10: Player loading state (black screen + white spinner) — `apps/web/src/features/videoPlayer/components/PlayerScreen.tsx`
-- [x] Task 11: Player error state (inline error + retry) — `apps/web/src/features/videoPlayer/components/PlayerScreen.tsx`
-- [x] Task 12: Auto-advance logic (videoStore index → next → wrap) — `apps/web/src/features/videoPlayer/components/PlayerScreen.tsx`
-- [x] Task 13: WatchPage — wire PlayerScreen + useWatchSession + guards — `apps/web/src/pages/WatchPage.tsx`
-- [x] Task 14: Responsive CSS — mobile viewport + no horizontal scroll — `apps/web/src/index.css`
-
----
-
-## Fix Tasks (Phase 5b)
-
-- [x] Fix-1: AuthGuard blocks /watch/:videoId — allow authenticated users to navigate freely beyond /library — `apps/web/src/shared/components/AuthGuard.tsx`
+- [ ] Task 1: dateRanges.ts — startOfToday / startOfWeek / startOfMonth — `packages/shared/src/utils/dateRanges.ts` — 8 min
+- [ ] Task 2: Fix formatSeconds — "1 hr 0 min" → "1 hr" edge case — `packages/shared/src/utils/watchTime.ts` — 5 min
+- [ ] Task 3: E2E seed helpers — seedChildProfileWithId + seedWatchSession — `apps/web/e2e/support/emulator.ts` — 7 min
+- [ ] Task 4: dashboardService.ts — fetchSessionsSince Firestore query — `apps/web/src/features/dashboard/services/dashboardService.ts` — 8 min
+- [ ] Task 5: useDashboard hook — Promise.all + aggregation — `apps/web/src/features/dashboard/hooks/useDashboard.ts` — 9 min
+- [ ] Task 6: WatchTimeChart component — 7-bar CSS chart — `apps/web/src/features/dashboard/components/WatchTimeChart.tsx` — 8 min
+- [ ] Task 7: DashboardScreen component — shimmer + empty + error + data states — `apps/web/src/features/dashboard/components/DashboardScreen.tsx` — 10 min
+- [ ] Task 8: ParentPanel side drawer — slide-in drawer for web — `apps/web/src/features/dashboard/components/ParentPanel.tsx` — 8 min
+- [ ] Task 9: Wire ParentPanel into LibraryPage — replace stub — `apps/web/src/pages/LibraryPage.tsx` — 6 min
 
 ---
 
 ## Integration Check
 
-- [x] Full unit test suite passing (`npm run test:unit` in apps/web and packages/shared)
-- [ ] All FT tasks GREEN (Playwright: `npx playwright test e2e/story-7/` + Vitest: `npm run test:all`)
-- [ ] All acceptance criteria from story-7.md verified (functional + non-functional + edge cases)
-- [x] No TypeScript errors in apps/web (`npm run check:types`)
-- [x] No lint errors (`npm run lint:fix`)
+- [ ] Full unit test suite passing (`npm run test:unit` in `apps/web`)
+- [ ] All FT tasks GREEN (Playwright: `FIREBASE_EMULATOR_RUNNING=1 npx playwright test e2e/story-8/`)
+- [ ] All acceptance criteria in story-8.md verified
+- [ ] Responsive: renders at 480–768px, no horizontal scroll at < 480px
 
 ## Story Acceptance
 
