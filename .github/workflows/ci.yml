@@ -57,13 +57,25 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      - name: Cache Firebase emulator binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-v1
+
+      - name: Pre-install emulator JARs (fast if cache hit)
+        working-directory: ${{ github.workspace }}
+        run: |
+          firebase setup:emulators:firestore
+          firebase setup:emulators:auth
+
       - name: Start Firebase emulators (auth + firestore)
         working-directory: ${{ github.workspace }}
         # --project must match the PROJECT constant in e2e/support/emulator.ts
         run: firebase emulators:start --only auth,firestore --project ckd-test &
 
       - name: Wait for emulators to be ready
-        run: npx wait-on tcp:9099 tcp:8080 --timeout 60000
+        run: npx wait-on tcp:9099 tcp:8080 --timeout 120000
       # ──────────────────────────────────────────────────────────────────────
 
       - name: Run Playwright tests
