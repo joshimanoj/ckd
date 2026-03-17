@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback, useRef, type RefObject } from 'react'
 import type { YouTubePlayerRef } from '../hooks/useWatchSession'
 import type { Video } from '@ckd/shared/types/video'
-import { formatSeconds } from '@ckd/shared/utils/watchTime'
+
+function toMMSS(seconds: number): string {
+  const s = Math.floor(seconds)
+  const m = Math.floor(s / 60)
+  const rem = s % 60
+  return `${m}:${rem.toString().padStart(2, '0')}`
+}
 
 interface PlayerScreenProps {
   youtubeVideoId: string
@@ -13,6 +19,8 @@ interface PlayerScreenProps {
   flushSession: () => Promise<void>
   onBack: () => void
   onVideoEnd?: () => void
+  onPrevVideo?: () => void
+  onNextVideo?: () => void
 }
 
 export function PlayerScreen({
@@ -24,13 +32,17 @@ export function PlayerScreen({
   flushSession,
   onBack,
   onVideoEnd,
+  onPrevVideo,
+  onNextVideo,
 }: PlayerScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [playerKey, setPlayerKey] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [displaySeconds, setDisplaySeconds] = useState(0)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Send play/pause command to YouTube iframe via postMessage
   useEffect(() => {
@@ -54,9 +66,14 @@ export function PlayerScreen({
     return () => clearInterval(id)
   }, [isPlaying, isLoading])
 
-  const handleLoad = useCallback(() => {
-    setIsLoading(false)
+  // Sync fullscreen state when user presses Esc
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', handler)
+    return () => document.removeEventListener('fullscreenchange', handler)
   }, [])
+
+  const handleLoad = useCallback(() => setIsLoading(false), [])
 
   const handleRetry = useCallback(() => {
     setHasError(false)
@@ -64,14 +81,24 @@ export function PlayerScreen({
     setPlayerKey((k) => k + 1)
   }, [])
 
-  const handlePlayPause = useCallback(() => {
-    setIsPlaying((p) => !p)
-  }, [])
+  const handlePlayPause = useCallback(() => setIsPlaying((p) => !p), [])
 
   const handleBack = useCallback(async () => {
     await flushSession()
     onBack()
   }, [flushSession, onBack])
+
+  const handleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }, [])
+
+  const handleScrub = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplaySeconds(Number(e.target.value))
+  }, [])
 
   // Expose test hooks
   useEffect(() => {
@@ -90,22 +117,36 @@ export function PlayerScreen({
 
   const iframeSrc = `https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&controls=0&autoplay=1&enablejsapi=1`
 
-  // Up Next: videos after the current one, wrapping around
+  // Up Next: videos after current, wrapping around
   const currentIdx = videos.findIndex((v) => v.videoId === currentVideoId)
-  const upNext = [
-    ...videos.slice(currentIdx + 1),
-    ...videos.slice(0, currentIdx),
-  ].slice(0, 4)
+  const upNext = [...videos.slice(currentIdx + 1), ...videos.slice(0, currentIdx)].slice(0, 4)
 
   const progressPct = videoDuration > 0 ? Math.min(100, (displaySeconds / videoDuration) * 100) : 0
 
+  const btnStyle = (large = false, primary = false): React.CSSProperties => ({
+    width: large ? '64px' : '48px',
+    height: large ? '64px' : '48px',
+    borderRadius: '50%',
+    background: primary ? '#F43F5E' : 'rgba(255,255,255,0.12)',
+    border: 'none',
+    color: '#fff',
+    fontSize: large ? '24px' : '18px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    boxShadow: primary ? '0 4px 20px rgba(244,63,94,0.45)' : 'none',
+  })
+
   return (
     <div
+      ref={containerRef}
       data-testid="player-screen"
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#0f0f1a',
+        background: '#0d0d1f',
         zIndex: 50,
         overflow: 'hidden',
         maxWidth: '100vw',
@@ -113,15 +154,22 @@ export function PlayerScreen({
         flexDirection: 'column',
       }}
     >
-      {/* ── Video section ── */}
-      <div style={{ position: 'relative', flex: '0 0 48%', background: '#000', overflow: 'hidden' }}>
+      {/* ── Video / artwork section ── */}
+      <div
+        style={{
+          position: 'relative',
+          flex: '0 0 46%',
+          background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 100%)',
+          overflow: 'hidden',
+        }}
+      >
         {isLoading && (
           <div
             data-testid="player-loading"
             style={{
               position: 'absolute',
               inset: 0,
-              background: '#000',
+              background: 'rgba(0,0,0,0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -138,12 +186,13 @@ export function PlayerScreen({
             style={{
               position: 'absolute',
               inset: 0,
-              background: '#000',
+              background: 'rgba(0,0,0,0.6)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '16px',
+              zIndex: 20,
             }}
           >
             <p style={{ color: '#fff', fontFamily: 'Nunito', fontSize: '16px', margin: 0 }}>
@@ -175,19 +224,17 @@ export function PlayerScreen({
             src={iframeSrc}
             allow="autoplay; fullscreen"
             onLoad={handleLoad}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block',
+              opacity: isLoading ? 0 : 1,
+            }}
           />
         )}
-
-        {/* Gradient overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to bottom, rgba(147,51,234,0.35) 0%, transparent 50%, rgba(0,0,0,0.5) 100%)',
-            pointerEvents: 'none',
-          }}
-        />
 
         {/* Back button */}
         <button
@@ -196,11 +243,11 @@ export function PlayerScreen({
           onClick={handleBack}
           style={{
             position: 'absolute',
-            top: '10px',
-            left: '10px',
+            top: '12px',
+            left: '12px',
             minWidth: '44px',
             minHeight: '44px',
-            background: 'rgba(0,0,0,0.4)',
+            background: 'rgba(0,0,0,0.35)',
             border: 'none',
             borderRadius: '50%',
             color: '#fff',
@@ -209,168 +256,164 @@ export function PlayerScreen({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            zIndex: 5,
           }}
         >
           ←
         </button>
-
-        {/* Title overlay at bottom of video section */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: '12px 16px',
-            background: 'linear-gradient(to top, rgba(15,15,26,0.95) 0%, transparent 100%)',
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: '#fff',
-              fontFamily: 'Nunito',
-              fontWeight: 700,
-              fontSize: '17px',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {videoTitle}
-          </p>
-        </div>
       </div>
 
-      {/* ── Controls panel ── */}
+      {/* ── Controls panel (dark navy) ── */}
       <div
         style={{
-          flex: 1,
-          overflowY: 'auto',
+          background: '#12122a',
+          padding: '16px 20px 20px',
           display: 'flex',
           flexDirection: 'column',
-          padding: '16px 20px 0',
           gap: '12px',
         }}
       >
-        {/* Progress bar */}
+        {/* Title */}
+        <p
+          style={{
+            margin: 0,
+            color: '#fff',
+            fontFamily: 'Nunito',
+            fontWeight: 700,
+            fontSize: '17px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {videoTitle}
+        </p>
+
+        {/* Scrubber */}
         <div>
-          <div
+          <input
+            type="range"
+            min={0}
+            max={videoDuration || 100}
+            value={displaySeconds}
+            onChange={handleScrub}
             style={{
+              width: '100%',
               height: '4px',
-              background: 'rgba(255,255,255,0.2)',
+              appearance: 'none',
+              WebkitAppearance: 'none',
               borderRadius: '2px',
-              overflow: 'hidden',
+              cursor: 'pointer',
+              background: `linear-gradient(to right, #F43F5E ${progressPct}%, rgba(255,255,255,0.25) ${progressPct}%)`,
+              outline: 'none',
             }}
-          >
-            <div
-              style={{
-                height: '100%',
-                width: `${progressPct}%`,
-                background: '#F43F5E',
-                borderRadius: '2px',
-                transition: 'width 1s linear',
-              }}
-            />
-          </div>
+          />
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'Nunito', fontSize: '12px' }}>
-              {formatSeconds(displaySeconds)}
+            <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Nunito', fontSize: '12px' }}>
+              {toMMSS(displaySeconds)}
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'Nunito', fontSize: '12px' }}>
-              {formatSeconds(videoDuration)}
+            <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Nunito', fontSize: '12px' }}>
+              {toMMSS(videoDuration)}
             </span>
           </div>
         </div>
 
-        {/* Play/Pause control */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {/* Control buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
+          <button style={btnStyle()} aria-label="Back to Library" onClick={handleBack}>←</button>
+          <button style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>⏮</button>
           <button
             data-testid="play-pause-btn"
             aria-label={isPlaying ? 'Pause' : 'Play'}
             onClick={handlePlayPause}
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: '#F43F5E',
-              border: 'none',
-              color: '#fff',
-              fontSize: '24px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(244,63,94,0.4)',
-            }}
+            style={btnStyle(true, true)}
           >
             {isPlaying ? '⏸' : '▶'}
           </button>
+          <button style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>⏭</button>
+          <button style={btnStyle()} aria-label="Fullscreen" onClick={handleFullscreen}>
+            {isFullscreen ? '⤡' : '⤢'}
+          </button>
         </div>
-
-        {/* Up Next */}
-        {upNext.length > 0 && (
-          <div>
-            <p
-              style={{
-                margin: '0 0 10px',
-                color: '#fff',
-                fontFamily: 'Nunito',
-                fontWeight: 700,
-                fontSize: '15px',
-              }}
-            >
-              Up Next
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {upNext.map((v) => (
-                <div
-                  key={v.videoId}
-                  style={{ display: 'flex', gap: '12px', alignItems: 'center' }}
-                >
-                  <img
-                    src={`https://img.youtube.com/vi/${v.youtubeVideoId}/mqdefault.jpg`}
-                    alt={v.title}
-                    style={{
-                      width: '72px',
-                      height: '48px',
-                      objectFit: 'cover',
-                      borderRadius: '6px',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div style={{ minWidth: 0 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: '#fff',
-                        fontFamily: 'Nunito',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {v.title}
-                    </p>
-                    <p
-                      style={{
-                        margin: '2px 0 0',
-                        color: 'rgba(255,255,255,0.5)',
-                        fontFamily: 'Nunito',
-                        fontSize: '12px',
-                      }}
-                    >
-                      {v.category}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* ── Up Next (white) ── */}
+      {upNext.length > 0 && (
+        <div
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            background: '#fff',
+            padding: '16px 16px 24px',
+          }}
+        >
+          <p
+            style={{
+              margin: '0 0 12px',
+              color: '#111',
+              fontFamily: 'Nunito',
+              fontWeight: 800,
+              fontSize: '15px',
+            }}
+          >
+            Up Next
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {upNext.map((v) => (
+              <div
+                key={v.videoId}
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'center',
+                  background: '#f7f7fb',
+                  borderRadius: '12px',
+                  padding: '10px',
+                }}
+              >
+                <img
+                  src={`https://img.youtube.com/vi/${v.youtubeVideoId}/mqdefault.jpg`}
+                  alt={v.title}
+                  style={{
+                    width: '72px',
+                    height: '48px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      color: '#111',
+                      fontFamily: 'Nunito',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {v.title}
+                  </p>
+                  <p
+                    style={{
+                      margin: '2px 0 0',
+                      color: '#9333EA',
+                      fontFamily: 'Nunito',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {v.category}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -35,11 +35,24 @@ export function WatchPage() {
 
   if (!user || !video) return null
 
+  const currentIdx = videos.findIndex((v) => v.youtubeVideoId === video.youtubeVideoId)
+
   const handleVideoEnd = () => {
-    const currentIdx = videos.findIndex((v) => v.youtubeVideoId === video.youtubeVideoId)
     const nextIdx = (currentIdx + 1) % videos.length
     flushSession()
     navigate(`/watch/${videos[nextIdx].videoId}`)
+  }
+
+  const handleNextVideo = () => {
+    const nextIdx = (currentIdx + 1) % videos.length
+    flushSession()
+    navigate(`/watch/${videos[nextIdx].videoId}`)
+  }
+
+  const handlePrevVideo = () => {
+    const prevIdx = (currentIdx - 1 + videos.length) % videos.length
+    flushSession()
+    navigate(`/watch/${videos[prevIdx].videoId}`)
   }
 
   return (
@@ -54,6 +67,8 @@ export function WatchPage() {
       flushSession={flushSession}
       onBack={() => navigate('/library')}
       onVideoEnd={handleVideoEnd}
+      onNextVideo={handleNextVideo}
+      onPrevVideo={handlePrevVideo}
     />
   )
 }
