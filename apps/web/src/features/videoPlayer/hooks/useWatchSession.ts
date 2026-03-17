@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useWatchSessionStore } from '../../../shared/store/watchSessionStore'
 import { writeWatchSession } from '../services/watchSessionService'
 import type { WatchSessionInput } from '@ckd/shared/types/watchSession'
@@ -37,7 +37,7 @@ export function useWatchSession({
     return () => clearInterval(interval)
   }, [addWatchedDelta, updateLastKnownTime])
 
-  const flushSession = async () => {
+  const flushSession = useCallback(async () => {
     const state = useWatchSessionStore.getState()
     if (state.hasWritten) return
     if (!state.youtubeVideoId || !state.childProfileId || !state.startTime) return
@@ -67,7 +67,7 @@ export function useWatchSession({
 
     await writeWatchSession(userId, finalState.childProfileId!, payload)
     markWritten()
-  }
+  }, [userId, addWatchedDelta, updateLastKnownTime, markWritten])
 
   return { flushSession }
 }
