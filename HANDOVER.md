@@ -2,6 +2,22 @@
 
 ---
 
+## Checkpoint: Story #5 Video Library Grid | 2026-03-17 | MERGED ✅
+
+Story complete: Video Library screen built for web — 2-column grid with VideoCard, SkeletonGrid shimmer, CategoryFilter (hidden < 20 videos), pull-to-refresh, empty state, error state, parent icon triggering Parental Gate, and `/watch/:videoId` stub routing.
+
+UAT fixes applied:
+- none (grid flows approved without real video data; Story #6 Admin Panel will seed production videos)
+
+CI fixes applied during /check (pre-existing issues exposed by first real emulator run):
+- Firebase CI: added Java 21 (firebase-tools requires JDK 21+), switched to `emulators:exec`, cached Firestore JAR
+- Story #2 FTs: `profile-screen` testid corrected to `child-profile-screen`
+- Story #3 FTs: `useChildProfile` now calls `setRouteTo('library')` before `navigate('/library')` so AuthGuard allows the route; stale heading text "Who's watching?" updated to "Add your child's profile"
+
+Next: Story #6 Admin Panel — Video Management | Ready for: /prd
+
+---
+
 ## Checkpoint: Story #1 Google Sign-In & Authentication | 2026-03-16 14:55 | /check PASSED
 
 Story complete: Full auth flow implemented for web — OnboardingPage, GoogleSignInButton, useAuth hook, authService, authStore, AuthGuard, React Router v6, shared User type + Firebase collection refs.
