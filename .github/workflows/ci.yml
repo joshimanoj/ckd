@@ -52,9 +52,25 @@ jobs:
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      # Note: tests guarded by FIREBASE_EMULATOR_RUNNING are skipped in CI.
-      # Only non-emulator tests (renders, responsive) run here.
-      - run: npx playwright test
+
+      # ── Firebase emulator ─────────────────────────────────────────────────
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase emulators (auth + firestore)
+        working-directory: ${{ github.workspace }}
+        # --project must match the PROJECT constant in e2e/support/emulator.ts
+        run: firebase emulators:start --only auth,firestore --project ckd-test &
+
+      - name: Wait for emulators to be ready
+        run: npx wait-on tcp:9099 tcp:8080 --timeout 60000
+      # ──────────────────────────────────────────────────────────────────────
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          # Unlocks emulator-guarded tests (skip guard removed from Story 5 onwards)
+          FIREBASE_EMULATOR_RUNNING: '1'
 
   mobile-e2e:
     # Disabled until React Native / Detox is set up (Sprint 4)
