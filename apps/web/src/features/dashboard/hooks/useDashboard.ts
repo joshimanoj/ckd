@@ -6,7 +6,10 @@ import { fetchSessionsSince } from '../services/dashboardService'
 export interface DashboardData {
   todaySeconds: number
   weekDayTotals: number[] // [Mon, Tue, Wed, Thu, Fri, Sat, Sun] — length 7
+  weekSeconds: number
   monthSeconds: number
+  avgDaySeconds: number
+  videosWatched: number
   loading: boolean
   error: Error | null
   isEmpty: boolean
@@ -16,7 +19,10 @@ export interface DashboardData {
 interface State {
   todaySeconds: number
   weekDayTotals: number[]
+  weekSeconds: number
   monthSeconds: number
+  avgDaySeconds: number
+  videosWatched: number
   loading: boolean
   error: Error | null
   isEmpty: boolean
@@ -28,7 +34,10 @@ type Action =
       type: 'FETCH_SUCCESS'
       todaySeconds: number
       weekDayTotals: number[]
+      weekSeconds: number
       monthSeconds: number
+      avgDaySeconds: number
+      videosWatched: number
       isEmpty: boolean
     }
   | { type: 'FETCH_ERROR'; error: Error }
@@ -43,7 +52,10 @@ function reducer(state: State, action: Action): State {
         loading: false,
         todaySeconds: action.todaySeconds,
         weekDayTotals: action.weekDayTotals,
+        weekSeconds: action.weekSeconds,
         monthSeconds: action.monthSeconds,
+        avgDaySeconds: action.avgDaySeconds,
+        videosWatched: action.videosWatched,
         isEmpty: action.isEmpty,
       }
     case 'FETCH_ERROR':
@@ -54,7 +66,10 @@ function reducer(state: State, action: Action): State {
 const initialState: State = {
   todaySeconds: 0,
   weekDayTotals: [0, 0, 0, 0, 0, 0, 0],
+  weekSeconds: 0,
   monthSeconds: 0,
+  avgDaySeconds: 0,
+  videosWatched: 0,
   loading: false,
   error: null,
   isEmpty: false,
@@ -100,14 +115,27 @@ export function useDashboard(
           buckets[dayIdx] += s.watchedSeconds
         }
 
+        // Week total
+        const weekTotal = weekSessions.reduce((sum, s) => sum + s.watchedSeconds, 0)
+
         // Month total
         const monthTotal = monthSessions.reduce((sum, s) => sum + s.watchedSeconds, 0)
+
+        // Avg per day: month total / days elapsed so far this month (min 1)
+        const dayOfMonth = new Date().getDate()
+        const avgDay = Math.round(monthTotal / dayOfMonth)
+
+        // Videos watched: count of sessions this month
+        const videosWatched = monthSessions.length
 
         dispatch({
           type: 'FETCH_SUCCESS',
           todaySeconds: todayTotal,
           weekDayTotals: buckets,
+          weekSeconds: weekTotal,
           monthSeconds: monthTotal,
+          avgDaySeconds: avgDay,
+          videosWatched,
           isEmpty:
             todaySessions.length === 0 &&
             weekSessions.length === 0 &&

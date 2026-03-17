@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { Firestore } from 'firebase/firestore'
 import { DashboardScreen } from './DashboardScreen'
 
@@ -9,14 +9,55 @@ interface ParentPanelProps {
   onClose: () => void
 }
 
+type Tab = 'dashboard' | 'settings'
+
+function SettingsPlaceholder() {
+  return (
+    <div style={{
+      padding: 32,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 12,
+    }}>
+      <span style={{ fontSize: 40 }}>⚙️</span>
+      <p style={{
+        fontFamily: "'Nunito', sans-serif",
+        fontSize: 15,
+        color: '#6B7280',
+        textAlign: 'center',
+        margin: 0,
+      }}>
+        Settings coming in the next update.
+      </p>
+    </div>
+  )
+}
+
 export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelProps) {
-  // Prevent background scroll while panel is open
+  const [activeTab, setActiveTab] = useState<Tab>('dashboard')
+
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = ''
     }
   }, [])
+
+  const tabStyle = (tab: Tab): React.CSSProperties => ({
+    flex: 1,
+    padding: '8px 0',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: "'Nunito', sans-serif",
+    fontWeight: 700,
+    fontSize: 13,
+    borderRadius: 8,
+    transition: 'all 150ms ease',
+    background: activeTab === tab ? 'white' : 'transparent',
+    color: activeTab === tab ? '#7C3AED' : '#9CA3AF',
+    boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+  })
 
   return (
     <>
@@ -87,20 +128,38 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
         </button>
 
         {/* Panel title */}
-        <p
-          style={{
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 18,
-            color: '#1E1B4B',
-            margin: '4px 16px 0',
-          }}
-        >
+        <p style={{
+          fontFamily: "'Baloo 2', sans-serif",
+          fontWeight: 700,
+          fontSize: 18,
+          color: '#1E1B4B',
+          margin: '4px 16px 0',
+        }}>
           Parent Panel
         </p>
 
-        {/* Dashboard content */}
-        <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
+        {/* Tab bar */}
+        <div style={{
+          display: 'flex',
+          margin: '12px 16px 0',
+          background: '#F3E8FF',
+          borderRadius: 10,
+          padding: 3,
+          gap: 2,
+        }}>
+          <button style={tabStyle('dashboard')} onClick={() => setActiveTab('dashboard')}>
+            📊 Dashboard
+          </button>
+          <button style={tabStyle('settings')} onClick={() => setActiveTab('settings')}>
+            ⚙️ Settings
+          </button>
+        </div>
+
+        {/* Tab content */}
+        {activeTab === 'dashboard'
+          ? <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
+          : <SettingsPlaceholder />
+        }
       </div>
     </>
   )

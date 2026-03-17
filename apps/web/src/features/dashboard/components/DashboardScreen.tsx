@@ -34,27 +34,61 @@ function ShimmerSkeleton() {
         }
       `}</style>
       <div data-testid="dashboard-shimmer" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Today block */}
         <ShimmerBar width={80} height={16} />
         <ShimmerBar width={120} height={36} />
-        {/* Chart bars */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
           {[40, 80, 60, 80, 50, 30, 40].map((h, i) => (
             <ShimmerBar key={i} width={8} height={h} />
           ))}
         </div>
-        {/* Monthly line */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[1, 2, 3, 4].map((i) => <ShimmerBar key={i} width={60} height={40} />)}
+        </div>
         <ShimmerBar width={160} height={16} />
       </div>
     </>
   )
 }
 
-export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProps) {
-  const { todaySeconds, weekDayTotals, monthSeconds, loading, error, isEmpty, refetch } =
-    useDashboard(db, uid, childProfileId)
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{
+      flex: 1,
+      background: '#F3E8FF',
+      borderRadius: 12,
+      padding: '8px 6px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 2,
+    }}>
+      <span style={{
+        fontFamily: "'Baloo 2', sans-serif",
+        fontWeight: 700,
+        fontSize: 15,
+        color: '#7C3AED',
+        lineHeight: 1.2,
+      }}>{value}</span>
+      <span style={{
+        fontFamily: "'Nunito', sans-serif",
+        fontWeight: 700,
+        fontSize: 10,
+        color: '#9CA3AF',
+        textTransform: 'uppercase' as const,
+        letterSpacing: '0.4px',
+        textAlign: 'center' as const,
+        lineHeight: 1.2,
+      }}>{label}</span>
+    </div>
+  )
+}
 
-  // today day index: Mon=0…Sun=6
+export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProps) {
+  const {
+    todaySeconds, weekDayTotals, weekSeconds, monthSeconds,
+    avgDaySeconds, videosWatched, loading, error, isEmpty, refetch,
+  } = useDashboard(db, uid, childProfileId)
+
   const todayDayIndex = (new Date().getDay() + 6) % 7
 
   if (loading) return <ShimmerSkeleton />
@@ -94,15 +128,13 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
         style={{ padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
       >
         <div style={{ width: 60, height: 60, borderRadius: '50%', background: '#E9D5FF' }} />
-        <p
-          style={{
-            fontFamily: "'Nunito', sans-serif",
-            fontSize: 15,
-            color: '#6B7280',
-            textAlign: 'center',
-            margin: 0,
-          }}
-        >
+        <p style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: 15,
+          color: '#6B7280',
+          textAlign: 'center',
+          margin: 0,
+        }}>
           No watch time recorded yet. Start a video to begin tracking.
         </p>
       </div>
@@ -116,15 +148,13 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
     >
       {/* Today */}
       <div>
-        <p
-          style={{
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 13,
-            color: '#6B7280',
-            margin: '0 0 4px 0',
-          }}
-        >
+        <p style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontWeight: 600,
+          fontSize: 13,
+          color: '#6B7280',
+          margin: '0 0 4px 0',
+        }}>
           Today
         </p>
         <p
@@ -143,6 +173,14 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
 
       {/* Weekly chart */}
       <WatchTimeChart weekDayTotals={weekDayTotals} todayDayIndex={todayDayIndex} />
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        <StatCard label="This Week" value={formatSeconds(weekSeconds)} />
+        <StatCard label="This Month" value={formatSeconds(monthSeconds)} />
+        <StatCard label="Avg / Day" value={formatSeconds(avgDaySeconds)} />
+        <StatCard label="Videos" value={String(videosWatched)} />
+      </div>
 
       {/* Monthly total */}
       <p
