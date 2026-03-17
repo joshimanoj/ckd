@@ -9,6 +9,7 @@ import {
   SnapshotOptions,
 } from 'firebase/firestore'
 import type { User, ChildProfile } from '../types/user'
+import type { Video } from '../types/video'
 
 const userConverter: FirestoreDataConverter<User> = {
   toFirestore(user: User) {
@@ -44,4 +45,19 @@ export function childProfilesCollection(
   uid: string,
 ): CollectionReference<ChildProfile> {
   return collection(db, 'users', uid, 'childProfiles').withConverter(childProfileConverter)
+}
+
+export const videoConverter: FirestoreDataConverter<Video> = {
+  toFirestore(video: Video) {
+    const { videoId: _videoId, ...rest } = video
+    return rest
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Video {
+    const data = snapshot.data(options)
+    return { videoId: snapshot.id, ...data } as Video
+  },
+}
+
+export function videosCollection(db: Firestore): CollectionReference<Video> {
+  return collection(db, 'videos').withConverter(videoConverter)
 }
