@@ -36,7 +36,7 @@ test.describe('FT-7: Already-consented user bypasses /consent', () => {
 
     // Should land on /profile (has consent, no child profile)
     await expect(page).toHaveURL('/profile', { timeout: 10000 })
-    await expect(page.getByTestId('profile-screen')).toBeVisible()
+    await expect(page.getByTestId('child-profile-screen')).toBeVisible()
 
     // Consent modal must NOT appear
     await expect(page.getByTestId('consent-modal')).not.toBeVisible()

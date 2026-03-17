@@ -32,7 +32,7 @@ test.describe('FT-5: Navigation to /profile on consent confirm', () => {
     await page.getByTestId('consent-submit-btn').click()
 
     await expect(page).toHaveURL('/profile', { timeout: 10000 })
-    await expect(page.getByTestId('profile-screen')).toBeVisible()
+    await expect(page.getByTestId('child-profile-screen')).toBeVisible()
     await expect(page.getByTestId('consent-modal')).not.toBeVisible()
   })
 })

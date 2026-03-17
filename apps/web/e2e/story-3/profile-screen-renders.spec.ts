@@ -33,7 +33,7 @@ test.describe('FT-1: Child Profile screen renders', () => {
 
     await expect(page).toHaveURL('/profile', { timeout: 10000 })
     await expect(page.getByTestId('child-profile-screen')).toBeVisible()
-    await expect(page.getByText("Who's watching?")).toBeVisible()
+    await expect(page.getByText("Add your child's profile")).toBeVisible()
     await expect(page.getByTestId('name-input')).toBeVisible()
     await expect(page.getByTestId('pill-under-3')).toBeVisible()
     await expect(page.getByTestId('pill-3-4')).toBeVisible()
