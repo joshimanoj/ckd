@@ -67,20 +67,18 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: firebase setup:emulators:firestore
 
-      - name: Start Firebase emulators (auth + firestore)
-        working-directory: ${{ github.workspace }}
-        # --project must match the PROJECT constant in e2e/support/emulator.ts
-        run: firebase emulators:start --only auth,firestore --project ckd-test &
-
-      - name: Wait for emulators to be ready
-        run: npx wait-on tcp:9099 tcp:8080 --timeout 120000
-      # ──────────────────────────────────────────────────────────────────────
-
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run Playwright tests inside emulator
+        # emulators:exec starts auth + firestore, waits for ready, runs the
+        # command, then exits — no manual wait-on needed.
+        working-directory: apps/web
+        run: >
+          firebase emulators:exec
+          --only auth,firestore
+          --project ckd-test
+          "npx playwright test"
         env:
-          # Unlocks emulator-guarded tests (skip guard removed from Story 5 onwards)
           FIREBASE_EMULATOR_RUNNING: '1'
+      # ──────────────────────────────────────────────────────────────────────
 
   mobile-e2e:
     # Disabled until React Native / Detox is set up (Sprint 4)
