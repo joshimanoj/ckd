@@ -130,7 +130,7 @@ export function PlayerScreen({
   const handlePlayPause = useCallback(() => setIsPlaying((p) => !p), [])
 
   const handleBack = useCallback(async () => {
-    await flushSession()
+    try { await flushSession() } catch { /* best-effort flush */ }
     onBack()
   }, [flushSession, onBack])
 

@@ -68,8 +68,8 @@ export function useWatchSession({
       deviceType: 'web',
     }
 
+    markWritten()  // mark BEFORE await — prevents concurrent double-write on fast double-tap
     await writeWatchSession(userId, finalState.childProfileId!, payload)
-    markWritten()
   }, [userId, addWatchedDelta, updateLastKnownTime, markWritten])
 
   return { flushSession }
