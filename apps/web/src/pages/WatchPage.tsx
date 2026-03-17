@@ -33,25 +33,38 @@ export function WatchPage() {
     }
   }, [user, video, navigate])
 
+  // Flush on tab close / browser close (best-effort — no await in beforeunload)
+  useEffect(() => {
+    const handleUnload = () => {
+      flushSession()
+    }
+    window.addEventListener('beforeunload', handleUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload)
+      // Also flush when component unmounts (e.g. navigating away by any means)
+      flushSession()
+    }
+  }, [flushSession])
+
   if (!user || !video) return null
 
   const currentIdx = videos.findIndex((v) => v.youtubeVideoId === video.youtubeVideoId)
 
-  const handleVideoEnd = () => {
+  const handleVideoEnd = async () => {
     const nextIdx = (currentIdx + 1) % videos.length
-    flushSession()
+    await flushSession()
     navigate(`/watch/${videos[nextIdx].videoId}`)
   }
 
-  const handleNextVideo = () => {
+  const handleNextVideo = async () => {
     const nextIdx = (currentIdx + 1) % videos.length
-    flushSession()
+    await flushSession()
     navigate(`/watch/${videos[nextIdx].videoId}`)
   }
 
-  const handlePrevVideo = () => {
+  const handlePrevVideo = async () => {
     const prevIdx = (currentIdx - 1 + videos.length) % videos.length
-    flushSession()
+    await flushSession()
     navigate(`/watch/${videos[prevIdx].videoId}`)
   }
 
