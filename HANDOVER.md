@@ -2,6 +2,20 @@
 
 ---
 
+## Checkpoint: Story #6 Admin Panel — Video Management | 2026-03-17 | MERGED ✅
+
+Story complete: Protected `/admin` route built for web — AdminGuard (Firebase custom claim check), video list table with isActive toggle, Add Video slide-over form with validation and thumbnail auto-populate, and notification panel with real-time status tracking.
+
+UAT fixes applied:
+- Removed dead `formRef` / `useRef` from VideoForm (linter had stripped the import but left the usage)
+- Fixed FT-7 assertion: Firestore emulator returns JS `null` for `nullValue`, not the string `"NULL_VALUE"`
+- Admin claim set on wrong UID initially (emulator user vs production); corrected to emulator UID
+- Notification status staying "Sending..." is expected — Cloud Function not yet deployed (Story #9)
+
+Next: Story #7 Video Player & Watch Session Tracking | Ready for: /prd
+
+---
+
 ## Checkpoint: Story #5 Video Library Grid | 2026-03-17 | MERGED ✅
 
 Story complete: Video Library screen built for web — 2-column grid with VideoCard, SkeletonGrid shimmer, CategoryFilter (hidden < 20 videos), pull-to-refresh, empty state, error state, parent icon triggering Parental Gate, and `/watch/:videoId` stub routing.
