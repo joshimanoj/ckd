@@ -55,6 +55,53 @@ export async function seedChildProfile(request: APIRequestContext, uid: string) 
   )
 }
 
+export interface SeedVideoInput {
+  id: string
+  title: string
+  category?: string
+  publishedAt?: string   // ISO string, e.g. '2026-01-01T00:00:00Z'
+  isActive?: boolean
+  order?: number
+  youtubeVideoId?: string
+  thumbnailUrl?: string
+  durationSeconds?: number
+}
+
+export async function seedVideo(request: APIRequestContext, video: SeedVideoInput) {
+  const {
+    id,
+    title,
+    category = 'Rhymes',
+    publishedAt = '2026-01-01T00:00:00Z',
+    isActive = true,
+    order = 1,
+    youtubeVideoId = 'dQw4w9WgXcQ',
+    thumbnailUrl = `https://img.youtube.com/vi/${youtubeVideoId ?? 'dQw4w9WgXcQ'}/0.jpg`,
+    durationSeconds = 180,
+  } = video
+  await request.patch(
+    `${FIRESTORE}/v1/projects/${PROJECT}/databases/(default)/documents/videos/${id}`,
+    {
+      data: {
+        fields: {
+          youtubeVideoId: { stringValue: youtubeVideoId },
+          title: { stringValue: title },
+          category: { stringValue: category },
+          thumbnailUrl: { stringValue: thumbnailUrl },
+          durationSeconds: { integerValue: String(durationSeconds) },
+          publishedAt: { timestampValue: publishedAt },
+          isActive: { booleanValue: isActive },
+          order: { integerValue: String(order) },
+        },
+      },
+    },
+  )
+}
+
+export async function seedVideos(request: APIRequestContext, videos: SeedVideoInput[]) {
+  await Promise.all(videos.map((v) => seedVideo(request, v)))
+}
+
 export async function signInViaTestHelper(page: Page, email: string, password: string) {
   await page.waitForFunction(
     () =>
