@@ -9,6 +9,9 @@ const routeMap: Record<string, string> = {
   library: '/library',
 }
 
+// Paths that are only valid before full auth — redirect away from these when authenticated
+const AUTH_GATE_PATHS = new Set(['/', '/consent', '/profile'])
+
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { loading, routeTo } = useAuth()
 
@@ -16,6 +19,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   const targetPath = routeMap[routeTo] ?? '/'
   const currentPath = window.location.pathname
+
+  // Fully authenticated: allow any app route except auth-gate paths
+  if (routeTo === 'library') {
+    if (AUTH_GATE_PATHS.has(currentPath)) {
+      return <Navigate to="/library" replace />
+    }
+    return <>{children}</>
+  }
 
   if (targetPath !== currentPath) {
     return <Navigate to={targetPath} replace />
