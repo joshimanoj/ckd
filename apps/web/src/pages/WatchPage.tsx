@@ -70,15 +70,19 @@ export function WatchPage() {
 
   const handleBack = useCallback(() => navigate('/library'), [navigate])
 
-  // Flush on tab close / unmount
+  // Keep a ref to latest flushSession so the unmount effect never re-fires on dep changes
+  const flushSessionRef = useRef(flushSession)
+  useEffect(() => { flushSessionRef.current = flushSession }, [flushSession])
+
+  // Flush on tab close / true unmount only (empty deps = runs once)
   useEffect(() => {
-    const handleUnload = () => { flushSession() }
+    const handleUnload = () => { flushSessionRef.current() }
     window.addEventListener('beforeunload', handleUnload)
     return () => {
       window.removeEventListener('beforeunload', handleUnload)
-      flushSession()
+      flushSessionRef.current()
     }
-  }, [flushSession])
+  }, [])
 
   if (!user || !video) return null
 

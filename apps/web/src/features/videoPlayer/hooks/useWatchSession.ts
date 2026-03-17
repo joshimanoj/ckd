@@ -38,6 +38,7 @@ export function useWatchSession({
   }, [addWatchedDelta, updateLastKnownTime])
 
   const flushSession = useCallback(async () => {
+    if (!userId) return  // guard: userId not yet resolved from auth
     const state = useWatchSessionStore.getState()
     if (state.hasWritten) return
     if (!state.youtubeVideoId || !state.childProfileId || !state.startTime) return
