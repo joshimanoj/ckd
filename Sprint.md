@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #5 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-17 | Next: Story #6
+Web Track  → Story #8 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-17 | Next: Story #9
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
@@ -138,8 +138,8 @@ Per architecture.md Section 9 and product_note.md Section 6:
 | 4 | Parental Gate | Design §7 (Families Policy) | UI | 2 | 1 | ✅ | ☐ |
 | 5 | Video Library Grid | Feature 3 | UI | 3 | 2 | ✅ | ☐ |
 | 6 | Admin Panel — Video Management | Design Flow 5 | UI | 3 | 2 | ✅ | Web Only |
-| 7 | Video Player & Watch Session Tracking | Feature 3 + 4 | UI | 4 | 2 | ☐ | ☐ |
-| 8 | Watch Time Dashboard | Feature 4 | UI | 3 | 3 | ☐ | ☐ |
+| 7 | Video Player & Watch Session Tracking | Feature 3 + 4 | UI | 4 | 2 | ✅ | ☐ |
+| 8 | Watch Time Dashboard | Feature 4 | UI | 3 | 3 | ✅ | ☐ |
 | 9 | Push Notifications | Feature 5 | UI | 3 | 3 | ☐ | ☐ |
 | 10 | Settings Screen & Privacy Policy Link | Compliance (§6) | UI | 2 | 3 | ☐ | ☐ |
 

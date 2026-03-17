@@ -2,6 +2,19 @@
 
 ---
 
+## Checkpoint: Story #8 Watch Time Dashboard | 2026-03-17 | MERGED ✅
+
+Story complete: Parent Panel side drawer built for web — slides in after Parental Gate is solved, shows today's watch total (Baloo 2 ExtraBold purple), a 7-bar Mon–Sun chart (CSS-only), and monthly total; shimmer skeleton, empty state, and error+retry states all implemented. Shared `dateRanges.ts` utils added; `formatSeconds` edge case fixed ("1 hr 0 min" → "1 hr").
+
+UAT fixes applied:
+- Refactored `useDashboard` from multiple `useState` setters to `useReducer` to fix `react-hooks/set-state-in-effect` lint error
+- `playwright.config.ts`: emulator runs now use port 5174 to avoid reusing non-emulator dev server on 5173
+- FT-1d and FT-7a: assertions updated to `dashboard-empty-state` (no sessions seeded in those tests) instead of `dashboard-screen` (data state only)
+
+Next: Story #9 Push Notifications | Ready for: /prd
+
+---
+
 ## Checkpoint: Story #6 Admin Panel — Video Management | 2026-03-17 | MERGED ✅
 
 Story complete: Protected `/admin` route built for web — AdminGuard (Firebase custom claim check), video list table with isActive toggle, Add Video slide-over form with validation and thumbnail auto-populate, and notification panel with real-time status tracking.
