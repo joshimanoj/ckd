@@ -97,7 +97,12 @@ export function PlayerScreen({
   }, [])
 
   const handleScrub = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setDisplaySeconds(Number(e.target.value))
+    const seconds = Number(e.target.value)
+    setDisplaySeconds(seconds)
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
+      '*',
+    )
   }, [])
 
   // Expose test hooks
