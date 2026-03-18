@@ -8,6 +8,8 @@ interface SettingsScreenProps {
   onSignOut: () => Promise<void>
 }
 
+const PRIVACY_POLICY_URL = (import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined) ?? '#'
+
 export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenProps) {
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
@@ -99,20 +101,27 @@ export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenPro
         🔒 Requires parent verification
       </p>
 
-      {/* Privacy policy placeholder */}
+      {/* Privacy Policy row */}
       <a
         data-testid="privacy-policy-link"
-        href="#"
-        aria-disabled="true"
+        href={PRIVACY_POLICY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 48,
+          padding: '0 4px',
           fontFamily: "'Nunito', sans-serif",
-          fontSize: 13,
-          color: '#9CA3AF',
-          textDecoration: 'none',
-          pointerEvents: 'none',
+          fontSize: 15,
+          color: '#9333EA',
+          textDecoration: 'underline',
+          textDecorationColor: '#9333EA',
         }}
       >
         Privacy Policy
+        <span style={{ textDecoration: 'none' }}>›</span>
       </a>
 
       {/* Parental Gate */}

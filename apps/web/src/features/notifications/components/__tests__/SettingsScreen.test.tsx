@@ -126,4 +126,17 @@ describe('SettingsScreen', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     expect(screen.getByText('Get notified when new rhymes are added')).toBeInTheDocument()
   })
+
+  it('Privacy Policy link should NOT be aria-disabled', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const link = screen.getByTestId('privacy-policy-link')
+    expect(link).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('Privacy Policy link should open in new tab', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const link = screen.getByTestId('privacy-policy-link')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
 })
