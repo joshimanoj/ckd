@@ -66,16 +66,18 @@ export function useAuth(): AuthResult {
     return unsubscribe
   }, [setUser, setLoading, setRouteTo])
 
-  // Clear all stores before signing out to prevent stale state on next sign-in.
-  // The onAuthStateChanged callback will set routeTo → 'sign-in', triggering
-  // the AuthGuard redirect automatically.
+  // Clear all stores and sign out. Firebase sign-out MUST be awaited before authStore
+  // is cleared so that the Firebase session is revoked before any redirect occurs.
+  // onAuthStateChanged(null) fires after signOutUser() resolves and drives the
+  // AuthGuard redirect — this prevents the race where a page reload after redirect
+  // still finds a valid Firebase session in IndexedDB.
   const signOut = useCallback(async () => {
     useChildProfileStore.getState().clearActiveProfile()
     useVideoStore.getState().reset()
     useWatchSessionStore.getState().resetSession()
     useNotificationStore.getState().reset()
-    useAuthStore.getState().reset()
     await signOutUser()
+    // authStore is updated by onAuthStateChanged(null) after signOutUser() resolves
   }, [])
 
   return { user, loading, routeTo, signOut }
