@@ -1,6 +1,6 @@
 const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-const MAX_BAR_HEIGHT = 120
-const MIN_BAR_HEIGHT = 4
+const MAX_BAR_HEIGHT = 138
+const MIN_BAR_HEIGHT = 18
 
 interface WatchTimeChartProps {
   weekDayTotals: number[] // [Mon…Sun], length 7
@@ -15,10 +15,9 @@ export function WatchTimeChart({ weekDayTotals, todayDayIndex }: WatchTimeChartP
       data-testid="watch-time-chart"
       style={{
         display: 'flex',
-        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        padding: '0 4px',
+        gap: 10,
       }}
     >
       {weekDayTotals.map((seconds, i) => {
@@ -27,38 +26,44 @@ export function WatchTimeChart({ weekDayTotals, todayDayIndex }: WatchTimeChartP
         return (
           <div
             key={i}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, flex: 1 }}
           >
-            {/* Track */}
             <div
               style={{
-                width: 8,
+                width: '100%',
                 height: MAX_BAR_HEIGHT,
-                background: '#E9D5FF',
-                borderRadius: 4,
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end',
-                overflow: 'hidden',
+                justifyContent: 'center',
+                alignItems: 'flex-end',
               }}
             >
-              {/* Filled bar */}
               <div
-                data-testid="chart-bar"
-                data-today={isToday ? 'true' : undefined}
                 style={{
-                  width: '100%',
+                  width: 42,
+                  maxWidth: '100%',
                   height: filledHeight,
-                  background: isToday ? '#9333EA' : '#C4B5FD',
-                  borderRadius: 4,
+                  background: isToday ? 'linear-gradient(180deg, #9333EA 0%, #7C3AED 100%)' : '#E9D5FF',
+                  borderRadius: 14,
+                  boxShadow: isToday ? '0 10px 18px rgba(147, 51, 234, 0.18)' : 'none',
                 }}
-              />
+              >
+                <div
+                  data-testid="chart-bar"
+                  data-today={isToday ? 'true' : undefined}
+                  style={{
+                    width: '100%',
+                    height: filledHeight,
+                    borderRadius: 14,
+                    opacity: 0,
+                  }}
+                />
+              </div>
             </div>
-            {/* Day label */}
             <span
               style={{
                 fontFamily: "'Nunito', sans-serif",
-                fontSize: 11,
+                fontSize: 12,
+                fontWeight: 700,
                 color: '#6B7280',
                 lineHeight: 1,
               }}
