@@ -35,6 +35,9 @@ export function VideoGrid({
         <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#1E1B4B' }}>
           Check your internet connection
         </p>
+        <p style={{ fontFamily: 'monospace', fontSize: 11, color: '#dc2626', wordBreak: 'break-all', padding: '0 16px' }}>
+          {error}
+        </p>
         <button
           data-testid="retry-btn"
           onClick={onRefresh}
