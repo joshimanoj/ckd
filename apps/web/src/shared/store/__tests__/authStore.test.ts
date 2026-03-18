@@ -19,4 +19,22 @@ describe('authStore', () => {
     useAuthStore.getState().setLoading(false)
     expect(useAuthStore.getState().loading).toBe(false)
   })
+
+  it('should reset to initial state', () => {
+    const mockUser = { uid: 'test-uid' } as FirebaseUser
+    useAuthStore.setState({ user: mockUser, loading: false, routeTo: 'library' })
+
+    useAuthStore.getState().reset()
+
+    expect(useAuthStore.getState().user).toBeNull()
+    expect(useAuthStore.getState().routeTo).toBe('sign-in')
+    expect(useAuthStore.getState().loading).toBe(false)
+  })
+
+  it('reset() is idempotent', () => {
+    useAuthStore.getState().reset()
+    useAuthStore.getState().reset()
+    expect(useAuthStore.getState().user).toBeNull()
+    expect(useAuthStore.getState().routeTo).toBe('sign-in')
+  })
 })

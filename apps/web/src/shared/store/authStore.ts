@@ -10,13 +10,20 @@ interface AuthState {
   setUser: (user: FirebaseUser | null) => void
   setLoading: (loading: boolean) => void
   setRouteTo: (routeTo: RouteTo) => void
+  reset: () => void
+}
+
+const initialState = {
+  user: null as FirebaseUser | null,
+  loading: false,
+  routeTo: 'sign-in' as RouteTo,
 }
 
 export const useAuthStore = create<AuthState>()((set) => ({
-  user: null,
+  ...initialState,
   loading: true,
-  routeTo: 'sign-in',
   setUser: (user) => set({ user }),
   setLoading: (loading) => set({ loading }),
   setRouteTo: (routeTo) => set({ routeTo }),
+  reset: () => set(initialState),
 }))
