@@ -5,9 +5,10 @@ import { ParentalGate } from '../../parentalGate/components/ParentalGate'
 
 interface SettingsScreenProps {
   uid: string
+  onSignOut: () => Promise<void>
 }
 
-export function SettingsScreen({ uid }: SettingsScreenProps) {
+export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenProps) {
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const [shaking, setShaking] = useState(false)
@@ -66,7 +67,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
             color: '#1E1B4B',
             margin: 0,
           }}>
-            New video alerts
+            New video notifications
           </p>
           <p style={{
             fontFamily: "'Nunito', sans-serif",
@@ -74,7 +75,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
             color: '#6B7280',
             margin: '2px 0 0 0',
           }}>
-            Get notified when new videos are added
+            Get notified when new rhymes are added
           </p>
         </div>
         <input

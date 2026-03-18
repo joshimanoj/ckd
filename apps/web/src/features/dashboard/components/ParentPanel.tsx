@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Firestore } from 'firebase/firestore'
 import { DashboardScreen } from './DashboardScreen'
 import { SettingsScreen } from '../../notifications/components/SettingsScreen'
+import { useAuth } from '../../auth/hooks/useAuth'
 
 interface ParentPanelProps {
   db: Firestore
@@ -14,6 +15,7 @@ type Tab = 'dashboard' | 'settings'
 
 export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
+  const { signOut } = useAuth()
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -136,7 +138,7 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
         {/* Tab content */}
         {activeTab === 'dashboard'
           ? <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
-          : <SettingsScreen uid={uid} />
+          : <SettingsScreen uid={uid} onSignOut={signOut} />
         }
       </div>
     </>
