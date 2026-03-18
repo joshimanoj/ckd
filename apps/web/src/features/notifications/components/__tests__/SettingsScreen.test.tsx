@@ -169,4 +169,17 @@ describe('SettingsScreen', () => {
     })
     expect(mockSignOut).toHaveBeenCalledOnce()
   })
+
+  it('should render app version footer', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByTestId('app-version')).toBeInTheDocument()
+    expect(screen.getByTestId('app-version').textContent).toMatch(/Version \d+\.\d+\.\d+/)
+  })
+
+  it('should not render app-version as a button or link', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const el = screen.getByTestId('app-version')
+    expect(el.tagName.toLowerCase()).not.toBe('button')
+    expect(el.tagName.toLowerCase()).not.toBe('a')
+  })
 })

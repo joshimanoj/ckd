@@ -9,6 +9,7 @@ interface SettingsScreenProps {
 }
 
 const PRIVACY_POLICY_URL = (import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined) ?? '#'
+const APP_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? '1.0.0'
 
 export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
@@ -44,7 +45,7 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
   }
 
   return (
-    <div data-testid="settings-screen" style={{ padding: '16px 20px' }}>
+    <div data-testid="settings-screen" style={{ padding: '16px 20px', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* Notifications section */}
       <p style={{
         fontFamily: "'Baloo 2', sans-serif",
@@ -105,6 +106,22 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
         margin: '0 0 20px 4px',
       }}>
         🔒 Requires parent verification
+      </p>
+
+      {/* Divider */}
+      <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '16px 0' }} />
+
+      {/* Account section header */}
+      <p style={{
+        fontFamily: "'Nunito', sans-serif",
+        fontWeight: 600,
+        fontSize: 11,
+        color: '#6B7280',
+        textTransform: 'uppercase',
+        paddingLeft: 16,
+        margin: '0 0 4px 0',
+      }}>
+        Account
       </p>
 
       {/* Privacy Policy row */}
@@ -236,6 +253,21 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
           </div>
         </div>
       )}
+
+      {/* Version footer */}
+      <p
+        data-testid="app-version"
+        style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: 13,
+          color: '#6B7280',
+          textAlign: 'center',
+          paddingBottom: 24,
+          marginTop: 32,
+        }}
+      >
+        Version {APP_VERSION}
+      </p>
 
       {/* Success toast */}
       {toast && (
