@@ -1,0 +1,46 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          # Override .env.production values from GitHub Secrets so they never
+          # need to be hard-coded in the repo. If a secret is empty the
+          # .env.production value is used as the fallback.
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_VAPID_KEY: ${{ secrets.VITE_VAPID_KEY }}
+          VITE_PRIVACY_POLICY_URL: ${{ secrets.VITE_PRIVACY_POLICY_URL }}
+
+      - name: Deploy to Firebase Hosting + Firestore rules
+        working-directory: ${{ github.workspace }}
+        run: |
+          npm install -g firebase-tools
+          firebase deploy --only hosting,firestore:rules,firestore:indexes \
+            --project chotikiduniya-831e8
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

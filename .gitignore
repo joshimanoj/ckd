@@ -10,12 +10,12 @@ build/
 out/
 
 # Environment files
+# .env.production is committed — Firebase config is intentionally public (security via Firestore rules)
+# .env.local overrides .env.production locally and is never committed
 .env
 .env.local
-.env.production
 apps/web/.env
 apps/web/.env.local
-apps/web/.env.production
 
 # Claude local settings
 .claude/settings.local.json
