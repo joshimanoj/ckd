@@ -79,7 +79,7 @@ describe('LibraryPage', () => {
     mockUseVideoLibrary.mockReturnValue(mockVideoLibraryReturn)
   })
 
-  it('renders library-screen, top-nav, parent-icon-btn', () => {
+  it('renders library-screen, top-nav, parent-icon', () => {
     renderInRouter(<LibraryPage />)
     expect(screen.getByTestId('library-screen')).toBeInTheDocument()
     expect(screen.getByTestId('top-nav')).toBeInTheDocument()
@@ -91,7 +91,7 @@ describe('LibraryPage', () => {
     expect(screen.queryByTestId('parent-panel')).not.toBeInTheDocument()
   })
 
-  it('clicking parent-icon-btn calls showGate', () => {
+  it('clicking parent-icon calls showGate', () => {
     renderInRouter(<LibraryPage />)
     fireEvent.click(screen.getByTestId('parent-icon'))
     expect(mockShowGate).toHaveBeenCalledTimes(1)

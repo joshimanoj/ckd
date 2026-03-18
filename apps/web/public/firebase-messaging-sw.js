@@ -13,12 +13,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 // and rely on the build pipeline to inject them.
 
 const firebaseConfig = {
-  apiKey: self.VITE_FIREBASE_API_KEY || '',
-  authDomain: self.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: self.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: self.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: self.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: self.VITE_FIREBASE_APP_ID || '',
+  apiKey: 'AIzaSyC109x04aHG4ul9DsrCOOO5PqS3Jdopx-c',
+  authDomain: 'chotikiduniya-831e8.firebaseapp.com',
+  projectId: 'chotikiduniya-831e8',
+  storageBucket: 'chotikiduniya-831e8.firebasestorage.app',
+  messagingSenderId: '48657234109',
+  appId: '1:48657234109:web:32786dbc9a55e9faa55fd4',
 }
 
 firebase.initializeApp(firebaseConfig)
