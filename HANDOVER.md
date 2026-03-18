@@ -2,6 +2,17 @@
 
 ---
 
+## Checkpoint: Story #10 Settings Screen & Privacy Policy Link (Web Pass) | 2026-03-18 | MERGED ✅
+
+Story complete: SettingsScreen fully implemented — notification toggle (with correct labels + Parental Gate), active Privacy Policy link (`target="_blank"`), Sign Out row + confirmation dialog, ACCOUNT section header/divider, version footer, and responsive polish.
+
+UAT fixes applied:
+- `useAuth.ts`: race condition fix — `signOutUser()` now awaited before stores are cleared, preventing Firebase session surviving a page reload after sign-out (caught by FT-3b)
+
+Next: Native App Pass begins — Story #1 (Web Done) → Native App Pass | Ready for: /prd
+
+---
+
 ## Checkpoint: Story #9 Push Notifications (Web Pass) | 2026-03-18 | MERGED ✅
 
 Story complete: FCM opt-in flow, notification settings toggle with Parental Gate, and token refresh implemented for web.

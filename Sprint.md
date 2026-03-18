@@ -31,7 +31,7 @@ Dev reference lives in `architecture-dev-summary.md`.
 ## Active Pointers
 
 ```
-Web Track  → Story #9 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-18 | Next: Story #10
+Web Track  → Story #10 [Pass 1] | COMPLETE ✅ | UAT Approved 2026-03-18 | All 10 Stories Web Done
 Native App Track → not started (begins after Story #1 Web Done)
 ```
 
@@ -141,7 +141,7 @@ Per architecture.md Section 9 and product_note.md Section 6:
 | 7 | Video Player & Watch Session Tracking | Feature 3 + 4 | UI | 4 | 2 | ✅ | ☐ |
 | 8 | Watch Time Dashboard | Feature 4 | UI | 3 | 3 | ✅ | ☐ |
 | 9 | Push Notifications | Feature 5 | UI | 3 | 3 | ✅ | ☐ |
-| 10 | Settings Screen & Privacy Policy Link | Compliance (§6) | UI | 2 | 3 | ☐ | ☐ |
+| 10 | Settings Screen & Privacy Policy Link | Compliance (§6) | UI | 2 | 3 | ✅ | ☐ |
 
 **Total complexity points:** 27
 **All stories are UI stories** — `/uat` required after `/check` for every story.
