@@ -10,11 +10,12 @@ interface SettingsScreenProps {
 
 const PRIVACY_POLICY_URL = (import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined) ?? '#'
 
-export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenProps) {
+export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const [shaking, setShaking] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false)
 
   function handleToggleTap() {
     showGate()
@@ -35,6 +36,11 @@ export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenPro
 
   function handleGateDismiss() {
     hideGate()
+  }
+
+  async function handleSignOutConfirm() {
+    setShowSignOutDialog(false)
+    await onSignOut()
   }
 
   return (
@@ -132,6 +138,104 @@ export function SettingsScreen({ uid, onSignOut: _onSignOut }: SettingsScreenPro
         onDismiss={handleGateDismiss}
         shaking={shaking}
       />
+
+      {/* Sign Out row */}
+      <button
+        data-testid="sign-out-btn"
+        onClick={() => setShowSignOutDialog(true)}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          width: '100%',
+          textAlign: 'left',
+          padding: '12px 16px',
+          minHeight: 48,
+          fontFamily: "'Nunito', sans-serif",
+          fontWeight: 700,
+          fontSize: 15,
+          color: '#EF4444',
+        }}
+      >
+        Sign Out
+      </button>
+
+      {/* Sign Out Confirmation Dialog */}
+      {showSignOutDialog && (
+        <div
+          data-testid="sign-out-confirm-dialog"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 502,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 20,
+              padding: 24,
+              maxWidth: 280,
+              width: '100%',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 600,
+                fontSize: 16,
+                color: '#1E1B4B',
+                margin: '0 0 20px 0',
+              }}
+            >
+              Are you sure you want to sign out?
+            </p>
+            <button
+              data-testid="sign-out-confirm-btn"
+              onClick={handleSignOutConfirm}
+              style={{
+                display: 'block',
+                width: '100%',
+                minHeight: 48,
+                background: '#EF4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 24,
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 700,
+                fontSize: 15,
+                cursor: 'pointer',
+                marginBottom: 8,
+              }}
+            >
+              Sign Out
+            </button>
+            <button
+              data-testid="sign-out-cancel-btn"
+              onClick={() => setShowSignOutDialog(false)}
+              style={{
+                display: 'block',
+                width: '100%',
+                minHeight: 48,
+                background: 'transparent',
+                color: '#6B7280',
+                border: '1px solid #6B7280',
+                borderRadius: 24,
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Success toast */}
       {toast && (

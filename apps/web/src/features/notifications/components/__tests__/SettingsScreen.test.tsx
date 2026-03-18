@@ -139,4 +139,34 @@ describe('SettingsScreen', () => {
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
+
+  it('should render Sign Out button', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByTestId('sign-out-btn')).toBeInTheDocument()
+  })
+
+  it('should show confirmation dialog when Sign Out is tapped', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    expect(screen.getByTestId('sign-out-confirm-dialog')).toBeVisible()
+  })
+
+  it('should hide dialog and NOT call onSignOut when Cancel is tapped', () => {
+    const mockSignOut = vi.fn()
+    render(<SettingsScreen uid="uid-1" onSignOut={mockSignOut} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    fireEvent.click(screen.getByTestId('sign-out-cancel-btn'))
+    expect(screen.queryByTestId('sign-out-confirm-dialog')).not.toBeInTheDocument()
+    expect(mockSignOut).not.toHaveBeenCalled()
+  })
+
+  it('should call onSignOut when confirm button is tapped', async () => {
+    const mockSignOut = vi.fn().mockResolvedValue(undefined)
+    render(<SettingsScreen uid="uid-1" onSignOut={mockSignOut} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('sign-out-confirm-btn'))
+    })
+    expect(mockSignOut).toHaveBeenCalledOnce()
+  })
 })
