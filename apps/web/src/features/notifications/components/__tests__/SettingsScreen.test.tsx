@@ -12,6 +12,18 @@ vi.mock('../../hooks/useNotifications', () => ({
   })),
 }))
 
+vi.mock('../../../../shared/store/childProfileStore', () => ({
+  useChildProfileStore: vi.fn((selector: (s: { activeProfile: null }) => unknown) =>
+    selector({ activeProfile: null }),
+  ),
+}))
+
+vi.mock('../../../../shared/store/authStore', () => ({
+  useAuthStore: vi.fn((selector: (s: { user: null }) => unknown) =>
+    selector({ user: null }),
+  ),
+}))
+
 const mockShowGate = vi.fn()
 const mockHideGate = vi.fn()
 const mockCheckAnswer = vi.fn()
@@ -64,14 +76,14 @@ describe('SettingsScreen', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const toggle = screen.getByRole('switch')
     expect(toggle).toBeInTheDocument()
-    expect((toggle as HTMLInputElement).checked).toBe(false)
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
   })
 
   it('should render toggle as checked when notificationsEnabled is true', () => {
     mockNotificationsEnabled = true
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const toggle = screen.getByRole('switch')
-    expect((toggle as HTMLInputElement).checked).toBe(true)
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
   })
 
   it('should open Parental Gate when toggle is tapped', () => {
@@ -117,14 +129,14 @@ describe('SettingsScreen', () => {
     expect(screen.getByTestId('privacy-policy-link')).toBeInTheDocument()
   })
 
-  it('should render notification toggle label "New video notifications"', () => {
+  it('should render notification toggle label "New video alerts"', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
-    expect(screen.getByText('New video notifications')).toBeInTheDocument()
+    expect(screen.getByText('New video alerts')).toBeInTheDocument()
   })
 
-  it('should render notification subtitle "Get notified when new rhymes are added"', () => {
+  it('should render notification subtitle "Get notified when new content is added"', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
-    expect(screen.getByText('Get notified when new rhymes are added')).toBeInTheDocument()
+    expect(screen.getByText('Get notified when new content is added')).toBeInTheDocument()
   })
 
   it('Privacy Policy link should NOT be aria-disabled', () => {

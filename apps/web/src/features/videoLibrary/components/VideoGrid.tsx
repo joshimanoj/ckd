@@ -89,7 +89,21 @@ export function VideoGrid({
   }
 
   return (
-    <div>
+    <div
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 6%, #BFE5FF 18%, #A9D8FB 100%)',
+        padding: '0 0 28px',
+        borderTop: '22px solid #FFFFFF',
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        overflow: 'visible',
+        flex: 1,
+        minHeight: 'calc(100dvh - 212px)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}
+    >
       <CategoryFilter
         categories={CATEGORIES}
         selected={selectedCategory}
@@ -101,22 +115,23 @@ export function VideoGrid({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '8px',
-          padding: '16px',
+          gap: '24px 22px',
+          padding: '24px 22px 10px',
+          alignContent: 'start',
         }}
       >
         {videos.map((video) => (
           <VideoCard key={video.videoId} video={video} onClick={onVideoTap} />
         ))}
       </div>
-      <div style={{ padding: '8px 16px 24px', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ padding: '16px 16px 28px', display: 'flex', justifyContent: 'center', marginTop: 'auto' }}>
         <button
           data-testid="refresh-btn"
           onClick={onRefresh}
           style={{
             background: 'transparent',
             border: '2px solid #9333EA',
-            borderRadius: 20,
+            borderRadius: 999,
             padding: '8px 24px',
             fontFamily: "'Nunito', sans-serif",
             fontWeight: 700,

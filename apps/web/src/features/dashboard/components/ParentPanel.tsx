@@ -18,26 +18,43 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
   const { signOut } = useAuth()
 
   useEffect(() => {
+    const scrollY = window.scrollY
+    const previousOverflow = document.body.style.overflow
+    const previousPosition = document.body.style.position
+    const previousTop = document.body.style.top
+    const previousWidth = document.body.style.width
+
     document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflow
+      document.body.style.position = previousPosition
+      document.body.style.top = previousTop
+      document.body.style.width = previousWidth
+      window.scrollTo(0, scrollY)
     }
   }, [])
 
   const tabStyle = (tab: Tab): React.CSSProperties => ({
     flex: 1,
-    padding: '8px 0',
+    minHeight: 52,
+    padding: '10px 10px',
     border: 'none',
     cursor: 'pointer',
     fontFamily: "'Nunito', sans-serif",
     fontWeight: 700,
-    fontSize: 13,
-    borderRadius: 8,
+    fontSize: 14,
+    borderRadius: 17,
     transition: 'all 150ms ease',
     background: activeTab === tab ? 'white' : 'transparent',
-    color: activeTab === tab ? '#7C3AED' : '#9CA3AF',
-    boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+    color: activeTab === tab ? '#9333EA' : '#6B7280',
+    boxShadow: activeTab === tab ? '0 14px 30px rgba(147, 51, 234, 0.14)' : 'none',
   })
+
+  const tabTitle = activeTab === 'dashboard' ? 'Parent Dashboard' : 'Settings'
 
   return (
     <>
@@ -57,6 +74,7 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
           inset: 0,
           background: 'rgba(0,0,0,0.4)',
           zIndex: 200,
+          overscrollBehavior: 'none',
         }}
       />
 
@@ -66,80 +84,145 @@ export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelPro
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 'min(320px, 100vw)',
-          background: '#FAFAFA',
-          borderRadius: '24px 0 0 24px',
+          inset: 0,
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100dvh',
+          minHeight: '100dvh',
+          background: '#FFFFFF',
+          borderRadius: 0,
           zIndex: 201,
-          overflowY: 'auto',
+          overflow: 'hidden',
+          overscrollBehavior: 'none',
+          touchAction: 'none',
           animation: 'slide-in-right 250ms ease-out',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
-          <div style={{ width: 32, height: 4, background: '#D1D5DB', borderRadius: 2 }} />
-        </div>
-
-        {/* Close button */}
-        <button
-          data-testid="panel-close-btn"
-          onClick={onClose}
+        {/* Gradient header */}
+        <div
           style={{
-            position: 'absolute',
-            top: 8,
-            right: 12,
-            width: 36,
-            height: 36,
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 20,
-            color: '#6B7280',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            background: 'linear-gradient(120deg, #CC5AAA 0%, #9333EA 48%, #EC4899 100%)',
+            borderRadius: 0,
+            padding: '12px 20px 6px',
+            flexShrink: 0,
+            minHeight: 94,
           }}
         >
-          ×
-        </button>
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: -36,
+              left: -34,
+              width: 128,
+              height: 128,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.14)',
+            }}
+          />
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: 18,
+              right: 20,
+              display: 'flex',
+              gap: 6,
+            }}
+          >
+            {[0, 1, 2].map((dot) => (
+              <span
+                key={dot}
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.95)',
+                  display: 'block',
+                }}
+              />
+            ))}
+          </div>
+          {/* Back / close button + title row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 28, marginBottom: 0, position: 'relative' }}>
+            <button
+              data-testid="panel-close-btn"
+              onClick={onClose}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.18)',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 21,
+                color: '#fff',
+                flexShrink: 0,
+              }}
+            >
+              ←
+            </button>
+            <p style={{
+              fontFamily: "'Baloo 2', sans-serif",
+              fontWeight: 700,
+              fontSize: 20,
+              color: '#fff',
+              margin: 0,
+              letterSpacing: '0.01em',
+            }}>
+              {tabTitle}
+            </p>
+          </div>
+        </div>
 
-        {/* Panel title */}
-        <p style={{
-          fontFamily: "'Baloo 2', sans-serif",
-          fontWeight: 700,
-          fontSize: 18,
-          color: '#1E1B4B',
-          margin: '4px 16px 0',
-        }}>
-          Parent Panel
-        </p>
-
-        {/* Tab bar */}
-        <div style={{
-          display: 'flex',
-          margin: '12px 16px 0',
-          background: '#F3E8FF',
-          borderRadius: 10,
-          padding: 3,
-          gap: 2,
-        }}>
-          <button style={tabStyle('dashboard')} onClick={() => setActiveTab('dashboard')}>
-            📊 Dashboard
-          </button>
-          <button style={tabStyle('settings')} onClick={() => setActiveTab('settings')}>
-            ⚙️ Settings
-          </button>
+        <div
+          style={{
+            background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF7FE 52%, #FFFFFF 100%)',
+            flexShrink: 0,
+            padding: '10px 20px 0',
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            background: '#F3E8FF',
+            borderRadius: 18,
+            padding: 6,
+            gap: 6,
+            position: 'relative',
+            boxShadow: '0 12px 28px rgba(147, 51, 234, 0.08)',
+          }}>
+            <button style={tabStyle('dashboard')} onClick={() => setActiveTab('dashboard')}>
+              📊 Dashboard
+            </button>
+            <button style={tabStyle('settings')} onClick={() => setActiveTab('settings')}>
+              ⚙️ Settings
+            </button>
+          </div>
         </div>
 
         {/* Tab content */}
-        {activeTab === 'dashboard'
-          ? <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
-          : <SettingsScreen uid={uid} onSignOut={signOut} />
-        }
+        <div
+          style={{
+            flex: 1,
+            background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF7FE 52%, #FFFFFF 100%)',
+            overflowY: 'auto',
+            overscrollBehaviorY: 'contain',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+          }}
+        >
+          {activeTab === 'dashboard'
+            ? <DashboardScreen db={db} uid={uid} childProfileId={childProfileId} />
+            : <SettingsScreen uid={uid} onSignOut={signOut} />
+          }
+        </div>
       </div>
     </>
   )
