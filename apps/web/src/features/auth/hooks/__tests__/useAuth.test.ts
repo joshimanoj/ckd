@@ -7,12 +7,13 @@ vi.mock('../../services/authService', () => ({
   subscribeToAuthState: vi.fn(),
   getUserDoc: vi.fn(),
   createUserDoc: vi.fn().mockResolvedValue(undefined),
+  refreshFcmTokenAfterSignIn: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock firebase/firestore for childProfiles query
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(),
-  collection: vi.fn(() => 'collection-ref'),
+  collection: vi.fn(() => ({ withConverter: vi.fn(() => 'collection-ref') })),
   query: vi.fn((ref) => ref),
   limit: vi.fn(() => 'limit-1'),
   getDocs: vi.fn(),
@@ -112,7 +113,7 @@ describe('useAuth', () => {
     } as Awaited<ReturnType<typeof getUserDoc>>)
     mockedGetDocs.mockResolvedValueOnce({
       empty: false,
-      docs: [{ id: 'profile1' }],
+      docs: [{ id: 'profile1', data: () => ({ name: 'Test Child' }) }],
     } as unknown as ReturnType<typeof getDocs>)
 
     await act(async () => {
