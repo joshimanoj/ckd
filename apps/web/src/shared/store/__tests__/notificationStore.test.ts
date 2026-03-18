@@ -40,4 +40,25 @@ describe('notificationStore', () => {
     useNotificationStore.getState().setPromptShown(true)
     expect(useNotificationStore.getState().promptShown).toBe(true)
   })
+
+  it('should reset to initial state', () => {
+    useNotificationStore.setState({
+      notificationsEnabled: true,
+      fcmToken: 'some-token',
+      promptShown: true,
+    })
+
+    useNotificationStore.getState().reset()
+
+    expect(useNotificationStore.getState().notificationsEnabled).toBe(false)
+    expect(useNotificationStore.getState().fcmToken).toBeNull()
+    expect(useNotificationStore.getState().promptShown).toBe(false)
+  })
+
+  it('reset() is idempotent', () => {
+    useNotificationStore.getState().reset()
+    useNotificationStore.getState().reset()
+    expect(useNotificationStore.getState().notificationsEnabled).toBe(false)
+    expect(useNotificationStore.getState().fcmToken).toBeNull()
+  })
 })

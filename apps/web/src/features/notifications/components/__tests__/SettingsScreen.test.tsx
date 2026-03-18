@@ -61,7 +61,7 @@ describe('SettingsScreen', () => {
   })
 
   it('should render notification toggle matching notificationsEnabled state', () => {
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const toggle = screen.getByRole('switch')
     expect(toggle).toBeInTheDocument()
     expect((toggle as HTMLInputElement).checked).toBe(false)
@@ -69,13 +69,13 @@ describe('SettingsScreen', () => {
 
   it('should render toggle as checked when notificationsEnabled is true', () => {
     mockNotificationsEnabled = true
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const toggle = screen.getByRole('switch')
     expect((toggle as HTMLInputElement).checked).toBe(true)
   })
 
   it('should open Parental Gate when toggle is tapped', () => {
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const toggle = screen.getByRole('switch')
     fireEvent.click(toggle)
     expect(mockShowGate).toHaveBeenCalledOnce()
@@ -83,7 +83,7 @@ describe('SettingsScreen', () => {
 
   it('should NOT change toggle state if gate is dismissed', () => {
     mockGateVisible = true
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const dismissBtn = screen.getByTestId('gate-dismiss-btn')
     fireEvent.click(dismissBtn)
     expect(mockSetEnabled).not.toHaveBeenCalled()
@@ -92,7 +92,7 @@ describe('SettingsScreen', () => {
   it('should call setEnabled(true) when gate passes and notificationsEnabled is false', async () => {
     mockCheckAnswer.mockReturnValue(true)
     mockGateVisible = true
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const confirmBtn = screen.getByTestId('gate-submit-btn')
     await act(async () => {
       fireEvent.click(confirmBtn)
@@ -104,7 +104,7 @@ describe('SettingsScreen', () => {
     mockNotificationsEnabled = true
     mockCheckAnswer.mockReturnValue(true)
     mockGateVisible = true
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     const confirmBtn = screen.getByTestId('gate-submit-btn')
     await act(async () => {
       fireEvent.click(confirmBtn)
@@ -113,7 +113,73 @@ describe('SettingsScreen', () => {
   })
 
   it('Privacy Policy link should be present', () => {
-    render(<SettingsScreen uid="uid-1" />)
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     expect(screen.getByTestId('privacy-policy-link')).toBeInTheDocument()
+  })
+
+  it('should render notification toggle label "New video notifications"', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByText('New video notifications')).toBeInTheDocument()
+  })
+
+  it('should render notification subtitle "Get notified when new rhymes are added"', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByText('Get notified when new rhymes are added')).toBeInTheDocument()
+  })
+
+  it('Privacy Policy link should NOT be aria-disabled', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const link = screen.getByTestId('privacy-policy-link')
+    expect(link).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('Privacy Policy link should open in new tab', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const link = screen.getByTestId('privacy-policy-link')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('should render Sign Out button', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByTestId('sign-out-btn')).toBeInTheDocument()
+  })
+
+  it('should show confirmation dialog when Sign Out is tapped', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    expect(screen.getByTestId('sign-out-confirm-dialog')).toBeVisible()
+  })
+
+  it('should hide dialog and NOT call onSignOut when Cancel is tapped', () => {
+    const mockSignOut = vi.fn()
+    render(<SettingsScreen uid="uid-1" onSignOut={mockSignOut} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    fireEvent.click(screen.getByTestId('sign-out-cancel-btn'))
+    expect(screen.queryByTestId('sign-out-confirm-dialog')).not.toBeInTheDocument()
+    expect(mockSignOut).not.toHaveBeenCalled()
+  })
+
+  it('should call onSignOut when confirm button is tapped', async () => {
+    const mockSignOut = vi.fn().mockResolvedValue(undefined)
+    render(<SettingsScreen uid="uid-1" onSignOut={mockSignOut} />)
+    fireEvent.click(screen.getByTestId('sign-out-btn'))
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('sign-out-confirm-btn'))
+    })
+    expect(mockSignOut).toHaveBeenCalledOnce()
+  })
+
+  it('should render app version footer', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    expect(screen.getByTestId('app-version')).toBeInTheDocument()
+    expect(screen.getByTestId('app-version').textContent).toMatch(/Version \d+\.\d+\.\d+/)
+  })
+
+  it('should not render app-version as a button or link', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    const el = screen.getByTestId('app-version')
+    expect(el.tagName.toLowerCase()).not.toBe('button')
+    expect(el.tagName.toLowerCase()).not.toBe('a')
   })
 })

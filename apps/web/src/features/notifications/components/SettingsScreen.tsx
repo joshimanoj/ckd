@@ -5,13 +5,18 @@ import { ParentalGate } from '../../parentalGate/components/ParentalGate'
 
 interface SettingsScreenProps {
   uid: string
+  onSignOut: () => Promise<void>
 }
 
-export function SettingsScreen({ uid }: SettingsScreenProps) {
+const PRIVACY_POLICY_URL = (import.meta.env.VITE_PRIVACY_POLICY_URL as string | undefined) ?? '#'
+const APP_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? '1.0.0'
+
+export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const [shaking, setShaking] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false)
 
   function handleToggleTap() {
     showGate()
@@ -34,8 +39,13 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
     hideGate()
   }
 
+  async function handleSignOutConfirm() {
+    setShowSignOutDialog(false)
+    await onSignOut()
+  }
+
   return (
-    <div data-testid="settings-screen" style={{ padding: '16px 20px' }}>
+    <div data-testid="settings-screen" style={{ padding: '16px 20px', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* Notifications section */}
       <p style={{
         fontFamily: "'Baloo 2', sans-serif",
@@ -66,7 +76,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
             color: '#1E1B4B',
             margin: 0,
           }}>
-            New video alerts
+            New video notifications
           </p>
           <p style={{
             fontFamily: "'Nunito', sans-serif",
@@ -74,7 +84,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
             color: '#6B7280',
             margin: '2px 0 0 0',
           }}>
-            Get notified when new videos are added
+            Get notified when new rhymes are added
           </p>
         </div>
         <input
@@ -98,20 +108,43 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
         🔒 Requires parent verification
       </p>
 
-      {/* Privacy policy placeholder */}
+      {/* Divider */}
+      <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '16px 0' }} />
+
+      {/* Account section header */}
+      <p style={{
+        fontFamily: "'Nunito', sans-serif",
+        fontWeight: 600,
+        fontSize: 11,
+        color: '#6B7280',
+        textTransform: 'uppercase',
+        paddingLeft: 16,
+        margin: '0 0 4px 0',
+      }}>
+        Account
+      </p>
+
+      {/* Privacy Policy row */}
       <a
         data-testid="privacy-policy-link"
-        href="#"
-        aria-disabled="true"
+        href={PRIVACY_POLICY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 48,
+          padding: '0 4px',
           fontFamily: "'Nunito', sans-serif",
-          fontSize: 13,
-          color: '#9CA3AF',
-          textDecoration: 'none',
-          pointerEvents: 'none',
+          fontSize: 15,
+          color: '#9333EA',
+          textDecoration: 'underline',
+          textDecorationColor: '#9333EA',
         }}
       >
         Privacy Policy
+        <span style={{ textDecoration: 'none' }}>›</span>
       </a>
 
       {/* Parental Gate */}
@@ -122,6 +155,119 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
         onDismiss={handleGateDismiss}
         shaking={shaking}
       />
+
+      {/* Sign Out row */}
+      <button
+        data-testid="sign-out-btn"
+        onClick={() => setShowSignOutDialog(true)}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          width: '100%',
+          textAlign: 'left',
+          padding: '12px 16px',
+          minHeight: 48,
+          fontFamily: "'Nunito', sans-serif",
+          fontWeight: 700,
+          fontSize: 15,
+          color: '#EF4444',
+        }}
+      >
+        Sign Out
+      </button>
+
+      {/* Sign Out Confirmation Dialog */}
+      {showSignOutDialog && (
+        <div
+          data-testid="sign-out-confirm-dialog"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 502,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 20,
+              padding: 24,
+              maxWidth: 280,
+              width: '100%',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 600,
+                fontSize: 16,
+                color: '#1E1B4B',
+                margin: '0 0 20px 0',
+              }}
+            >
+              Are you sure you want to sign out?
+            </p>
+            <button
+              data-testid="sign-out-confirm-btn"
+              onClick={handleSignOutConfirm}
+              style={{
+                display: 'block',
+                width: '100%',
+                minHeight: 48,
+                background: '#EF4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 24,
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 700,
+                fontSize: 15,
+                cursor: 'pointer',
+                marginBottom: 8,
+              }}
+            >
+              Sign Out
+            </button>
+            <button
+              data-testid="sign-out-cancel-btn"
+              onClick={() => setShowSignOutDialog(false)}
+              style={{
+                display: 'block',
+                width: '100%',
+                minHeight: 48,
+                background: 'transparent',
+                color: '#6B7280',
+                border: '1px solid #6B7280',
+                borderRadius: 24,
+                fontFamily: "'Nunito', sans-serif",
+                fontWeight: 600,
+                fontSize: 15,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Version footer */}
+      <p
+        data-testid="app-version"
+        style={{
+          fontFamily: "'Nunito', sans-serif",
+          fontSize: 13,
+          color: '#6B7280',
+          textAlign: 'center',
+          paddingBottom: 24,
+          marginTop: 32,
+        }}
+      >
+        Version {APP_VERSION}
+      </p>
 
       {/* Success toast */}
       {toast && (
