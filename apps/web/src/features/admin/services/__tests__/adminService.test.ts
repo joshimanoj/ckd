@@ -17,13 +17,13 @@ const mockOrderBy = vi.fn()
 const mockServerTimestamp = vi.fn(() => ({ _type: 'serverTimestamp' }))
 
 vi.mock('firebase/firestore', () => ({
-  getDocs: (...args: unknown[]) => mockGetDocs(...args),
-  addDoc: (...args: unknown[]) => mockAddDoc(...args),
-  updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
-  onSnapshot: (...args: unknown[]) => mockOnSnapshot(...args),
-  doc: (...args: unknown[]) => mockDoc(...args),
-  query: (...args: unknown[]) => mockQuery(...args),
-  orderBy: (...args: unknown[]) => mockOrderBy(...args),
+  getDocs: mockGetDocs,
+  addDoc: mockAddDoc,
+  updateDoc: mockUpdateDoc,
+  onSnapshot: mockOnSnapshot,
+  doc: mockDoc,
+  query: mockQuery,
+  orderBy: mockOrderBy,
   serverTimestamp: () => mockServerTimestamp(),
 }))
 

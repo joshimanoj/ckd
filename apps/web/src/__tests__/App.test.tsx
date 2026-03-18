@@ -25,7 +25,7 @@ describe('App routing', () => {
     const { default: App } = await import('../App')
 
     // Unauthenticated: shows OnboardingPage (sign-in-screen)
-    vi.mocked(useAuth).mockReturnValue({ user: null, loading: false, routeTo: 'sign-in' })
+    vi.mocked(useAuth).mockReturnValue({ user: null, loading: false, routeTo: 'sign-in', signOut: vi.fn() })
     render(<App />)
     await waitFor(() => expect(screen.getByTestId('sign-in-screen')).toBeInTheDocument())
   })
@@ -34,7 +34,7 @@ describe('App routing', () => {
     const { useAuth } = await import('../features/auth/hooks/useAuth')
     const { default: App } = await import('../App')
 
-    vi.mocked(useAuth).mockReturnValue({ user: null, loading: true, routeTo: 'sign-in' })
+    vi.mocked(useAuth).mockReturnValue({ user: null, loading: true, routeTo: 'sign-in', signOut: vi.fn() })
     render(<App />)
     await waitFor(() => expect(screen.getByTestId('loading-spinner')).toBeInTheDocument())
   })
@@ -43,7 +43,7 @@ describe('App routing', () => {
     const { useAuth } = await import('../features/auth/hooks/useAuth')
     const { default: App } = await import('../App')
 
-    vi.mocked(useAuth).mockReturnValue({ user: { uid: 'u1' } as Parameters<ReturnType<typeof useAuth>['user'] & object extends never ? never : object>['uid'] extends string ? import('firebase/auth').User : never, loading: false, routeTo: 'consent' })
+    vi.mocked(useAuth).mockReturnValue({ user: { uid: 'u1' } as Parameters<ReturnType<typeof useAuth>['user'] & object extends never ? never : object>['uid'] extends string ? import('firebase/auth').User : never, loading: false, routeTo: 'consent', signOut: vi.fn() })
     render(<App />)
     await waitFor(() => expect(screen.getByTestId('consent-modal')).toBeInTheDocument())
   })
@@ -52,7 +52,7 @@ describe('App routing', () => {
     const { useAuth } = await import('../features/auth/hooks/useAuth')
     const { default: App } = await import('../App')
 
-    vi.mocked(useAuth).mockReturnValue({ user: { uid: 'u1' } as import('firebase/auth').User, loading: false, routeTo: 'library' })
+    vi.mocked(useAuth).mockReturnValue({ user: { uid: 'u1' } as import('firebase/auth').User, loading: false, routeTo: 'library', signOut: vi.fn() })
     render(<App />)
     await waitFor(() => expect(screen.getByTestId('library-screen')).toBeInTheDocument())
   })

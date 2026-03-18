@@ -22,7 +22,8 @@ jobs:
       - run: npm ci
 
       - name: Build
-        run: npm run build
+        # Use vite build directly — tsc type-check is already run in the CI unit job
+        run: npx vite build
         env:
           # Override .env.production values from GitHub Secrets so they never
           # need to be hard-coded in the repo. If a secret is empty the
