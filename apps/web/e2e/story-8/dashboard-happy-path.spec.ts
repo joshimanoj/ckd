@@ -74,7 +74,7 @@ test.describe('Story 8 — FT-2: Dashboard happy path (today + chart + monthly)'
 
   test('FT-2a: today total shown as "45 min"', async ({ page, request }) => {
     await setup(page, request, 'ft2a-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await solveGate(page)
     await expect(page.getByTestId('parent-panel')).toBeVisible({ timeout: 5000 })
     await expect(page.getByTestId('today-value')).toHaveText('45 min', { timeout: 8000 })
@@ -82,7 +82,7 @@ test.describe('Story 8 — FT-2: Dashboard happy path (today + chart + monthly)'
 
   test('FT-2b: weekly chart shows 7 bars', async ({ page, request }) => {
     await setup(page, request, 'ft2b-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await solveGate(page)
     await expect(page.getByTestId('watch-time-chart')).toBeVisible({ timeout: 8000 })
     const bars = await page.getByTestId('chart-bar').count()
@@ -91,7 +91,7 @@ test.describe('Story 8 — FT-2: Dashboard happy path (today + chart + monthly)'
 
   test('FT-2c: monthly total is visible and non-empty', async ({ page, request }) => {
     await setup(page, request, 'ft2c-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await solveGate(page)
     await expect(page.getByTestId('monthly-total')).toBeVisible({ timeout: 8000 })
     const text = await page.getByTestId('monthly-total').textContent()
@@ -101,7 +101,7 @@ test.describe('Story 8 — FT-2: Dashboard happy path (today + chart + monthly)'
 
   test('FT-2d: empty state is NOT shown when sessions exist', async ({ page, request }) => {
     await setup(page, request, 'ft2d-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await solveGate(page)
     await expect(page.getByTestId('today-value')).toBeVisible({ timeout: 8000 })
     await expect(page.getByTestId('dashboard-empty-state')).not.toBeVisible()

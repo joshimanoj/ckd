@@ -47,14 +47,14 @@ test.describe('Story 8 — FT-1: Dashboard accessible only after Parental Gate',
 
   test('FT-1b: gate appears on parent icon tap; panel still hidden', async ({ page, request }) => {
     await setup(page, request, 'ft1b-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await expect(page.getByTestId('parental-gate')).toBeVisible()
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
   })
 
   test('FT-1c: dismissing gate without solving keeps panel hidden', async ({ page, request }) => {
     await setup(page, request, 'ft1c-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await expect(page.getByTestId('parental-gate')).toBeVisible()
     await page.getByTestId('gate-dismiss-btn').click()
     await expect(page.getByTestId('parental-gate')).not.toBeVisible()
@@ -63,7 +63,7 @@ test.describe('Story 8 — FT-1: Dashboard accessible only after Parental Gate',
 
   test('FT-1d: correct answer reveals panel with dashboard-screen inside', async ({ page, request }) => {
     await setup(page, request, 'ft1d-s8')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await solveGate(page)
     await expect(page.getByTestId('parental-gate')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).toBeVisible({ timeout: 5000 })

@@ -28,7 +28,7 @@ test.describe('Story 8 — FT-7: Parent panel side drawer opens and closes', () 
   }
 
   async function openPanel(page: Page) {
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     const questionText = await page.getByTestId('gate-question').textContent()
     const match = questionText!.match(/(\d+) ([+\u2212]) (\d+)/)
     expect(match).not.toBeNull()

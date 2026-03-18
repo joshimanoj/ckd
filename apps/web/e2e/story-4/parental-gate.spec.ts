@@ -37,7 +37,7 @@ test.describe('Story 4 — Parental Gate', () => {
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft1-gate')
     await expect(page.getByTestId('library-screen')).toBeVisible()
-    await expect(page.getByTestId('parent-icon-btn')).toBeVisible()
+    await expect(page.getByTestId('parent-icon')).toBeVisible()
     await expect(page.getByTestId('parental-gate')).not.toBeVisible()
   })
 
@@ -46,7 +46,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft2-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await expect(page.getByTestId('parental-gate')).toBeVisible()
     await expect(page.getByTestId('gate-question')).toBeVisible()
     await expect(page.getByTestId('gate-question')).toHaveText(/\d+ [+−] \d+ = \?/)
@@ -60,7 +60,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft3-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await expect(page.getByTestId('gate-submit-btn')).toBeDisabled()
     await page.getByTestId('gate-answer-input').fill('5')
     await expect(page.getByTestId('gate-submit-btn')).not.toBeDisabled()
@@ -73,7 +73,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft4-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     const firstQuestion = await page.getByTestId('gate-question').textContent()
     await page.getByTestId('gate-answer-input').fill('99')
     await page.getByTestId('gate-submit-btn').click()
@@ -89,7 +89,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft5-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     const questionText = await page.getByTestId('gate-question').textContent()
     // Parse "A + B = ?" or "A − B = ?"
     const match = questionText!.match(/(\d+) ([+\u2212]) (\d+)/)
@@ -109,7 +109,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft6-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     await expect(page.getByTestId('parental-gate')).toBeVisible()
     await page.getByTestId('gate-dismiss-btn').click()
     await expect(page.getByTestId('parental-gate')).not.toBeVisible()
