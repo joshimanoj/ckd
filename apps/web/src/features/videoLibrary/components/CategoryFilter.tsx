@@ -1,5 +1,13 @@
 import type { Category } from '@ckd/shared/types/video'
 
+const labelMap: Record<string, string> = {
+  Rhymes: '🎵 Rhymes',
+  Colours: '🎨 Colours',
+  Numbers: '🔢 Numbers',
+  Animals: '🐘 Animals',
+  Stories: '⭐ Exclusive',
+}
+
 interface CategoryFilterProps {
   categories: Category[]
   selected: Category | null
@@ -7,42 +15,32 @@ interface CategoryFilterProps {
   visible: boolean
 }
 
-const chipStyle = (isSelected: boolean): React.CSSProperties => ({
-  background: isSelected ? '#9333EA' : '#F3E8FF',
-  color: isSelected ? 'white' : '#9333EA',
-  borderRadius: 20,
-  padding: '6px 16px',
-  fontFamily: "'Nunito', sans-serif",
-  fontWeight: 600,
-  fontSize: 13,
-  border: 'none',
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-})
-
 export function CategoryFilter({ categories, selected, onSelect, visible }: CategoryFilterProps) {
   return (
     <div
       data-testid="category-filter"
-      style={{ display: visible ? 'flex' : 'none', overflowX: 'auto', gap: 8, padding: '8px 16px' }}
+      className="ckd-library__sticky"
+      style={{ display: visible ? 'block' : 'none' }}
     >
-      <button
-        data-testid="category-chip-All"
-        style={chipStyle(selected === null)}
-        onClick={() => onSelect(null)}
-      >
-        All
-      </button>
-      {categories.map((cat) => (
+      <div className="ckd-chip-row" style={{ padding: '10px 16px 4px' }}>
         <button
-          key={cat}
-          data-testid={`category-chip-${cat}`}
-          style={chipStyle(selected === cat)}
-          onClick={() => onSelect(cat)}
+          data-testid="category-chip-All"
+          className={`ckd-chip ${selected === null ? 'ckd-chip--active' : 'ckd-chip--inactive'}`}
+          onClick={() => onSelect(null)}
         >
-          {cat}
+          All
         </button>
-      ))}
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            data-testid={`category-chip-${cat}`}
+            className={`ckd-chip ${selected === cat ? 'ckd-chip--active' : 'ckd-chip--inactive'}`}
+            onClick={() => onSelect(cat)}
+          >
+            {labelMap[cat] ?? cat}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

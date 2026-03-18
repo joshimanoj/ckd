@@ -1,8 +1,8 @@
 import type { Video, Category } from '@ckd/shared/types/video'
 import { CATEGORIES } from '@ckd/shared/types/video'
-import { VideoCard } from './VideoCard'
-import { SkeletonGrid } from './SkeletonGrid'
 import { CategoryFilter } from './CategoryFilter'
+import { SkeletonGrid } from './SkeletonGrid'
+import { VideoCard } from './VideoCard'
 
 interface VideoGridProps {
   videos: Video[]
@@ -25,34 +25,16 @@ export function VideoGrid({
   onCategorySelect,
   onRefresh,
 }: VideoGridProps) {
-  if (loading) {
-    return <SkeletonGrid />
-  }
+  if (loading) return <SkeletonGrid />
 
   if (error !== null) {
     return (
-      <div data-testid="error-state" style={{ padding: 24, textAlign: 'center' }}>
-        <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#1E1B4B' }}>
+      <div data-testid="error-state" className="ckd-app-shell" style={{ padding: 24, textAlign: 'center' }}>
+        <p style={{ font: "700 18px 'Baloo 2', cursive", color: '#1E1B4B', margin: '0 0 8px' }}>
           Check your internet connection
         </p>
-        <p style={{ fontFamily: 'monospace', fontSize: 11, color: '#dc2626', wordBreak: 'break-all', padding: '0 16px' }}>
-          {error}
-        </p>
-        <button
-          data-testid="retry-btn"
-          onClick={onRefresh}
-          style={{
-            background: '#9333EA',
-            color: 'white',
-            border: 'none',
-            borderRadius: 20,
-            padding: '10px 24px',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 700,
-            fontSize: 15,
-            cursor: 'pointer',
-          }}
-        >
+        <p style={{ font: '11px monospace', color: '#dc2626', wordBreak: 'break-all', padding: '0 16px' }}>{error}</p>
+        <button data-testid="retry-btn" className="ckd-btn-purple" onClick={onRefresh} style={{ padding: '0 24px' }}>
           Retry
         </button>
       </div>
@@ -61,27 +43,11 @@ export function VideoGrid({
 
   if (videos.length === 0) {
     return (
-      <div data-testid="empty-state" style={{ padding: 40, textAlign: 'center' }}>
-        <p
-          style={{
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 20,
-            color: '#1E1B4B',
-            margin: '0 0 8px',
-          }}
-        >
+      <div data-testid="empty-state" className="ckd-app-shell" style={{ padding: 40, textAlign: 'center' }}>
+        <p style={{ font: "700 20px 'Baloo 2', cursive", color: '#1E1B4B', margin: '0 0 8px' }}>
           Videos coming soon!
         </p>
-        <p
-          style={{
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 400,
-            fontSize: 15,
-            color: '#6B7280',
-            margin: 0,
-          }}
-        >
+        <p style={{ font: "400 15px 'Nunito', sans-serif", color: '#6B7280', margin: 0 }}>
           Check back soon for new rhymes.
         </p>
       </div>
@@ -91,17 +57,11 @@ export function VideoGrid({
   return (
     <div
       style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 6%, #BFE5FF 18%, #A9D8FB 100%)',
-        padding: '0 0 28px',
-        borderTop: '22px solid #FFFFFF',
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-        overflow: 'visible',
         flex: 1,
-        minHeight: 'calc(100dvh - 212px)',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
+        minHeight: 'calc(100svh - 160px)',
+        background: '#BAE6FD',
       }}
     >
       <CategoryFilter
@@ -110,13 +70,14 @@ export function VideoGrid({
         onSelect={onCategorySelect}
         visible={allVideos.length >= 20}
       />
+
       <div
         data-testid="video-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '24px 22px',
-          padding: '24px 22px 10px',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 12,
+          padding: '12px 16px 24px',
           alignContent: 'start',
         }}
       >
@@ -124,24 +85,18 @@ export function VideoGrid({
           <VideoCard key={video.videoId} video={video} onClick={onVideoTap} />
         ))}
       </div>
-      <div style={{ padding: '16px 16px 28px', display: 'flex', justifyContent: 'center', marginTop: 'auto' }}>
-        <button
-          data-testid="refresh-btn"
-          onClick={onRefresh}
-          style={{
-            background: 'transparent',
-            border: '2px solid #9333EA',
-            borderRadius: 999,
-            padding: '8px 24px',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 700,
-            fontSize: 14,
-            color: '#9333EA',
-            cursor: 'pointer',
-          }}
-        >
-          Refresh
-        </button>
+
+      <div style={{ marginTop: 'auto' }}>
+        <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'center' }}>
+          <button
+            data-testid="refresh-btn"
+            className="ckd-btn-ghost"
+            onClick={onRefresh}
+            style={{ minHeight: 40, border: '2px solid #9333EA', padding: '0 24px' }}
+          >
+            Refresh
+          </button>
+        </div>
       </div>
     </div>
   )

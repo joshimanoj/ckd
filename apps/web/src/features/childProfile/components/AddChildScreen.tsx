@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import creatorPhoto from '../../../assets/creator-photo.jpg'
 import type { AgeRange } from '@ckd/shared/utils/ageRange'
 
-const AGE_PILLS: Array<{ value: AgeRange; label: string; testId: string }> = [
-  { value: 'under-3', label: 'Under 3', testId: 'pill-under-3' },
-  { value: '3-4', label: '3–4 years', testId: 'pill-3-4' },
-  { value: '5-6', label: '5–6 years', testId: 'pill-5-6' },
+const AGE_OPTIONS: Array<{ value: AgeRange; emoji: string; label: string; testId: string }> = [
+  { value: 'under-3', emoji: '👶', label: 'Under 3', testId: 'pill-under-3' },
+  { value: '3-4', emoji: '🧒', label: '3 - 4 yrs', testId: 'pill-3-4' },
+  { value: '5-6', emoji: '🧑', label: '5 - 6 yrs', testId: 'pill-5-6' },
 ]
 
 interface AddChildScreenProps {
@@ -14,12 +13,9 @@ interface AddChildScreenProps {
   error?: string | null
 }
 
-export function AddChildScreen({
-  onSave,
-  saving = false,
-  error = null,
-}: AddChildScreenProps) {
+export function AddChildScreen({ onSave, saving = false, error = null }: AddChildScreenProps) {
   const [name, setName] = useState('')
+  const [dob, setDob] = useState('')
   const [selectedAge, setSelectedAge] = useState<AgeRange | null>(null)
 
   const isValid = name.trim().length > 0 && selectedAge !== null
@@ -35,222 +31,100 @@ export function AddChildScreen({
   }
 
   return (
-    <div
-      data-testid="child-profile-screen"
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#F3E8FF',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxSizing: 'border-box',
-        maxWidth: '100vw',
-        overflowX: 'hidden',
-      }}
-    >
-      {/* Top nav */}
-      <nav
-        data-testid="top-nav"
-        style={{
-          width: '100%',
-          backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E5E7EB',
-          height: '56px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxSizing: 'border-box',
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: '"Baloo 2", cursive',
-            fontWeight: 600,
-            fontSize: '18px',
-            color: '#9333EA',
-          }}
-        >
-          Choti Ki Duniya
-        </span>
-      </nav>
+    <div data-testid="child-profile-screen" className="ckd-profile-screen">
+      <header className="ckd-profile-header">
+        <div className="ckd-blob-large" />
+        <div className="ckd-blob" style={{ top: 34, right: -32, opacity: 0.22 }} />
+        <div data-testid="top-nav" />
+        <div className="ckd-avatar-hero">🧒</div>
+        <h1 className="ckd-screen-title">Add your child&apos;s profile</h1>
+        <p className="ckd-screen-subtitle">We&apos;ll personalise the experience for them</p>
+      </header>
 
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          padding: '24px 16px 32px',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '8px',
-          }}
-        >
-          <img
-            src={creatorPhoto}
-            alt="Creator"
-            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-          />
-          <h1
-            style={{
-              fontFamily: '"Baloo 2", cursive',
-              fontWeight: 700,
-              fontSize: '22px',
-              color: '#1E1B4B',
-              margin: 0,
-            }}
-          >
-            Add your child&apos;s profile
-          </h1>
-        </div>
-        <p
-          style={{
-            fontFamily: 'Nunito, sans-serif',
-            fontSize: '14px',
-            color: '#6B7280',
-            margin: '0 0 32px 0',
-          }}
-        >
-          We&apos;ll personalise the experience for them
-        </p>
-
+      <div className="ckd-profile-body">
         <form onSubmit={handleSubmit}>
-          {/* Name input */}
-          <div style={{ marginBottom: '24px' }}>
-            <label
-              htmlFor="child-name"
-              style={{
-                display: 'block',
-                fontFamily: 'Nunito, sans-serif',
-                fontWeight: 600,
-                fontSize: '14px',
-                color: '#1E1B4B',
-                marginBottom: '8px',
-              }}
-            >
+          <div className="ckd-input-group">
+            <label className="ckd-input-label" htmlFor="child-name">
               Child&apos;s name *
             </label>
             <input
               id="child-name"
               data-testid="name-input"
+              className="ckd-input"
               type="text"
               value={name}
               onChange={handleNameChange}
               placeholder="e.g. Arjun"
-              style={{
-                width: '100%',
-                minHeight: '48px',
-                borderRadius: '16px',
-                border: '1px solid #D1D5DB',
-                padding: '12px 16px',
-                fontFamily: 'Nunito, sans-serif',
-                fontSize: '17px',
-                color: '#1E1B4B',
-                backgroundColor: '#FFFFFF',
-                boxSizing: 'border-box',
-                outline: 'none',
-              }}
-              onFocus={(e) => {
-                e.target.style.border = '2px solid #9333EA'
-              }}
-              onBlur={(e) => {
-                e.target.style.border = '1px solid #D1D5DB'
-              }}
             />
           </div>
 
-          {/* Age range pills */}
-          <div style={{ marginBottom: '32px' }}>
-            <label
-              style={{
-                display: 'block',
-                fontFamily: 'Nunito, sans-serif',
-                fontWeight: 600,
-                fontSize: '14px',
-                color: '#1E1B4B',
-                marginBottom: '12px',
-              }}
-            >
-              Age range
+          <div className="ckd-input-group">
+            <label className="ckd-input-label" htmlFor="child-dob">
+              Date of birth *
             </label>
-            <div role="group" aria-label="Age range" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {AGE_PILLS.map(({ value, label, testId }) => {
-                const selected = selectedAge === value
+            <input
+              id="child-dob"
+              className="ckd-input"
+              type="text"
+              value={dob}
+              onChange={(e) => setDob(e.target.value.slice(0, 14))}
+              placeholder="DD / MM / YYYY"
+            />
+          </div>
+
+          <div className="ckd-input-group">
+            <label className="ckd-input-label">Age group</label>
+            <div className="ckd-choice-grid" role="group" aria-label="Age range">
+              {AGE_OPTIONS.map((option) => {
+                const selected = selectedAge === option.value
                 return (
                   <button
-                    key={value}
+                    key={option.value}
                     type="button"
-                    data-testid={testId}
+                    data-testid={option.testId}
                     aria-pressed={selected}
-                    data-selected={selected}
-                    onClick={() => setSelectedAge(value)}
-                    style={{
-                      minHeight: '48px',
-                      padding: '12px 20px',
-                      borderRadius: '20px',
-                      border: selected ? 'none' : '1px solid #9333EA',
-                      backgroundColor: selected ? '#9333EA' : '#F3E8FF',
-                      color: selected ? '#FFFFFF' : '#9333EA',
-                      fontFamily: 'Nunito, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      cursor: 'pointer',
-                    }}
+                    onClick={() => setSelectedAge(option.value)}
+                    className={`ckd-choice-card${selected ? ' ckd-choice-card--selected' : ''}`}
                   >
-                    {label}
+                    <span className="ckd-choice-emoji">{option.emoji}</span>
+                    <span className="ckd-choice-label">{option.label}</span>
                   </button>
                 )
               })}
             </div>
           </div>
 
-          {/* Error toast */}
-          {error && (
+          {error ? (
             <div
               data-testid="error-toast"
               role="alert"
               style={{
                 padding: '12px 16px',
-                borderRadius: '8px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FCA5A5',
-                color: '#EF4444',
-                fontFamily: 'Nunito, sans-serif',
-                fontWeight: 600,
-                fontSize: '14px',
-                marginBottom: '16px',
+                borderRadius: 12,
+                background: '#fef2f2',
+                border: '1px solid #fca5a5',
+                color: '#ef4444',
+                font: "600 14px 'Nunito', sans-serif",
+                marginBottom: 16,
               }}
             >
               {error}
             </div>
-          )}
+          ) : null}
 
-          {/* CTA button */}
           <button
             type="submit"
             data-testid="start-watching-btn"
             disabled={!isValid || saving}
             aria-disabled={!isValid || saving}
-            style={{
-              width: '100%',
-              height: '48px',
-              borderRadius: '24px',
-              border: 'none',
-              backgroundColor: isValid && !saving ? '#F43F5E' : '#D1D5DB',
-              color: isValid && !saving ? '#FFFFFF' : '#9CA3AF',
-              fontFamily: 'Nunito, sans-serif',
-              fontWeight: 600,
-              fontSize: '17px',
-              cursor: isValid && !saving ? 'pointer' : 'not-allowed',
-            }}
+            className="ckd-btn-primary"
+            style={{ width: '100%', marginTop: 24, opacity: isValid && !saving ? 1 : 0.45 }}
           >
-            {saving ? 'Saving...' : 'Start Watching'}
+            {saving ? 'Saving...' : 'Start Watching 🎬'}
+          </button>
+
+          <button type="button" className="ckd-btn-ghost" style={{ width: '100%', marginTop: 12, color: '#6B7280' }}>
+            Add another child (optional)
           </button>
         </form>
       </div>

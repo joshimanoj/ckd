@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './styles/ckd-ui.css'
 import App from './App.tsx'
 
 if (import.meta.env['VITE_USE_EMULATOR'] === 'true') {

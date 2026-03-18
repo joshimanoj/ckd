@@ -85,4 +85,24 @@ describe('PlayerScreen — states', () => {
     })
     expect(screen.queryByTestId('player-error')).not.toBeInTheDocument()
   })
+
+  it('scrubber can be moved to seek through the video', async () => {
+    const { PlayerScreen } = await import('../PlayerScreen')
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="dQw4w9WgXcQ"
+          videoDuration={200}
+          flushSession={vi.fn().mockResolvedValue(undefined)}
+          onBack={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+
+    const scrubber = screen.getByTestId('player-scrubber')
+    act(() => {
+      fireEvent.change(scrubber, { target: { value: '75' } })
+    })
+    expect(scrubber).toHaveValue('75')
+  })
 })

@@ -6,16 +6,12 @@ interface NotificationOptInSheetProps {
   onDismiss: () => void
 }
 
-export function NotificationOptInSheet({
-  visible,
-  onAccept,
-  onDismiss,
-}: NotificationOptInSheetProps) {
+export function NotificationOptInSheet({ visible, onAccept, onDismiss }: NotificationOptInSheetProps) {
   const [loading, setLoading] = useState(false)
 
   if (!visible) return null
 
-  const handleAccept = async () => {
+  async function handleAccept() {
     setLoading(true)
     try {
       await onAccept()
@@ -26,125 +22,31 @@ export function NotificationOptInSheet({
 
   return (
     <>
-      <style>{`
-        @keyframes slide-up-sheet {
-          from { transform: translateY(100%) }
-          to   { transform: translateY(0) }
-        }
-      `}</style>
-
-      {/* Backdrop */}
-      <div
-        data-testid="notif-overlay"
-        onClick={onDismiss}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.4)',
-          zIndex: 300,
-        }}
-      />
-
-      {/* Sheet */}
-      <div
-        data-testid="notif-optin-sheet"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: '#FAFAFA',
-          borderRadius: '24px 24px 0 0',
-          zIndex: 301,
-          padding: '0 16px 32px',
-          animation: 'slide-up-sheet 300ms ease-out',
-          maxWidth: '100vw',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px' }}>
-          <div style={{ width: 40, height: 4, background: '#D1D5DB', borderRadius: 2 }} />
-        </div>
-
-        {/* Bell icon */}
-        <div style={{ textAlign: 'center', fontSize: 32, color: '#9333EA', margin: '8px 0 4px' }}>
-          🔔
-        </div>
-
-        {/* Title */}
-        <p
-          style={{
-            margin: '8px 0 0',
-            textAlign: 'center',
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 20,
-            color: '#1E1B4B',
-          }}
-        >
+      <div data-testid="notif-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 300 }} onClick={onDismiss} />
+      <div data-testid="notif-optin-sheet" className="ckd-bottom-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="ckd-sheet-handle" />
+        <div style={{ textAlign: 'center', fontSize: 32, color: '#9333EA', marginBottom: 8 }}>🔔</div>
+        <p style={{ margin: 0, textAlign: 'center', color: '#1E1B4B', font: "700 20px 'Baloo 2', cursive" }}>
           Get notified about new rhymes!
         </p>
-
-        {/* Subtitle */}
-        <p
-          style={{
-            margin: '8px 8px 20px',
-            textAlign: 'center',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 400,
-            fontSize: 14,
-            color: '#6B7280',
-          }}
-        >
-          We'll let you know when new videos are added.
+        <p style={{ margin: '8px 8px 20px', textAlign: 'center', color: '#6B7280', font: "400 14px 'Nunito', sans-serif" }}>
+          We&apos;ll let you know when new videos are added.
         </p>
-
-        {/* "Yes, notify me" — primary */}
         <button
           data-testid="notif-accept-btn"
-          onClick={handleAccept}
+          className="ckd-btn-primary"
           disabled={loading}
-          style={{
-            display: 'block',
-            width: '100%',
-            minHeight: '48px',
-            background: '#F43F5E',
-            border: 'none',
-            borderRadius: 24,
-            color: '#fff',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-            marginBottom: 12,
-            boxSizing: 'border-box',
-          }}
+          onClick={handleAccept}
+          style={{ width: '100%', minHeight: '48px', marginBottom: 12, opacity: loading ? 0.7 : 1 }}
         >
           {loading ? '…' : 'Yes, notify me'}
         </button>
-
-        {/* "Not now" — ghost */}
         <button
           data-testid="notif-dismiss-btn"
-          onClick={onDismiss}
+          className="ckd-btn-ghost"
           disabled={loading}
-          style={{
-            display: 'block',
-            width: '100%',
-            minHeight: '48px',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: 24,
-            color: '#7C3AED',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            boxSizing: 'border-box',
-          }}
+          onClick={onDismiss}
+          style={{ width: '100%' }}
         >
           Not now
         </button>

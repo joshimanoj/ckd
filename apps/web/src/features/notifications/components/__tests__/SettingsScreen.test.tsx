@@ -74,7 +74,7 @@ describe('SettingsScreen', () => {
 
   it('should render notification toggle matching notificationsEnabled state', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
-    const toggle = screen.getByRole('switch')
+    const toggle = screen.getByTestId('notif-toggle')
     expect(toggle).toBeInTheDocument()
     expect(toggle).toHaveAttribute('aria-checked', 'false')
   })
@@ -82,13 +82,13 @@ describe('SettingsScreen', () => {
   it('should render toggle as checked when notificationsEnabled is true', () => {
     mockNotificationsEnabled = true
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
-    const toggle = screen.getByRole('switch')
+    const toggle = screen.getByTestId('notif-toggle')
     expect(toggle).toHaveAttribute('aria-checked', 'true')
   })
 
   it('should open Parental Gate when toggle is tapped', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
-    const toggle = screen.getByRole('switch')
+    const toggle = screen.getByTestId('notif-toggle')
     fireEvent.click(toggle)
     expect(mockShowGate).toHaveBeenCalledOnce()
   })

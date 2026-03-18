@@ -3,6 +3,39 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../../shared/store/authStore'
 import { recordConsent } from '../services/authService'
 
+const consentItems = [
+  {
+    icon: '📧',
+    title: 'Your email address',
+    description: 'Used only to identify your account. Never shared.',
+  },
+  {
+    icon: '👶',
+    title: "Child's name & age",
+    description: 'Used to personalise and track watch time for your child.',
+  },
+  {
+    icon: '⏱️',
+    title: 'Watch time data',
+    description: 'Which videos were watched and for how long. Powers your dashboard.',
+  },
+  {
+    icon: '🔔',
+    title: 'Push notifications',
+    description: 'Only if you opt in. For new video alerts. Always optional.',
+  },
+]
+
+function BlobBackground() {
+  return (
+    <div className="ckd-blob-bg" aria-hidden="true">
+      <span className="ckd-blob ckd-blob--one" />
+      <span className="ckd-blob ckd-blob--two" />
+      <span className="ckd-blob ckd-blob--three" />
+    </div>
+  )
+}
+
 export function ConsentModal() {
   const { user, setRouteTo } = useAuthStore()
   const navigate = useNavigate()
@@ -34,122 +67,44 @@ export function ConsentModal() {
   }
 
   return (
-    <div
-      data-testid="consent-modal"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 100,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        data-testid="consent-card"
-        style={{
-          background: '#FAFAFA',
-          borderRadius: '20px',
-          padding: '32px 24px',
-          maxWidth: '480px',
-          width: '90%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          boxSizing: 'border-box',
-        }}
-      >
-        <h2
-          data-testid="consent-title"
-          style={{
-            fontFamily: '"Baloo 2", cursive',
-            fontWeight: 700,
-            fontSize: '22px',
-            color: '#1E1B4B',
-            margin: '0 0 16px',
-          }}
-        >
-          Before we begin
+    <div data-testid="consent-modal" className="ckd-consent">
+      <header className="ckd-consent__header">
+        <BlobBackground />
+        <h2 data-testid="consent-title" className="ckd-consent__title">
+          Before you start 🔒
         </h2>
+        <p className="ckd-consent__sub">We collect minimal data to power the experience</p>
+      </header>
 
-        <div data-testid="consent-body">
-          <p
-            style={{
-              fontFamily: 'Nunito, sans-serif',
-              fontSize: '15px',
-              color: '#1E1B4B',
-              lineHeight: 1.5,
-              margin: '0 0 8px',
-            }}
-          >
-            We collect:
-          </p>
-          <ul
-            style={{
-              fontFamily: 'Nunito, sans-serif',
-              fontSize: '15px',
-              color: '#1E1B4B',
-              lineHeight: 1.5,
-              paddingLeft: '20px',
-              margin: '0 0 16px',
-            }}
-          >
-            <li>Your name and email (from your Google account)</li>
-            <li>Your child&apos;s name and date of birth</li>
-            <li>How long your child watches each video (watch time data)</li>
-            <li>Your device token (to send you notifications, only if you opt in)</li>
-          </ul>
-          <p
-            style={{
-              fontFamily: 'Nunito, sans-serif',
-              fontSize: '15px',
-              color: '#1E1B4B',
-              lineHeight: 1.5,
-              margin: '0 0 24px',
-            }}
-          >
-            <strong>Why:</strong> To personalise your child&apos;s profile, show you watch time,
-            and notify you about new videos.
-          </p>
-        </div>
+      <div data-testid="consent-card" className="ckd-consent__body">
+        {consentItems.map((item) => (
+          <div className="ckd-consent__item" key={item.title}>
+            <div className="ckd-consent__icon" aria-hidden="true">
+              {item.icon}
+            </div>
+            <div>
+              <p className="ckd-consent__item-title">{item.title}</p>
+              <p className="ckd-consent__item-desc">{item.description}</p>
+            </div>
+          </div>
+        ))}
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '12px',
-            minHeight: '48px',
-            marginBottom: '24px',
-          }}
-        >
+        <label className="ckd-consent__checkbox" htmlFor="consent-checkbox">
           <input
-            type="checkbox"
             id="consent-checkbox"
             data-testid="consent-checkbox"
             checked={checked}
             onChange={(e) => setChecked(e.target.checked)}
-            style={{
-              marginTop: '2px',
-              width: '20px',
-              height: '20px',
-              accentColor: '#9333EA',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
+            type="checkbox"
+            style={{ display: 'none' }}
           />
-          <label
-            htmlFor="consent-checkbox"
-            style={{
-              fontFamily: 'Nunito, sans-serif',
-              fontSize: '14px',
-              color: '#1E1B4B',
-              lineHeight: 1.5,
-              cursor: 'pointer',
-            }}
+          <span
+            className={`ckd-consent__checkbox-box${checked ? ' ckd-consent__checkbox-box--checked' : ''}`}
+            aria-hidden="true"
           >
+            {checked ? '✓' : ''}
+          </span>
+          <span className="ckd-consent__checkbox-label">
             I have read and agree to the{' '}
             <a
               href="#"
@@ -161,47 +116,24 @@ export function ConsentModal() {
               Privacy Policy
             </a>{' '}
             and consent to the collection of my child&apos;s usage data as described above.
-          </label>
-        </div>
+          </span>
+        </label>
 
         <button
           data-testid="consent-submit-btn"
           disabled={!checked || submitting}
           onClick={handleSubmit}
-          style={{
-            width: '100%',
-            height: '48px',
-            borderRadius: '24px',
-            border: 'none',
-            backgroundColor: checked && !submitting ? '#F43F5E' : '#D1D5DB',
-            color: '#fff',
-            opacity: checked && !submitting ? 1 : 0.6,
-            cursor: checked && !submitting ? 'pointer' : 'not-allowed',
-            fontFamily: 'Nunito, sans-serif',
-            fontWeight: 600,
-            fontSize: '16px',
-          }}
+          className="ckd-primary-btn"
+          style={{ width: '100%' }}
         >
-          I Agree &amp; Continue
+          I Agree &amp; Continue →
         </button>
 
-        {error && (
-          <div
-            data-testid="consent-error-toast"
-            role="alert"
-            style={{
-              marginTop: '12px',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              backgroundColor: '#FEE2E2',
-              color: '#991B1B',
-              fontFamily: 'Nunito, sans-serif',
-              fontSize: '14px',
-            }}
-          >
+        {error ? (
+          <div data-testid="consent-error-toast" role="alert" className="ckd-error-toast">
             {error}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

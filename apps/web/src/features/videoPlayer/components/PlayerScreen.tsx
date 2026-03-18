@@ -185,10 +185,10 @@ export function PlayerScreen({
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
 
   const btnStyle = (large = false, primary = false): React.CSSProperties => ({
-    width: large ? '64px' : '48px',
-    height: large ? '64px' : '48px',
+    width: large ? '56px' : '44px',
+    height: large ? '56px' : '44px',
     borderRadius: '50%',
-    background: primary ? '#F43F5E' : 'rgba(255,255,255,0.12)',
+    background: primary ? '#F43F5E' : 'rgba(255,255,255,0.1)',
     border: 'none',
     color: '#fff',
     fontSize: large ? '24px' : '18px',
@@ -201,29 +201,8 @@ export function PlayerScreen({
   })
 
   return (
-    <div
-      ref={containerRef}
-      data-testid="player-screen"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: '#0d0d1f',
-        zIndex: 50,
-        overflow: 'hidden',
-        maxWidth: '100vw',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* ── Video / artwork section ── */}
-      <div
-        style={{
-          position: 'relative',
-          flex: '0 0 46%',
-          background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 100%)',
-          overflow: 'hidden',
-        }}
-      >
+    <div ref={containerRef} data-testid="player-screen" className="ckd-player-shell">
+      <div className="ckd-player-video">
         {isLoading && (
           <div
             data-testid="player-loading"
@@ -302,86 +281,60 @@ export function PlayerScreen({
           data-testid="back-btn"
           aria-label="Back to Library"
           onClick={handleBack}
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            minWidth: '44px',
-            minHeight: '44px',
-            background: 'rgba(0,0,0,0.35)',
-            border: 'none',
-            borderRadius: '50%',
-            color: '#fff',
-            fontSize: '20px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 5,
-          }}
+          style={{ position: 'absolute', top: 12, left: 12, zIndex: 5 }}
+          className="ckd-back-button"
         >
           ←
         </button>
       </div>
 
-      {/* ── Controls panel (dark navy) ── */}
-      <div
-        style={{
-          background: '#12122a',
-          padding: '16px 20px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}
-      >
-        {/* Title */}
+      <div className="ckd-player-controls">
         <p
           style={{
             margin: 0,
             color: '#fff',
-            fontFamily: 'Nunito',
-            fontWeight: 700,
-            fontSize: '17px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            font: "700 16px 'Baloo 2', cursive",
+            marginBottom: 12,
           }}
         >
           {videoTitle}
         </p>
 
-        {/* Scrubber */}
         <div>
-          <input
-            type="range"
-            min={0}
-            max={ytDuration || 100}
-            value={displaySeconds}
-            onChange={handleScrub}
-            style={{
-              width: '100%',
-              height: '4px',
-              appearance: 'none',
-              WebkitAppearance: 'none',
-              borderRadius: '2px',
-              cursor: 'pointer',
-              background: `linear-gradient(to right, #F43F5E ${progressPct}%, rgba(255,255,255,0.25) ${progressPct}%)`,
-              outline: 'none',
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-            <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Nunito', fontSize: '12px' }}>
+          <div style={{ position: 'relative', marginBottom: 12 }}>
+            <div style={{ height: 4, borderRadius: 2, background: '#374151' }}>
+              <div style={{ height: '100%', width: `${progressPct}%`, borderRadius: 2, background: '#F43F5E' }} />
+            </div>
+            <input
+              data-testid="player-scrubber"
+              type="range"
+              min={0}
+              max={ytDuration || 100}
+              value={displaySeconds}
+              onChange={handleScrub}
+              aria-label="Seek video"
+              style={{
+                position: 'absolute',
+                inset: '-8px 0',
+                width: '100%',
+                height: 20,
+                margin: 0,
+                opacity: 0,
+                cursor: 'pointer',
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '-4px' }}>
+            <span style={{ color: 'rgba(255,255,255,0.55)', font: "12px 'Nunito', sans-serif" }}>
               {toMMSS(displaySeconds)}
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.55)', fontFamily: 'Nunito', fontSize: '12px' }}>
+            <span style={{ color: 'rgba(255,255,255,0.55)', font: "12px 'Nunito', sans-serif" }}>
               {toMMSS(ytDuration)}
             </span>
           </div>
         </div>
 
-        {/* Control buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
-          <button style={btnStyle()} aria-label="Back to Library" onClick={handleBack}>←</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
           <button style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>⏮</button>
           <button
             data-testid="play-pause-btn"
@@ -392,68 +345,42 @@ export function PlayerScreen({
             {isBuffering ? <span className="player-spinner" style={{ width: 20, height: 20 }} /> : isPlaying ? '⏸' : '▶'}
           </button>
           <button style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>⏭</button>
-          <button style={btnStyle()} aria-label="Fullscreen" onClick={handleFullscreen}>
-            {isFullscreen ? '⤡' : '⤢'}
-          </button>
+          <button style={btnStyle()} aria-label="Fullscreen" onClick={handleFullscreen}>{isFullscreen ? '⤡' : '⤢'}</button>
         </div>
       </div>
 
-      {/* ── Up Next (white) ── */}
       {upNext.length > 0 && (
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            background: '#fff',
-            padding: '16px 16px 24px',
-          }}
-        >
+        <div className="ckd-player-body">
           <p
             style={{
               margin: '0 0 12px',
-              color: '#111',
-              fontFamily: 'Nunito',
-              fontWeight: 800,
-              fontSize: '15px',
+              color: '#1E1B4B',
+              font: "700 16px 'Baloo 2', cursive",
             }}
           >
             Up Next
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {upNext.map((v) => (
-              <div
-                key={v.videoId}
-                style={{
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'center',
-                  background: '#f7f7fb',
-                  borderRadius: '12px',
-                  padding: '10px',
-                }}
-              >
-                <img
-                  src={`https://img.youtube.com/vi/${v.youtubeVideoId}/mqdefault.jpg`}
-                  alt={v.title}
-                  style={{
-                    width: '72px',
-                    height: '48px',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    flexShrink: 0,
-                  }}
-                />
+              <div key={v.videoId} className="ckd-mini-card">
+                <div className="ckd-mini-thumb" style={{ overflow: 'hidden' }}>
+                  {v.thumbnailUrl ? (
+                    <img
+                      src={v.thumbnailUrl}
+                      alt={v.title}
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <span aria-hidden="true">▶</span>
+                  )}
+                </div>
                 <div style={{ minWidth: 0 }}>
                   <p
                     style={{
                       margin: 0,
-                      color: '#111',
-                      fontFamily: 'Nunito',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
+                      color: '#1E1B4B',
+                      font: "600 13px 'Baloo 2', cursive",
                     }}
                   >
                     {v.title}
@@ -462,12 +389,16 @@ export function PlayerScreen({
                     style={{
                       margin: '2px 0 0',
                       color: '#9333EA',
-                      fontFamily: 'Nunito',
-                      fontSize: '12px',
-                      fontWeight: 600,
+                      font: "600 12px 'Nunito', sans-serif",
                     }}
                   >
-                    {v.category}
+                    {v.category === 'Colours'
+                      ? '🎨 Colours'
+                      : v.category === 'Numbers'
+                        ? '🔢 Numbers'
+                        : v.category === 'Rhymes'
+                          ? '🎵 Rhymes'
+                          : v.category}
                   </p>
                 </div>
               </div>

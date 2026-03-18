@@ -1,78 +1,45 @@
-const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-const MAX_BAR_HEIGHT = 138
-const MIN_BAR_HEIGHT = 18
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const MAX_BAR_HEIGHT = 100
+const MIN_BAR_HEIGHT = 20
 
 interface WatchTimeChartProps {
-  weekDayTotals: number[] // [Mon…Sun], length 7
-  todayDayIndex: number   // 0=Mon…6=Sun
+  weekDayTotals: number[]
+  todayDayIndex: number
 }
 
 export function WatchTimeChart({ weekDayTotals, todayDayIndex }: WatchTimeChartProps) {
   const maxSeconds = Math.max(...weekDayTotals, 1)
 
   return (
-    <div
-      data-testid="watch-time-chart"
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        gap: 10,
-      }}
-    >
-      {weekDayTotals.map((seconds, i) => {
-        const isToday = i === todayDayIndex
-        const filledHeight = Math.max(MIN_BAR_HEIGHT, (seconds / maxSeconds) * MAX_BAR_HEIGHT)
-        return (
-          <div
-            key={i}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, flex: 1 }}
-          >
-            <div
-              style={{
-                width: '100%',
-                height: MAX_BAR_HEIGHT,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-end',
-              }}
-            >
+    <div data-testid="watch-time-chart">
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 100, marginBottom: 8 }}>
+        {weekDayTotals.map((seconds, index) => {
+          const isToday = index === todayDayIndex
+          const filledHeight = Math.max(MIN_BAR_HEIGHT, (seconds / maxSeconds) * MAX_BAR_HEIGHT)
+
+          return (
+            <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <div
                 style={{
-                  width: 42,
-                  maxWidth: '100%',
+                  width: '100%',
                   height: filledHeight,
-                  background: isToday ? 'linear-gradient(180deg, #9333EA 0%, #7C3AED 100%)' : '#E9D5FF',
-                  borderRadius: 14,
-                  boxShadow: isToday ? '0 10px 18px rgba(147, 51, 234, 0.18)' : 'none',
+                  borderRadius: '6px 6px 0 0',
+                  background: isToday ? 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)' : '#F3E8FF',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
                 <div
                   data-testid="chart-bar"
                   data-today={isToday ? 'true' : undefined}
-                  style={{
-                    width: '100%',
-                    height: filledHeight,
-                    borderRadius: 14,
-                    opacity: 0,
-                  }}
+                  style={{ width: '100%', height: '100%', opacity: 0 }}
                 />
               </div>
+              <span style={{ color: '#6B7280', font: "600 11px 'Nunito', sans-serif" }}>{DAY_LABELS[index][0]}</span>
             </div>
-            <span
-              style={{
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: 12,
-                fontWeight: 700,
-                color: '#6B7280',
-                lineHeight: 1,
-              }}
-            >
-              {DAY_LABELS[i]}
-            </span>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

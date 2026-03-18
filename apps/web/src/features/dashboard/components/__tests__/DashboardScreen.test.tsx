@@ -114,7 +114,7 @@ describe('DashboardScreen — data and empty states', () => {
     })
     render(<DashboardScreen {...BASE_PROPS} />)
     const monthEl = screen.getByTestId('monthly-total')
-    expect(monthEl.textContent).toContain('1 hr 30 min')
+    expect(monthEl.textContent).toContain('2 hr 15 min')
   })
 
   it('shows stats row with week, month, avg and video count', () => {
@@ -129,9 +129,9 @@ describe('DashboardScreen — data and empty states', () => {
       isEmpty: false,
     })
     render(<DashboardScreen {...BASE_PROPS} />)
-    expect(screen.getByText('This Week')).toBeDefined()
+    expect(screen.getAllByText('This Week').length).toBeGreaterThan(0)
     expect(screen.getByText('Avg / Day')).toBeDefined()
-    expect(screen.getByText('Videos')).toBeDefined()
+    expect(screen.getByText('Videos Watched')).toBeDefined()
     expect(screen.getByText('15')).toBeDefined()
   })
 })

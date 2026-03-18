@@ -129,7 +129,7 @@ export function VideoForm({ open, onClose, onPublish, onError }: Props) {
         right: 0,
         width: 480,
         height: '100vh',
-        background: '#FAFAFA',
+        background: '#FFFFFF',
         boxShadow: '-4px 0 24px rgba(0,0,0,0.12)',
         zIndex: 100,
         display: 'flex',
@@ -255,18 +255,8 @@ export function VideoForm({ open, onClose, onPublish, onError }: Props) {
           data-testid="btn-publish"
           disabled={submitting}
           onClick={() => void handlePublish()}
-          style={{
-            width: '100%',
-            height: 44,
-            background: submitting ? '#F9A8B5' : '#F43F5E',
-            color: 'white',
-            border: 'none',
-            borderRadius: 24,
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: submitting ? 'not-allowed' : 'pointer',
-          }}
+          className="ckd-btn-purple"
+          style={{ width: '100%', opacity: submitting ? 0.7 : 1 }}
         >
           {submitting ? 'Publishing…' : 'Publish'}
         </button>

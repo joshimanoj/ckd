@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useAdmin } from '../../features/admin/hooks/useAdmin'
-import { VideoList } from '../../features/admin/components/VideoList'
-import { VideoForm } from '../../features/admin/components/VideoForm'
+import { useEffect, useState } from 'react'
 import { NotificationPanel } from '../../features/admin/components/NotificationPanel'
+import { VideoForm } from '../../features/admin/components/VideoForm'
+import { VideoList } from '../../features/admin/components/VideoList'
+import { useAdmin } from '../../features/admin/hooks/useAdmin'
 
 export function AdminPage() {
   const {
@@ -17,8 +17,8 @@ export function AdminPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
-  function showToast(msg: string) {
-    setToast(msg)
+  function showToast(message: string) {
+    setToast(message)
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -29,91 +29,62 @@ export function AdminPage() {
   }
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setFormOpen(false)
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setFormOpen(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  const liveVideos = videos.filter((video) => video.isActive).length
+  const exclusiveVideos = videos.filter((video) => video.category === 'Stories').length
+
   return (
-    <div
-      data-testid="admin-page"
-      style={{ display: 'flex', minHeight: '100vh', fontFamily: "'Nunito', sans-serif" }}
-    >
-      {/* Sidebar */}
-      <aside
+    <div data-testid="admin-page" className="ckd-admin-shell" style={{ minHeight: '100svh', background: '#F1F0F8' }}>
+      <header
         style={{
-          width: 240,
-          minWidth: 240,
           background: '#1E1B4B',
-          color: 'white',
-          padding: '24px 16px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
+          color: '#FFFFFF',
+          padding: '60px 20px 24px',
         }}
       >
-        <h1
-          style={{
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 20,
-            color: 'white',
-            margin: '0 0 24px 0',
-          }}
-        >
-          Admin Panel
-        </h1>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ color: '#C4B5FD', fontSize: 14, padding: '8px 12px' }}>Videos</span>
-          <span style={{ color: '#C4B5FD', fontSize: 14, padding: '8px 12px' }}>Notifications</span>
-        </nav>
-      </aside>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+          <span style={{ fontSize: 28 }}>🎬</span>
+          <h1 style={{ margin: 0, color: '#FFFFFF', font: "800 20px 'Baloo 2', cursive" }}>Creator Admin</h1>
+        </div>
+        <p style={{ margin: '6px 0 24px', color: 'rgba(255,255,255,0.6)', font: "400 13px 'Nunito', sans-serif" }}>
+          Choti Ki Duniya · creator@chotikiduniya.com
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {[
+            { label: 'Total Videos', value: String(videos.length) },
+            { label: 'App Users', value: '247' },
+            { label: 'Notif Opt-ins', value: '189' },
+            { label: "Today's Views", value: '83' },
+          ].map((stat) => (
+            <div key={stat.label} className="ckd-card" style={{ padding: 14, borderRadius: 14, boxShadow: 'none' }}>
+              <p style={{ margin: 0, color: '#6B7280', font: "600 12px 'Nunito', sans-serif" }}>{stat.label}</p>
+              <p style={{ margin: '2px 0 0', color: '#1E1B4B', font: "800 24px 'Baloo 2', cursive" }}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      </header>
 
-      {/* Content */}
-      <main style={{ flex: 1, background: '#FAFAFA', padding: 24, overflowY: 'auto' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 24,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "'Baloo 2', sans-serif",
-              fontWeight: 700,
-              fontSize: 22,
-              color: '#1E1B4B',
-              margin: 0,
-            }}
-          >
-            Videos
-          </h2>
+      <main style={{ padding: 16, background: '#F1F0F8', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <p style={{ margin: 0, color: '#1E1B4B', font: "700 16px 'Baloo 2', cursive" }}>Videos</p>
           <button
             data-testid="btn-add-video"
+            className="ckd-btn-purple"
             onClick={() => setFormOpen(true)}
-            style={{
-              height: 44,
-              background: '#F43F5E',
-              color: 'white',
-              border: 'none',
-              borderRadius: 24,
-              fontFamily: "'Nunito', sans-serif",
-              fontWeight: 600,
-              fontSize: 15,
-              padding: '0 24px',
-              cursor: 'pointer',
-            }}
+            style={{ padding: '0 24px' }}
           >
-            Add Video
+            + Add New Video
           </button>
         </div>
 
         {loading ? (
-          <p style={{ color: '#6B7280' }}>Loading videos…</p>
+          <p style={{ color: '#6B7280', font: "400 14px 'Nunito', sans-serif" }}>Loading videos…</p>
         ) : (
           <VideoList videos={videos} onToggleActive={toggleVideoActive} />
         )}
@@ -125,16 +96,9 @@ export function AdminPage() {
         />
       </main>
 
-      {/* VideoForm slide-over */}
-      <VideoForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onPublish={handlePublish}
-        onError={showToast}
-      />
+      <VideoForm open={formOpen} onClose={() => setFormOpen(false)} onPublish={handlePublish} onError={showToast} />
 
-      {/* Success toast */}
-      {toast && (
+      {toast ? (
         <div
           data-testid="toast-success"
           style={{
@@ -142,20 +106,18 @@ export function AdminPage() {
             bottom: 24,
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#22C55E',
-            color: 'white',
             padding: '12px 24px',
             borderRadius: 24,
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 15,
+            background: '#22C55E',
+            color: '#FFFFFF',
+            font: "600 15px 'Nunito', sans-serif",
             boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
             zIndex: 200,
           }}
         >
           {toast}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

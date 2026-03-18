@@ -5,113 +5,75 @@ interface Props {
   onToggleActive: (videoId: string, currentIsActive: boolean) => Promise<void>
 }
 
-const styles = {
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse' as const,
-    fontFamily: "'Nunito', sans-serif",
-    fontSize: 15,
-  },
-  th: {
-    textAlign: 'left' as const,
-    padding: '12px 16px',
-    borderBottom: '2px solid #E5E7EB',
-    color: '#6B7280',
-    fontSize: 13,
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-  },
-  td: {
-    padding: '12px 16px',
-    borderBottom: '1px solid #E5E7EB',
-    color: '#1E1B4B',
-    verticalAlign: 'middle' as const,
-  },
-  toggle: (isActive: boolean): React.CSSProperties => ({
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    width: 44,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: isActive ? '#9333EA' : '#D1D5DB',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 150ms ease',
-    padding: 0,
-  }),
-  toggleKnob: (isActive: boolean): React.CSSProperties => ({
-    position: 'absolute',
-    top: 2,
-    left: isActive ? 22 : 2,
-    width: 20,
-    height: 20,
-    borderRadius: '50%',
-    backgroundColor: 'white',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-    transition: 'left 150ms ease',
-  }),
-  emptyState: {
-    padding: '40px 16px',
-    textAlign: 'center' as const,
-    color: '#6B7280',
-    fontFamily: "'Nunito', sans-serif",
-  },
+function statusBadge(isActive: boolean) {
+  return {
+    text: isActive ? 'Live' : 'Draft',
+    background: isActive ? '#DCFCE7' : '#FEF9C3',
+    color: isActive ? '#15803D' : '#A16207',
+  }
 }
 
 export function VideoList({ videos, onToggleActive }: Props) {
   if (videos.length === 0) {
-    return (
-      <div style={styles.emptyState}>
-        No videos yet. Add your first video.
-      </div>
-    )
+    return <div style={{ padding: '40px 16px', textAlign: 'center', color: '#6B7280', font: "400 14px 'Nunito', sans-serif" }}>No videos yet. Add your first video.</div>
   }
 
   return (
-    <table style={styles.table}>
-      <thead>
-        <tr>
-          <th style={styles.th}>Title</th>
-          <th style={styles.th}>Category</th>
-          <th style={styles.th}>Published</th>
-          <th style={styles.th}>Active</th>
-        </tr>
-      </thead>
-      <tbody>
-        {videos.map((video) => (
-          <tr
-            key={video.videoId}
-            data-testid="video-row"
-            style={{ opacity: video.isActive ? 1 : 0.5 }}
-          >
-            <td style={styles.td}>
-              <span data-testid="row-title">{video.title}</span>
-            </td>
-            <td style={styles.td}>{video.category}</td>
-            <td style={styles.td}>
-              {video.publishedAt
-                ? new Date(
-                    (video.publishedAt as unknown as { seconds: number }).seconds * 1000,
-                  ).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                : '—'}
-            </td>
-            <td style={styles.td}>
-              <button
-                data-testid={`toggle-active-${video.videoId}`}
-                aria-checked={video.isActive}
-                role="switch"
-                aria-label={`Toggle active for ${video.title}`}
-                style={styles.toggle(video.isActive)}
-                onClick={() => void onToggleActive(video.videoId, video.isActive)}
-              >
-                <span style={styles.toggleKnob(video.isActive)} />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {videos.map((video) => {
+        const badge = statusBadge(video.isActive)
+
+        return (
+          <div key={video.videoId} data-testid="video-row" className="ckd-card" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, borderRadius: 14 }}>
+            <div
+              style={{
+                width: 64,
+                height: 36,
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                fontSize: 16,
+              }}
+            >
+              {video.category.includes('Number') ? '🔢' : video.category.includes('Rhymes') ? '🎵' : '🌞'}
+            </div>
+
+            <div style={{ minWidth: 0 }}>
+              <p data-testid="row-title" style={{ margin: 0, color: '#1E1B4B', font: "700 13px 'Nunito', sans-serif" }}>
+                {video.title}
+              </p>
+              <p style={{ margin: '2px 0 0', color: '#9333EA', font: "600 12px 'Nunito', sans-serif" }}>{video.category}</p>
+            </div>
+
+            <span
+              style={{
+                marginLeft: 'auto',
+                padding: '3px 10px',
+                borderRadius: 10,
+                background: badge.background,
+                color: badge.color,
+                font: "700 11px 'Nunito', sans-serif",
+              }}
+            >
+              {badge.text}
+            </span>
+
+            <button
+              data-testid={`toggle-active-${video.videoId}`}
+              aria-checked={video.isActive}
+              role="switch"
+              aria-label={`Toggle active for ${video.title}`}
+              className={`ckd-toggle ${video.isActive ? 'ckd-toggle--on' : ''}`}
+              onClick={() => void onToggleActive(video.videoId, video.isActive)}
+            >
+              <span className="ckd-toggle-knob" />
+            </button>
+          </div>
+        )
+      })}
+    </div>
   )
 }

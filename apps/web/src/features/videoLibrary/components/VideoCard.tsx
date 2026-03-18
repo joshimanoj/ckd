@@ -6,49 +6,39 @@ interface VideoCardProps {
   onClick: (videoId: string) => void
 }
 
+const categoryLabel: Record<string, string> = {
+  Rhymes: '🎵 Rhymes',
+  Colours: '🎨 Colours',
+  Numbers: '🔢 Numbers',
+  Animals: '🐘 Animals',
+  Stories: '⭐ Exclusive',
+}
+
+const thumbGradient: Record<string, string> = {
+  Rhymes: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 100%)',
+  Colours: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
+  Numbers: 'linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)',
+  Animals: 'linear-gradient(135deg, #F43F5E 0%, #EC4899 100%)',
+  Stories: 'linear-gradient(135deg, #9333EA 0%, #F43F5E 100%)',
+}
+
 export function VideoCard({ video, onClick }: VideoCardProps) {
   const [imgError, setImgError] = useState(false)
   const [pressed, setPressed] = useState(false)
+  const showNewBadge = video.order === 0
+  const showExclusiveBadge = video.category === 'Stories'
 
   return (
     <div
       data-testid="video-card"
+      className={`ckd-video-card${pressed ? ' ckd-video-card--pressed' : ''}`}
       onClick={() => onClick(video.videoId)}
       onPointerDown={() => setPressed(true)}
-      onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
-      style={{
-        background: '#FFFFFF',
-        borderRadius: 28,
-        boxShadow: '0 16px 28px rgba(76, 29, 149, 0.12)',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        transform: pressed ? 'scale(0.95)' : 'scale(1)',
-        transition: 'transform 100ms',
-        minHeight: 214,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+      onPointerUp={() => setPressed(false)}
     >
-      <div
-        style={{
-          position: 'relative',
-          height: 106,
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 55%, #EC4899 100%)',
-          flex: '0 0 auto',
-        }}
-      >
-        {imgError ? (
-          <div
-            data-testid="thumbnail-placeholder"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)',
-            }}
-          />
-        ) : (
+      <div className="ckd-video-card__thumb" style={{ background: thumbGradient[video.category] ?? undefined }}>
+        {!imgError && video.thumbnailUrl ? (
           <img
             data-testid="card-thumbnail"
             src={video.thumbnailUrl}
@@ -58,60 +48,25 @@ export function VideoCard({ video, onClick }: VideoCardProps) {
               ;(e.currentTarget as HTMLImageElement).src = ''
               setImgError(true)
             }}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
           />
+        ) : (
+          <div data-testid="thumbnail-placeholder" style={{ position: 'absolute', inset: 0, background: thumbGradient[video.category] }} />
         )}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(17, 24, 39, 0.04) 100%)',
-          }}
-        />
+        <div className="ckd-video-card__play" aria-hidden="true">
+          ▶
+        </div>
+        {showNewBadge ? <div className="ckd-video-card__badge">NEW</div> : null}
+        {showExclusiveBadge ? <div className="ckd-video-card__exclusive">🌟 App Exclusive</div> : null}
       </div>
 
-      <div
-        style={{
-          padding: '14px 16px 16px',
-          flex: '1 1 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          minHeight: 108,
-          boxSizing: 'border-box',
-        }}
-      >
-        <p
-          data-testid="card-title"
-          style={{
-            margin: '0 0 6px 0',
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 15,
-            lineHeight: 1.08,
-            color: '#1E1B4B',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: 32,
-          }}
-        >
+      <div className="ckd-video-card__info">
+        <p data-testid="card-title" className="ckd-video-card__title">
           {video.title}
         </p>
-        <p
-          data-testid="card-category-chip"
-          style={{
-            margin: 0,
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 800,
-            fontSize: 11,
-            color: '#9333EA',
-            lineHeight: 1.1,
-          }}
-        >
-          {video.category}
+        <p data-testid="card-category-chip" className="ckd-video-card__category">
+          <span style={{ color: video.category === 'Stories' ? '#F43F5E' : undefined }}>
+            {categoryLabel[video.category] ?? video.category}
+          </span>
         </p>
       </div>
     </div>

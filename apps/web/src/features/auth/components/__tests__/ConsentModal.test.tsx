@@ -39,13 +39,13 @@ describe('ConsentModal', () => {
   it('should render all required elements with correct content', () => {
     renderModal()
 
-    expect(screen.getByTestId('consent-title')).toHaveTextContent('Before we begin')
     expect(screen.getByTestId('consent-checkbox')).toBeInTheDocument()
     expect(screen.getByTestId('consent-submit-btn')).toHaveTextContent('I Agree & Continue')
     expect(screen.getByTestId('consent-privacy-link')).toHaveTextContent('Privacy Policy')
-    expect(screen.getByTestId('consent-modal')).toHaveTextContent('Your name and email')
-    expect(screen.getByTestId('consent-modal')).toHaveTextContent('watch time data')
-    expect(screen.getByTestId('consent-modal')).toHaveTextContent('device token')
+    expect(screen.getByTestId('consent-title')).toHaveTextContent('Before you start 🔒')
+    expect(screen.getByTestId('consent-modal')).toHaveTextContent('Your email address')
+    expect(screen.getByTestId('consent-modal')).toHaveTextContent("Child's name & age")
+    expect(screen.getByTestId('consent-modal')).toHaveTextContent('Watch time data')
   })
 
   // Task 3: checkbox state + button gating

@@ -25,20 +25,21 @@ export function GoogleSignInButton({ onSignIn, error }: GoogleSignInButtonProps)
         disabled={isLoading}
         aria-busy={isLoading}
         style={{
-          backgroundColor: '#F43F5E',
-          color: '#FFFFFF',
-          height: '48px',
+          backgroundColor: '#FFFFFF',
+          color: '#1E1B4B',
+          height: '52px',
           borderRadius: '24px',
           width: '100%',
           fontFamily: 'Nunito, sans-serif',
-          fontWeight: 600,
-          fontSize: '15px',
+          fontWeight: 700,
+          fontSize: '16px',
           border: 'none',
           cursor: isLoading ? 'not-allowed' : 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
         }}
       >
         {isLoading ? (
@@ -47,8 +48,8 @@ export function GoogleSignInButton({ onSignIn, error }: GoogleSignInButtonProps)
               style={{
                 width: '18px',
                 height: '18px',
-                border: '2px solid rgba(255,255,255,0.3)',
-                borderTopColor: '#fff',
+                border: '2px solid rgba(147,51,234,0.18)',
+                borderTopColor: '#9333EA',
                 borderRadius: '50%',
                 display: 'inline-block',
                 animation: 'spin 0.8s linear infinite',
@@ -66,7 +67,7 @@ export function GoogleSignInButton({ onSignIn, error }: GoogleSignInButtonProps)
       {error && (
         <p
           data-testid="auth-error"
-          style={{ color: '#EF4444', fontFamily: 'Nunito, sans-serif', fontSize: '13px', margin: '4px 0 0' }}
+          style={{ color: '#EF4444', fontFamily: 'Nunito, sans-serif', fontSize: '13px', margin: '8px 0 0' }}
         >
           {error}
         </p>

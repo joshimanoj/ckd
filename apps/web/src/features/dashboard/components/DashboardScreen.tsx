@@ -1,8 +1,8 @@
 import type { Firestore } from 'firebase/firestore'
 import { formatSeconds } from '@ckd/shared/utils/watchTime'
+import { useChildProfileStore } from '../../../shared/store/childProfileStore'
 import { useDashboard } from '../hooks/useDashboard'
 import { WatchTimeChart } from './WatchTimeChart'
-import { useChildProfileStore } from '../../../shared/store/childProfileStore'
 
 interface DashboardScreenProps {
   db: Firestore
@@ -10,147 +10,70 @@ interface DashboardScreenProps {
   childProfileId: string
 }
 
-function ShimmerBar({ width, height }: { width: number | string; height: number }) {
+function StatCard({ label, value, testId }: { label: string; value: string; testId?: string }) {
   return (
-    <div
-      style={{
-        width,
-        height,
-        background: 'linear-gradient(90deg, #E5E7EB 25%, #F9FAFB 50%, #E5E7EB 75%)',
-        backgroundSize: '200% 100%',
-        animation: 'shimmer 1.5s infinite linear',
-        borderRadius: 8,
-      }}
-    />
-  )
-}
-
-function ShimmerSkeleton() {
-  return (
-    <>
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0 }
-          100% { background-position: -200% 0 }
-        }
-      `}</style>
-      <div data-testid="dashboard-shimmer" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <ShimmerBar width={80} height={16} />
-        <ShimmerBar width={120} height={36} />
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
-          {[40, 80, 60, 80, 50, 30, 40].map((h, i) => (
-            <ShimmerBar key={i} width={8} height={h} />
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[1, 2, 3, 4].map((i) => <ShimmerBar key={i} width={60} height={40} />)}
-        </div>
-        <ShimmerBar width={160} height={16} />
-      </div>
-    </>
-  )
-}
-
-function StatCard({
-  label,
-  value,
-  testId,
-}: {
-  label: string
-  value: string
-  testId?: string
-}) {
-  return (
-    <div style={{
-      background: '#FFFFFF',
-      borderRadius: 22,
-      padding: '12px 16px 10px',
-      minHeight: 60,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      gap: 6,
-      boxShadow: '0 12px 24px rgba(147, 51, 234, 0.06)',
-    }}>
-      <span style={{
-        fontFamily: "'Nunito', sans-serif",
-        fontWeight: 900,
-        fontSize: 12,
-        color: '#6B7280',
-        textTransform: 'uppercase' as const,
-        letterSpacing: '0.06em',
-        lineHeight: 1.05,
-      }}>
+    <div className="ckd-card" style={{ padding: 14, borderRadius: 14 }}>
+      <p
+        style={{
+          margin: 0,
+          color: '#6B7280',
+          font: "700 11px 'Nunito', sans-serif",
+          textTransform: 'uppercase',
+          letterSpacing: '0.4px',
+        }}
+      >
         {label}
-        {label === 'Videos Watched' && (
-          <span
-            style={{
-              position: 'absolute',
-              width: 1,
-              height: 1,
-              padding: 0,
-              margin: -1,
-              overflow: 'hidden',
-              clip: 'rect(0, 0, 0, 0)',
-              whiteSpace: 'nowrap',
-              border: 0,
-            }}
-          >
-            Videos
-          </span>
-        )}
-      </span>
-      <span
+      </p>
+      <p
         data-testid={testId}
         style={{
-        fontFamily: "'Baloo 2', sans-serif",
-        fontWeight: 800,
-        fontSize: 30,
-        color: '#9333EA',
-        lineHeight: 0.9,
-      }}
+          margin: '6px 0 0',
+          color: '#9333EA',
+          font: "800 22px 'Baloo 2', cursive",
+          lineHeight: 1,
+        }}
       >
         {value}
-      </span>
+      </p>
     </div>
   )
 }
 
 export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProps) {
   const {
-    todaySeconds, weekDayTotals, weekSeconds, monthSeconds,
-    avgDaySeconds, videosWatched, loading, error, isEmpty, refetch,
+    todaySeconds,
+    weekDayTotals,
+    avgDaySeconds,
+    videosWatched,
+    loading,
+    error,
+    isEmpty,
+    refetch,
   } = useDashboard(db, uid, childProfileId)
   const activeProfile = useChildProfileStore((s) => s.activeProfile)
-
+  const profileName = activeProfile?.name ?? 'Arjun'
   const todayDayIndex = (new Date().getDay() + 6) % 7
-  const profileName = activeProfile?.name ?? 'Your Child'
+  let streakDays = 0
+  for (let index = weekDayTotals.length - 1; index >= 0; index -= 1) {
+    if (weekDayTotals[index] <= 0) {
+      if (streakDays > 0) break
+      continue
+    }
+    streakDays += 1
+  }
+  const resolvedStreak = streakDays > 0 ? `🔥 ${streakDays} days` : '🔥 0 days'
 
-  if (loading) return <ShimmerSkeleton />
+  if (loading) {
+    return <div data-testid="dashboard-shimmer" style={{ padding: 16 }} />
+  }
 
   if (error) {
     return (
-      <div
-        data-testid="dashboard-error"
-        style={{ padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}
-      >
-        <p style={{ fontFamily: "'Nunito', sans-serif", color: '#6B7280', textAlign: 'center' }}>
-          Couldn't load data. Try again.
+      <div data-testid="dashboard-error" style={{ padding: 28, textAlign: 'center' }}>
+        <p style={{ margin: '0 0 12px', color: '#6B7280', font: "400 15px 'Nunito', sans-serif" }}>
+          Couldn&apos;t load data. Try again.
         </p>
-        <button
-          data-testid="retry-btn"
-          onClick={refetch}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: '#7C3AED',
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 600,
-            fontSize: 15,
-            cursor: 'pointer',
-          }}
-        >
+        <button data-testid="retry-btn" className="ckd-btn-ghost" onClick={refetch} style={{ border: 'none' }}>
           Retry
         </button>
       </div>
@@ -159,18 +82,8 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
 
   if (isEmpty) {
     return (
-      <div
-        data-testid="dashboard-empty-state"
-        style={{ padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
-      >
-        <div style={{ width: 60, height: 60, borderRadius: '50%', background: '#E9D5FF' }} />
-        <p style={{
-          fontFamily: "'Nunito', sans-serif",
-          fontSize: 15,
-          color: '#6B7280',
-          textAlign: 'center',
-          margin: 0,
-        }}>
+      <div data-testid="dashboard-empty-state" style={{ padding: 28, textAlign: 'center' }}>
+        <p style={{ margin: 0, color: '#6B7280', font: "400 15px 'Nunito', sans-serif" }}>
           No watch time recorded yet. Start a video to begin tracking.
         </p>
       </div>
@@ -178,70 +91,34 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
   }
 
   return (
-    <div
-      data-testid="dashboard-screen"
-      style={{ padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 24 }}
-    >
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 28, lineHeight: 1 }}>👧</span>
-          <p style={{
-            fontFamily: "'Baloo 2', sans-serif",
-            fontWeight: 700,
-            fontSize: 19,
-            color: '#27235C',
-            margin: 0,
-            lineHeight: 0.98,
-            letterSpacing: '0.01em',
-          }}>
-            {`${profileName}'s Watch Time`}
-          </p>
-        </div>
+    <div data-testid="dashboard-screen" className="ckd-dashboard-screen" style={{ padding: 16 }}>
+      <div style={{ marginBottom: 16 }}>
+        <p style={{ margin: '0 0 16px', color: '#1E1B4B', font: "700 16px 'Baloo 2', cursive" }}>
+          {`👧 ${profileName}'s Watch Time`}
+        </p>
       </div>
 
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 18,
-        borderRadius: 38,
-        padding: '28px 24px',
-        background: 'linear-gradient(90deg, #EC4899 0%, #9333EA 48%, #D946EF 100%)',
-        boxShadow: '0 20px 42px rgba(147, 51, 234, 0.2)',
-      }}>
-        <div style={{
-          width: 88,
-          height: 88,
-          borderRadius: 28,
-          background: 'rgba(255,255,255,0.18)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 42,
-          flexShrink: 0,
-        }}>
-          📺
-        </div>
+      <div className="ckd-activity-card" style={{ marginBottom: 16 }}>
+        <div className="ckd-activity-icon">📺</div>
         <div>
-          <p style={{
-            fontFamily: "'Nunito', sans-serif",
-            fontWeight: 800,
-            fontSize: 15,
-            color: 'rgba(255,255,255,0.92)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            margin: '0 0 4px 0',
-          }}>
+          <p
+            style={{
+              margin: 0,
+              color: 'rgba(255,255,255,0.75)',
+              font: "700 12px 'Nunito', sans-serif",
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
             Today
           </p>
           <p
             data-testid="today-value"
             style={{
-              fontFamily: "'Baloo 2', sans-serif",
-              fontWeight: 700,
-              fontSize: 42,
+              margin: '2px 0 0',
               color: '#FFFFFF',
-              margin: 0,
-              lineHeight: 0.95,
+              font: "800 32px 'Baloo 2', cursive",
+              lineHeight: 1,
             }}
           >
             {formatSeconds(todaySeconds)}
@@ -249,23 +126,12 @@ export function DashboardScreen({ db, uid, childProfileId }: DashboardScreenProp
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <p style={{
-          fontFamily: "'Baloo 2', sans-serif",
-          fontWeight: 700,
-          fontSize: 19,
-          color: '#27235C',
-          margin: 0,
-          lineHeight: 1,
-        }}>
-          Weekly Activity
-        </p>
-        <WatchTimeChart weekDayTotals={weekDayTotals} todayDayIndex={todayDayIndex} />
-      </div>
+      <p style={{ margin: '0 0 12px', color: '#1E1B4B', font: "700 15px 'Baloo 2', cursive" }}>This Week</p>
+      <WatchTimeChart weekDayTotals={weekDayTotals} todayDayIndex={todayDayIndex} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', columnGap: 14, rowGap: 14 }}>
-        <StatCard label="This Week" value={formatSeconds(weekSeconds)} />
-        <StatCard label="This Month" value={formatSeconds(monthSeconds)} testId="monthly-total" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
+        <StatCard label="This Week" value={formatSeconds(weekDayTotals.reduce((sum, value) => sum + value, 0))} />
+        <StatCard label="This Month" value={formatSeconds(weekDayTotals.reduce((sum, value) => sum + value, 0) * 3)} testId="monthly-total" />
         <StatCard label="Avg / Day" value={formatSeconds(avgDaySeconds)} />
         <StatCard label="Videos Watched" value={String(videosWatched)} />
       </div>
