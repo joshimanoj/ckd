@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import type { User as FirebaseUser } from 'firebase/auth'
+import { useAuthStore } from '../../../../shared/store/authStore'
+import { useVideoStore } from '../../../../shared/store/videoStore'
+import { useWatchSessionStore } from '../../../../shared/store/watchSessionStore'
+import { useNotificationStore } from '../../../../shared/store/notificationStore'
 
 // Mock authService
 vi.mock('../../services/authService', () => ({
@@ -8,6 +12,7 @@ vi.mock('../../services/authService', () => ({
   getUserDoc: vi.fn(),
   createUserDoc: vi.fn().mockResolvedValue(undefined),
   refreshFcmTokenAfterSignIn: vi.fn().mockResolvedValue(undefined),
+  signOutUser: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock firebase/firestore for childProfiles query
@@ -121,5 +126,35 @@ describe('useAuth', () => {
     })
 
     expect(result.current.routeTo).toBe('library')
+  })
+
+  it('signOut() should call signOutUser and reset all stores', async () => {
+    const { subscribeToAuthState, signOutUser } = await import('../../services/authService')
+    const mockedSubscribe = vi.mocked(subscribeToAuthState)
+    const mockedSignOut = vi.mocked(signOutUser)
+
+    mockedSubscribe.mockImplementation((cb) => {
+      // Immediately fire null to simulate signed-out state
+      cb(null)
+      return () => {}
+    })
+
+    // Put stores in a non-default state to verify reset
+    useAuthStore.setState({ routeTo: 'library', loading: false })
+    useNotificationStore.setState({ notificationsEnabled: true, fcmToken: 'tok' })
+    useVideoStore.setState({ videos: [], hydrated: true })
+    useWatchSessionStore.setState({ youtubeVideoId: 'abc', watchedSeconds: 30 } as never)
+
+    const { useAuth } = await import('../useAuth')
+    const { result } = renderHook(() => useAuth())
+
+    await act(async () => {
+      await result.current.signOut()
+    })
+
+    expect(mockedSignOut).toHaveBeenCalledOnce()
+    expect(useNotificationStore.getState().notificationsEnabled).toBe(false)
+    expect(useNotificationStore.getState().fcmToken).toBeNull()
+    expect(useVideoStore.getState().hydrated).toBe(false)
   })
 })

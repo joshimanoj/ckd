@@ -1,8 +1,17 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useAuthStore } from '../../../shared/store/authStore'
 import { useChildProfileStore } from '../../../shared/store/childProfileStore'
+import { useVideoStore } from '../../../shared/store/videoStore'
+import { useWatchSessionStore } from '../../../shared/store/watchSessionStore'
+import { useNotificationStore } from '../../../shared/store/notificationStore'
 import type { RouteTo } from '../../../shared/store/authStore'
-import { subscribeToAuthState, getUserDoc, createUserDoc, refreshFcmTokenAfterSignIn } from '../services/authService'
+import {
+  subscribeToAuthState,
+  getUserDoc,
+  createUserDoc,
+  refreshFcmTokenAfterSignIn,
+  signOutUser,
+} from '../services/authService'
 import { getChildProfiles } from '../../childProfile/services/childProfileService'
 import type { User as FirebaseUser } from 'firebase/auth'
 
@@ -25,6 +34,7 @@ interface AuthResult {
   user: FirebaseUser | null
   loading: boolean
   routeTo: RouteTo
+  signOut: () => Promise<void>
 }
 
 export function useAuth(): AuthResult {
@@ -56,5 +66,17 @@ export function useAuth(): AuthResult {
     return unsubscribe
   }, [setUser, setLoading, setRouteTo])
 
-  return { user, loading, routeTo }
+  // Clear all stores before signing out to prevent stale state on next sign-in.
+  // The onAuthStateChanged callback will set routeTo → 'sign-in', triggering
+  // the AuthGuard redirect automatically.
+  const signOut = useCallback(async () => {
+    useChildProfileStore.getState().clearActiveProfile()
+    useVideoStore.getState().reset()
+    useWatchSessionStore.getState().resetSession()
+    useNotificationStore.getState().reset()
+    useAuthStore.getState().reset()
+    await signOutUser()
+  }, [])
+
+  return { user, loading, routeTo, signOut }
 }
