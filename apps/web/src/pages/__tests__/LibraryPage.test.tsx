@@ -79,11 +79,11 @@ describe('LibraryPage', () => {
     mockUseVideoLibrary.mockReturnValue(mockVideoLibraryReturn)
   })
 
-  it('renders library-screen, top-nav, parent-icon-btn', () => {
+  it('renders library-screen, top-nav, parent-icon', () => {
     renderInRouter(<LibraryPage />)
     expect(screen.getByTestId('library-screen')).toBeInTheDocument()
     expect(screen.getByTestId('top-nav')).toBeInTheDocument()
-    expect(screen.getByTestId('parent-icon-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('parent-icon')).toBeInTheDocument()
   })
 
   it('parent-panel is NOT visible initially', () => {
@@ -91,16 +91,16 @@ describe('LibraryPage', () => {
     expect(screen.queryByTestId('parent-panel')).not.toBeInTheDocument()
   })
 
-  it('clicking parent-icon-btn calls showGate', () => {
+  it('clicking parent-icon calls showGate', () => {
     renderInRouter(<LibraryPage />)
-    fireEvent.click(screen.getByTestId('parent-icon-btn'))
+    fireEvent.click(screen.getByTestId('parent-icon'))
     expect(mockShowGate).toHaveBeenCalledTimes(1)
   })
 
   it('gate modal appears when isVisible=true', () => {
     mockUseParentalGate.mockReturnValue({ ...defaultHookReturn, isVisible: true })
     renderInRouter(<LibraryPage />)
-    expect(screen.getByTestId('parental-gate-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('parental-gate')).toBeInTheDocument()
   })
 
   it('correct answer: parent-panel visible, gate dismissed', () => {
@@ -108,7 +108,7 @@ describe('LibraryPage', () => {
     mockUseParentalGate.mockReturnValue({ ...defaultHookReturn, isVisible: true })
     renderInRouter(<LibraryPage />)
     fireEvent.change(screen.getByTestId('gate-answer-input'), { target: { value: '8' } })
-    fireEvent.click(screen.getByTestId('gate-confirm-btn'))
+    fireEvent.click(screen.getByTestId('gate-submit-btn'))
     expect(mockCheckAnswer).toHaveBeenCalledWith('8')
     expect(mockHideGate).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('parent-panel')).toBeInTheDocument()

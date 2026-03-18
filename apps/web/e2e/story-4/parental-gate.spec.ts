@@ -37,8 +37,8 @@ test.describe('Story 4 — Parental Gate', () => {
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft1-gate')
     await expect(page.getByTestId('library-screen')).toBeVisible()
-    await expect(page.getByTestId('parent-icon-btn')).toBeVisible()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parent-icon')).toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
   })
 
   test('FT-2: Tapping parent icon opens gate modal with math question', async ({
@@ -46,13 +46,13 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft2-gate')
-    await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await page.getByTestId('parent-icon').click()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
     await expect(page.getByTestId('gate-question')).toBeVisible()
     await expect(page.getByTestId('gate-question')).toHaveText(/\d+ [+−] \d+ = \?/)
     await expect(page.getByTestId('gate-dismiss-btn')).toBeVisible()
     await expect(page.getByTestId('gate-answer-input')).toBeVisible()
-    await expect(page.getByTestId('gate-confirm-btn')).toBeVisible()
+    await expect(page.getByTestId('gate-submit-btn')).toBeVisible()
   })
 
   test('FT-3: Confirm button disabled when answer field is empty', async ({
@@ -60,12 +60,12 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft3-gate')
-    await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('gate-confirm-btn')).toBeDisabled()
+    await page.getByTestId('parent-icon').click()
+    await expect(page.getByTestId('gate-submit-btn')).toBeDisabled()
     await page.getByTestId('gate-answer-input').fill('5')
-    await expect(page.getByTestId('gate-confirm-btn')).not.toBeDisabled()
+    await expect(page.getByTestId('gate-submit-btn')).not.toBeDisabled()
     await page.getByTestId('gate-answer-input').clear()
-    await expect(page.getByTestId('gate-confirm-btn')).toBeDisabled()
+    await expect(page.getByTestId('gate-submit-btn')).toBeDisabled()
   })
 
   test('FT-4: Wrong answer clears input, new question generated, modal stays open', async ({
@@ -73,12 +73,12 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft4-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     const firstQuestion = await page.getByTestId('gate-question').textContent()
     await page.getByTestId('gate-answer-input').fill('99')
-    await page.getByTestId('gate-confirm-btn').click()
+    await page.getByTestId('gate-submit-btn').click()
     await expect(page.getByTestId('gate-answer-input')).toHaveValue('')
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
     const newQuestion = await page.getByTestId('gate-question').textContent()
     expect(newQuestion).not.toBe(firstQuestion)
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
@@ -89,7 +89,7 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft5-gate')
-    await page.getByTestId('parent-icon-btn').click()
+    await page.getByTestId('parent-icon').click()
     const questionText = await page.getByTestId('gate-question').textContent()
     // Parse "A + B = ?" or "A − B = ?"
     const match = questionText!.match(/(\d+) ([+\u2212]) (\d+)/)
@@ -99,8 +99,8 @@ test.describe('Story 4 — Parental Gate', () => {
     const b = parseInt(match![3])
     const answer = op === '+' ? a + b : a - b
     await page.getByTestId('gate-answer-input').fill(String(answer))
-    await page.getByTestId('gate-confirm-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await page.getByTestId('gate-submit-btn').click()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).toBeVisible()
   })
 
@@ -109,10 +109,10 @@ test.describe('Story 4 — Parental Gate', () => {
     request,
   }) => {
     await setupAndNavigateToLibrary(page, request, 'ft6-gate')
-    await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await page.getByTestId('parent-icon').click()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
     await page.getByTestId('gate-dismiss-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
     await expect(page.getByTestId('library-screen')).toBeVisible()
   })

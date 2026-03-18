@@ -146,11 +146,11 @@ test.describe('Story 5 — Video Library Grid', () => {
     await setupUser(page, request, 'ft5-lib')
     await signInAndNavigate(page, email)
 
-    await expect(page.getByTestId('parent-icon-btn')).toBeVisible()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parent-icon')).toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
 
-    await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await page.getByTestId('parent-icon').click()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
   })
 
   // FT-6: Pull-to-refresh re-fetches and updates video list

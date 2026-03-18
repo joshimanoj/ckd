@@ -32,6 +32,8 @@ test.describe('Story 7 — FT-8: Auto-advance to next video', () => {
       { id: 'video-2', title: 'Video Two', youtubeVideoId: 'yt-v2', publishedAt: '2026-02-01T00:00:00Z', order: 2 },
       { id: 'video-3', title: 'Video Three', youtubeVideoId: 'yt-v3', publishedAt: '2026-03-01T00:00:00Z', order: 1 },
     ])
+    // Bypass Story 9 notification opt-in sheet so auto-advance fires immediately
+    await page.addInitScript(() => localStorage.setItem('ckd_notif_prompted', '1'))
     await page.goto('/')
     await signInViaTestHelper(page, email, 'password123')
     await expect(page).toHaveURL('/library', { timeout: 10000 })

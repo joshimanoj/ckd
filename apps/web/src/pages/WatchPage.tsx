@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useVideoStore } from '../shared/store/videoStore'
 import { useAuthStore } from '../shared/store/authStore'
@@ -6,6 +6,8 @@ import { useChildProfileStore } from '../shared/store/childProfileStore'
 import { useWatchSessionStore } from '../shared/store/watchSessionStore'
 import { useWatchSession } from '../features/videoPlayer/hooks/useWatchSession'
 import { PlayerScreen } from '../features/videoPlayer/components/PlayerScreen'
+import { NotificationOptInSheet } from '../features/notifications/components/NotificationOptInSheet'
+import { useNotifications } from '../features/notifications/hooks/useNotifications'
 
 export function WatchPage() {
   const { videoId } = useParams<{ videoId: string }>()
@@ -41,6 +43,10 @@ export function WatchPage() {
     useWatchSessionStore.getState().updateYTDuration(d)
   }, [])
 
+  const { notificationsEnabled, optIn } = useNotifications(user?.uid ?? '')
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false)
+  const nextVideoIdRef = useRef<string | null>(null)
+
   // currentIdx is -1 when video is null — handlers guard against that
   const currentIdx = video
     ? videos.findIndex((v) => v.youtubeVideoId === video.youtubeVideoId)
@@ -50,9 +56,29 @@ export function WatchPage() {
   const handleVideoEnd = useCallback(async () => {
     if (currentIdx === -1 || videos.length === 0) return
     const nextIdx = (currentIdx + 1) % videos.length
+    const nextId = videos[nextIdx].videoId
+    if (!notificationsEnabled && !localStorage.getItem('ckd_notif_prompted')) {
+      nextVideoIdRef.current = nextId
+      await flushSession()
+      setShowNotifPrompt(true)
+      return
+    }
     await flushSession()
-    navigate(`/watch/${videos[nextIdx].videoId}`)
-  }, [currentIdx, videos, flushSession, navigate])
+    navigate(`/watch/${nextId}`)
+  }, [currentIdx, videos, flushSession, navigate, notificationsEnabled])
+
+  const handleNotifAccept = useCallback(async () => {
+    localStorage.setItem('ckd_notif_prompted', '1')
+    await optIn()
+    setShowNotifPrompt(false)
+    if (nextVideoIdRef.current) navigate(`/watch/${nextVideoIdRef.current}`)
+  }, [optIn, navigate])
+
+  const handleNotifDismiss = useCallback(() => {
+    localStorage.setItem('ckd_notif_prompted', '1')
+    setShowNotifPrompt(false)
+    if (nextVideoIdRef.current) navigate(`/watch/${nextVideoIdRef.current}`)
+  }, [navigate])
 
   const handleNextVideo = useCallback(async () => {
     if (currentIdx === -1 || videos.length === 0) return
@@ -87,20 +113,27 @@ export function WatchPage() {
   if (!user || !video) return null
 
   return (
-    <PlayerScreen
-      key={video.videoId}
-      youtubeVideoId={video.youtubeVideoId}
-      videoTitle={video.title}
-      videoDuration={video.durationSeconds}
-      videos={videos}
-      currentVideoId={video.videoId}
-      flushSession={flushSession}
-      onBack={handleBack}
-      onVideoEnd={handleVideoEnd}
-      onNextVideo={handleNextVideo}
-      onPrevVideo={handlePrevVideo}
-      onTimeUpdate={handleTimeUpdate}
-      onDurationUpdate={handleDurationUpdate}
-    />
+    <>
+      <PlayerScreen
+        key={video.videoId}
+        youtubeVideoId={video.youtubeVideoId}
+        videoTitle={video.title}
+        videoDuration={video.durationSeconds}
+        videos={videos}
+        currentVideoId={video.videoId}
+        flushSession={flushSession}
+        onBack={handleBack}
+        onVideoEnd={handleVideoEnd}
+        onNextVideo={handleNextVideo}
+        onPrevVideo={handlePrevVideo}
+        onTimeUpdate={handleTimeUpdate}
+        onDurationUpdate={handleDurationUpdate}
+      />
+      <NotificationOptInSheet
+        visible={showNotifPrompt}
+        onAccept={handleNotifAccept}
+        onDismiss={handleNotifDismiss}
+      />
+    </>
   )
 }

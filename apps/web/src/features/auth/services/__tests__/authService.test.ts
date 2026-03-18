@@ -32,6 +32,12 @@ vi.mock('@ckd/shared/firebase/collections', () => ({
   userDoc: vi.fn(() => ({ path: 'users/test-uid' })),
 }))
 
+// Mock notificationService for refreshFcmTokenAfterSignIn
+vi.mock('../../../notifications/services/notificationService', () => ({
+  requestWebFcmToken: vi.fn(),
+  writeFcmToken: vi.fn().mockResolvedValue(undefined),
+}))
+
 describe('authService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -94,5 +100,31 @@ describe('authService', () => {
 
     const { recordConsent } = await import('../authService')
     await expect(recordConsent('test-uid')).rejects.toThrow('network error')
+  })
+
+  describe('refreshFcmTokenAfterSignIn()', () => {
+    it('should call writeFcmToken with uid and token when requestWebFcmToken returns a token', async () => {
+      const { requestWebFcmToken, writeFcmToken } = await import(
+        '../../../notifications/services/notificationService'
+      )
+      vi.mocked(requestWebFcmToken).mockResolvedValue('fresh-token')
+
+      const { refreshFcmTokenAfterSignIn } = await import('../authService')
+      await refreshFcmTokenAfterSignIn('uid-sign-in')
+
+      expect(writeFcmToken).toHaveBeenCalledWith('uid-sign-in', 'fresh-token')
+    })
+
+    it('should NOT call writeFcmToken when requestWebFcmToken returns null', async () => {
+      const { requestWebFcmToken, writeFcmToken } = await import(
+        '../../../notifications/services/notificationService'
+      )
+      vi.mocked(requestWebFcmToken).mockResolvedValue(null)
+
+      const { refreshFcmTokenAfterSignIn } = await import('../authService')
+      await refreshFcmTokenAfterSignIn('uid-no-token')
+
+      expect(writeFcmToken).not.toHaveBeenCalled()
+    })
   })
 })

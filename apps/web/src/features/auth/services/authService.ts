@@ -11,6 +11,7 @@ import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firest
 import { auth, db } from '@ckd/shared/firebase/config'
 import { userDoc } from '@ckd/shared/firebase/collections'
 import type { User } from '@ckd/shared/types/user'
+import { requestWebFcmToken, writeFcmToken } from '../../notifications/services/notificationService'
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -59,4 +60,10 @@ export function subscribeToAuthState(
   callback: (user: FirebaseUser | null) => void
 ): Unsubscribe {
   return onAuthStateChanged(auth, callback)
+}
+
+export async function refreshFcmTokenAfterSignIn(uid: string): Promise<void> {
+  const token = await requestWebFcmToken()
+  if (!token) return
+  await writeFcmToken(uid, token)
 }
