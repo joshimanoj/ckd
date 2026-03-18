@@ -13,7 +13,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 // and rely on the build pipeline to inject them.
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyC109x04aHG4ul9DsrCOOO5PqS3Jdopx-c',
+  apiKey: 'AIzaSyC1O9x04aHG4ul9DsrCOOO5PqS3Jdopx-c',
   authDomain: 'chotikiduniya-831e8.firebaseapp.com',
   projectId: 'chotikiduniya-831e8',
   storageBucket: 'chotikiduniya-831e8.firebasestorage.app',
