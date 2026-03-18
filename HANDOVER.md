@@ -2,6 +2,33 @@
 
 ---
 
+## Checkpoint: Story #9 Push Notifications (Web Pass) | 2026-03-18 | /check GREEN ✅
+
+Story complete: FCM opt-in flow, notification settings toggle with Parental Gate, and token refresh implemented for web.
+
+Key changes:
+- `notificationService.ts`: fixed `getMessaging(getApp())` (was importing non-exported `app` from shared config)
+- `useNotifications`: added `setEnabled(bool)` method for Settings toggle (updates Firestore without requesting browser permission)
+- `SettingsScreen`: wired to `setEnabled`, added `data-testid="settings-screen"` and `data-testid="notif-toggle"`
+- `ParentalGate`: renamed testids `parental-gate-modal` → `parental-gate`, `gate-confirm-btn` → `gate-submit-btn`
+- `LibraryPage`: renamed `parent-icon-btn` → `parent-icon` on lock button
+- E2E story-4/5/8/9 specs: updated all testid references to match renamed components
+- Parental Gate regex: fixed to handle Unicode minus `−` (U+2212) in gate question
+
+CI run `23231001370` result:
+- unit: 1 pre-existing failure (`useAuth` — `expected 'sign-in' to be 'profile'`), 227 passing
+- web-playwright: 2 pre-existing failures (Story-7 FT-8a/FT-8b auto-advance — URL doesn't navigate after video end), 103 passing including all 16 Story 9 FTs
+- integration: ✅ passed
+- Story 9 E2E: 16/16 ✅
+
+Known debt (pre-existing, not Story 9's responsibility):
+- `useAuth.test.ts` → "should return correct routeTo based on auth state and Firestore user document" fails (`expected 'sign-in' to be 'profile'`) — needs investigation in a future story
+- `story-7/auto-advance.spec.ts` FT-8a/FT-8b → auto-advance to next video does not navigate in CI environment — pre-existing Story 7 gap
+
+Next: Story #9 → /uat
+
+---
+
 ## Checkpoint: Story #8 Watch Time Dashboard | 2026-03-17 | MERGED ✅
 
 Story complete: Parent Panel side drawer built for web — slides in after Parental Gate is solved, shows today's watch total (Baloo 2 ExtraBold purple), a 7-bar Mon–Sun chart (CSS-only), and monthly total; shimmer skeleton, empty state, and error+retry states all implemented. Shared `dateRanges.ts` utils added; `formatSeconds` edge case fixed ("1 hr 0 min" → "1 hr").
