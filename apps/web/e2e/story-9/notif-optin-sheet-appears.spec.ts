@@ -35,8 +35,6 @@ test.describe('Story 9 — FT-1: Notification opt-in sheet appears after video e
     // Inject mock FCM token before page load so notificationService picks it up
     await page.addInitScript(() => {
       ;(window as unknown as Record<string, unknown>)['__mockFcmToken'] = 'test-fcm-token-ft1'
-      // Clear the "already prompted" flag so sheet is allowed to appear
-      localStorage.removeItem('ckd_notif_prompted')
     })
 
     const uid = await createEmulatorUser(request, email)

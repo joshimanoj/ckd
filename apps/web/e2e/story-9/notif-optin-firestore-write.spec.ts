@@ -38,7 +38,6 @@ test.describe('Story 9 — FT-3: "Yes, notify me" writes notificationsEnabled:tr
 
     await page.addInitScript((token: string) => {
       ;(window as unknown as Record<string, unknown>)['__mockFcmToken'] = token
-      localStorage.removeItem('ckd_notif_prompted')
     }, MOCK_FCM_TOKEN)
 
     const uid = await createEmulatorUser(request, 'ft3a-notif@example.com')
@@ -93,7 +92,6 @@ test.describe('Story 9 — FT-3: "Yes, notify me" writes notificationsEnabled:tr
 
     await page.addInitScript((token: string) => {
       ;(window as unknown as Record<string, unknown>)['__mockFcmToken'] = token
-      localStorage.removeItem('ckd_notif_prompted')
     }, MOCK_FCM_TOKEN)
 
     const uid = await createEmulatorUser(request, 'ft3b-notif@example.com')

@@ -1,6 +1,7 @@
 import { getMessaging, getToken } from 'firebase/messaging'
 import { doc, updateDoc } from 'firebase/firestore'
-import { app, db } from '@ckd/shared/firebase/config'
+import { getApp } from 'firebase/app'
+import { db } from '@ckd/shared/firebase/config'
 
 export async function requestWebFcmToken(): Promise<string | null> {
   // Test hook — injected by Playwright via page.addInitScript
@@ -12,7 +13,7 @@ export async function requestWebFcmToken(): Promise<string | null> {
 
   try {
     const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    const messaging = getMessaging(app)
+    const messaging = getMessaging(getApp())
     const token = await getToken(messaging, {
       vapidKey: import.meta.env['VITE_VAPID_KEY'] as string,
       serviceWorkerRegistration: swReg,

@@ -68,7 +68,7 @@ export function LibraryPage() {
           Choti Ki Duniya
         </span>
         <button
-          data-testid="parent-icon-btn"
+          data-testid="parent-icon"
           onClick={showGate}
           style={{
             width: 44,

@@ -34,7 +34,6 @@ test.describe('Story 9 — FT-2: "Not now" dismisses sheet, notificationsEnabled
   ) {
     await page.addInitScript(() => {
       ;(window as unknown as Record<string, unknown>)['__mockFcmToken'] = 'test-fcm-token-ft2'
-      localStorage.removeItem('ckd_notif_prompted')
     })
 
     const uid = await createEmulatorUser(request, email)

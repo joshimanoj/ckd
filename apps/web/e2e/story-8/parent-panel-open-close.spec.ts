@@ -37,7 +37,7 @@ test.describe('Story 8 — FT-7: Parent panel side drawer opens and closes', () 
     const b = parseInt(match![3])
     const answer = op === '+' ? a + b : a - b
     await page.getByTestId('gate-answer-input').fill(String(answer))
-    await page.getByTestId('gate-confirm-btn').click()
+    await page.getByTestId('gate-submit-btn').click()
     await expect(page.getByTestId('parent-panel')).toBeVisible({ timeout: 5000 })
   }
 

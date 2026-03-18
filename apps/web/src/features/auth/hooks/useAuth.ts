@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useAuthStore } from '../../../shared/store/authStore'
 import { useChildProfileStore } from '../../../shared/store/childProfileStore'
 import type { RouteTo } from '../../../shared/store/authStore'
-import { subscribeToAuthState, getUserDoc, createUserDoc } from '../services/authService'
+import { subscribeToAuthState, getUserDoc, createUserDoc, refreshFcmTokenAfterSignIn } from '../services/authService'
 import { getChildProfiles } from '../../childProfile/services/childProfileService'
 import type { User as FirebaseUser } from 'firebase/auth'
 
@@ -44,6 +44,10 @@ export function useAuth(): AuthResult {
       if (!sameUser) {
         const route = await resolveRouteTo(firebaseUser)
         setRouteTo(route)
+        // Refresh FCM token on sign-in (token may have rotated)
+        if (firebaseUser) {
+          refreshFcmTokenAfterSignIn(firebaseUser.uid).catch(() => undefined)
+        }
       }
 
       setUser(firebaseUser)

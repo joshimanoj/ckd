@@ -2,15 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
-const mockOptIn = vi.fn().mockResolvedValue(undefined)
-const mockOptOut = vi.fn().mockResolvedValue(undefined)
+const mockSetEnabled = vi.fn().mockResolvedValue(undefined)
 let mockNotificationsEnabled = false
 
 vi.mock('../../hooks/useNotifications', () => ({
   useNotifications: vi.fn(() => ({
     notificationsEnabled: mockNotificationsEnabled,
-    optIn: mockOptIn,
-    optOut: mockOptOut,
+    setEnabled: mockSetEnabled,
   })),
 }))
 
@@ -40,8 +38,8 @@ vi.mock('../../../../features/parentalGate/components/ParentalGate', () => ({
     onDismiss: () => void
   }) =>
     visible ? (
-      <div data-testid="parental-gate-modal">
-        <button data-testid="gate-confirm-btn" onClick={() => onConfirm('5')}>
+      <div data-testid="parental-gate">
+        <button data-testid="gate-submit-btn" onClick={() => onConfirm('5')}>
           Confirm
         </button>
         <button data-testid="gate-dismiss-btn" onClick={onDismiss}>
@@ -88,31 +86,30 @@ describe('SettingsScreen', () => {
     render(<SettingsScreen uid="uid-1" />)
     const dismissBtn = screen.getByTestId('gate-dismiss-btn')
     fireEvent.click(dismissBtn)
-    expect(mockOptIn).not.toHaveBeenCalled()
-    expect(mockOptOut).not.toHaveBeenCalled()
+    expect(mockSetEnabled).not.toHaveBeenCalled()
   })
 
-  it('should call optIn() when gate passes and notificationsEnabled is false', async () => {
+  it('should call setEnabled(true) when gate passes and notificationsEnabled is false', async () => {
     mockCheckAnswer.mockReturnValue(true)
     mockGateVisible = true
     render(<SettingsScreen uid="uid-1" />)
-    const confirmBtn = screen.getByTestId('gate-confirm-btn')
+    const confirmBtn = screen.getByTestId('gate-submit-btn')
     await act(async () => {
       fireEvent.click(confirmBtn)
     })
-    await waitFor(() => expect(mockOptIn).toHaveBeenCalledOnce())
+    await waitFor(() => expect(mockSetEnabled).toHaveBeenCalledWith(true))
   })
 
-  it('should call optOut() when gate passes and notificationsEnabled is true', async () => {
+  it('should call setEnabled(false) when gate passes and notificationsEnabled is true', async () => {
     mockNotificationsEnabled = true
     mockCheckAnswer.mockReturnValue(true)
     mockGateVisible = true
     render(<SettingsScreen uid="uid-1" />)
-    const confirmBtn = screen.getByTestId('gate-confirm-btn')
+    const confirmBtn = screen.getByTestId('gate-submit-btn')
     await act(async () => {
       fireEvent.click(confirmBtn)
     })
-    await waitFor(() => expect(mockOptOut).toHaveBeenCalledOnce())
+    await waitFor(() => expect(mockSetEnabled).toHaveBeenCalledWith(false))
   })
 
   it('Privacy Policy link should be present', () => {

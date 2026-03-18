@@ -8,7 +8,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ uid }: SettingsScreenProps) {
-  const { notificationsEnabled, optIn, optOut } = useNotifications(uid)
+  const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const [shaking, setShaking] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -25,11 +25,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
       return
     }
     hideGate()
-    if (!notificationsEnabled) {
-      await optIn()
-    } else {
-      await optOut()
-    }
+    await setEnabled(!notificationsEnabled)
     setToast(notificationsEnabled ? 'Notifications turned off' : 'Notifications turned on')
     setTimeout(() => setToast(null), 3000)
   }
@@ -39,7 +35,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
   }
 
   return (
-    <div style={{ padding: '16px 20px' }}>
+    <div data-testid="settings-screen" style={{ padding: '16px 20px' }}>
       {/* Notifications section */}
       <p style={{
         fontFamily: "'Baloo 2', sans-serif",
@@ -82,6 +78,7 @@ export function SettingsScreen({ uid }: SettingsScreenProps) {
           </p>
         </div>
         <input
+          data-testid="notif-toggle"
           type="checkbox"
           role="switch"
           checked={notificationsEnabled}

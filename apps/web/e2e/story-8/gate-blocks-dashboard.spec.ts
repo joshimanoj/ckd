@@ -36,28 +36,28 @@ test.describe('Story 8 — FT-1: Dashboard accessible only after Parental Gate',
     const b = parseInt(match![3])
     const answer = op === '+' ? a + b : a - b
     await page.getByTestId('gate-answer-input').fill(String(answer))
-    await page.getByTestId('gate-confirm-btn').click()
+    await page.getByTestId('gate-submit-btn').click()
   }
 
   test('FT-1a: parent-panel not visible on library load', async ({ page, request }) => {
     await setup(page, request, 'ft1a-s8')
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
   })
 
   test('FT-1b: gate appears on parent icon tap; panel still hidden', async ({ page, request }) => {
     await setup(page, request, 'ft1b-s8')
     await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
   })
 
   test('FT-1c: dismissing gate without solving keeps panel hidden', async ({ page, request }) => {
     await setup(page, request, 'ft1c-s8')
     await page.getByTestId('parent-icon-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).toBeVisible()
+    await expect(page.getByTestId('parental-gate')).toBeVisible()
     await page.getByTestId('gate-dismiss-btn').click()
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).not.toBeVisible()
   })
 
@@ -65,7 +65,7 @@ test.describe('Story 8 — FT-1: Dashboard accessible only after Parental Gate',
     await setup(page, request, 'ft1d-s8')
     await page.getByTestId('parent-icon-btn').click()
     await solveGate(page)
-    await expect(page.getByTestId('parental-gate-modal')).not.toBeVisible()
+    await expect(page.getByTestId('parental-gate')).not.toBeVisible()
     await expect(page.getByTestId('parent-panel')).toBeVisible({ timeout: 5000 })
     // No sessions seeded → DashboardScreen renders empty state (still confirms dashboard loaded)
     await expect(page.getByTestId('dashboard-empty-state')).toBeVisible({ timeout: 8000 })

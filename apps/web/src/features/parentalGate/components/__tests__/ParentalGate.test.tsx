@@ -18,29 +18,29 @@ describe('ParentalGate', () => {
 
   it('renders modal with all children when visible=true', () => {
     render(<ParentalGate {...defaultProps} />)
-    expect(screen.getByTestId('parental-gate-modal')).toBeInTheDocument()
+    expect(screen.getByTestId('parental-gate')).toBeInTheDocument()
     expect(screen.getByTestId('gate-question')).toHaveTextContent('3 + 5 = ?')
     expect(screen.getByTestId('gate-answer-input')).toBeInTheDocument()
-    expect(screen.getByTestId('gate-confirm-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('gate-submit-btn')).toBeInTheDocument()
     expect(screen.getByTestId('gate-dismiss-btn')).toBeInTheDocument()
   })
 
   it('confirm button disabled when input is empty', () => {
     render(<ParentalGate {...defaultProps} />)
-    expect(screen.getByTestId('gate-confirm-btn')).toBeDisabled()
+    expect(screen.getByTestId('gate-submit-btn')).toBeDisabled()
   })
 
   it('confirm button enabled when input has value', () => {
     render(<ParentalGate {...defaultProps} />)
     fireEvent.change(screen.getByTestId('gate-answer-input'), { target: { value: '8' } })
-    expect(screen.getByTestId('gate-confirm-btn')).not.toBeDisabled()
+    expect(screen.getByTestId('gate-submit-btn')).not.toBeDisabled()
   })
 
   it('clicking confirm calls onConfirm with the typed value', () => {
     const onConfirm = vi.fn()
     render(<ParentalGate {...defaultProps} onConfirm={onConfirm} />)
     fireEvent.change(screen.getByTestId('gate-answer-input'), { target: { value: '8' } })
-    fireEvent.click(screen.getByTestId('gate-confirm-btn'))
+    fireEvent.click(screen.getByTestId('gate-submit-btn'))
     expect(onConfirm).toHaveBeenCalledWith('8')
   })
 
@@ -54,7 +54,7 @@ describe('ParentalGate', () => {
   it('clicking scrim does NOT call onDismiss', () => {
     const onDismiss = vi.fn()
     render(<ParentalGate {...defaultProps} onDismiss={onDismiss} />)
-    fireEvent.click(screen.getByTestId('parental-gate-modal'))
+    fireEvent.click(screen.getByTestId('parental-gate'))
     expect(onDismiss).not.toHaveBeenCalled()
   })
 

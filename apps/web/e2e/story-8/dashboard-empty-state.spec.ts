@@ -37,7 +37,7 @@ test.describe('Story 8 — FT-3: Empty state when no watch sessions', () => {
     const b = parseInt(match![3])
     const answer = op === '+' ? a + b : a - b
     await page.getByTestId('gate-answer-input').fill(String(answer))
-    await page.getByTestId('gate-confirm-btn').click()
+    await page.getByTestId('gate-submit-btn').click()
   }
 
   test('FT-3a: empty state shown when child has no sessions', async ({ page, request }) => {

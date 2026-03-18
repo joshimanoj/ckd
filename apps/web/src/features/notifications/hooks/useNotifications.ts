@@ -41,10 +41,17 @@ export function useNotifications(uid: string) {
     setNotificationsEnabled(true)
   }, [uid, setFcmToken, setNotificationsEnabled])
 
+  // For Settings toggle — updates preference without re-requesting browser permission
+  const setEnabled = useCallback(async (enabled: boolean) => {
+    if (!uid) return
+    await updateNotificationsEnabled(uid, enabled)
+    setNotificationsEnabled(enabled)
+  }, [uid, setNotificationsEnabled])
+
   const optOut = useCallback(async () => {
     await updateNotificationsEnabled(uid, false)
     setNotificationsEnabled(false)
   }, [uid, setNotificationsEnabled])
 
-  return { notificationsEnabled, optIn, optOut }
+  return { notificationsEnabled, optIn, optOut, setEnabled }
 }

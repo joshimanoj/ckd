@@ -30,7 +30,7 @@ export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking 
         }
       `}</style>
       <div
-        data-testid="parental-gate-modal"
+        data-testid="parental-gate"
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'fixed',
@@ -123,7 +123,7 @@ export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking 
           </div>
 
           <button
-            data-testid="gate-confirm-btn"
+            data-testid="gate-submit-btn"
             disabled={answer === ''}
             onClick={() => onConfirm(answer)}
             style={{

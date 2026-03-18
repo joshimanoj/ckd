@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mock firebase/app before importing service
+vi.mock('firebase/app', () => ({
+  getApp: vi.fn(() => ({})),
+}))
+
 // Mock firebase/messaging before importing service
 vi.mock('firebase/messaging', () => ({
   getMessaging: vi.fn(() => ({ app: {} })),
@@ -17,7 +22,6 @@ vi.mock('firebase/firestore', async (importOriginal) => {
 
 vi.mock('@ckd/shared/firebase/config', () => ({
   db: {},
-  app: {},
 }))
 
 import { getToken } from 'firebase/messaging'
