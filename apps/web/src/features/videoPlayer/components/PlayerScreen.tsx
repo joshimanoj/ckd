@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, type ChangeEvent, type CSSProperties, type ReactNode } from 'react'
 import type { Video } from '@ckd/shared/types/video'
 
 function toMMSS(seconds: number): string {
@@ -19,8 +19,105 @@ interface PlayerScreenProps {
   onVideoEnd?: () => void
   onPrevVideo?: () => void
   onNextVideo?: () => void
+  onSelectVideo?: (videoId: string) => void
   onTimeUpdate?: (currentTime: number) => void
   onDurationUpdate?: (duration: number) => void
+}
+
+type FullscreenCapableElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void
+}
+
+type FullscreenCapableDocument = Document & {
+  webkitExitFullscreen?: () => Promise<void> | void
+  webkitFullscreenElement?: Element | null
+}
+
+function ControlIcon({
+  children,
+  label,
+  isFilled = false,
+}: {
+  children: ReactNode
+  label: string
+  isFilled?: boolean
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill={isFilled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      focusable="false"
+      data-icon-label={label}
+    >
+      {children}
+    </svg>
+  )
+}
+
+function PlayIcon() {
+  return (
+    <ControlIcon label="Play" isFilled>
+      <polygon points="8,6 19,12 8,18" stroke="none" />
+    </ControlIcon>
+  )
+}
+
+function PauseIcon() {
+  return (
+    <ControlIcon label="Pause" isFilled>
+      <rect x="7" y="6" width="3.5" height="12" rx="1" stroke="none" />
+      <rect x="13.5" y="6" width="3.5" height="12" rx="1" stroke="none" />
+    </ControlIcon>
+  )
+}
+
+function PreviousIcon() {
+  return (
+    <ControlIcon label="Previous" isFilled>
+      <rect x="5" y="6" width="2.5" height="12" rx="1" stroke="none" />
+      <polygon points="17,6 8.5,12 17,18" stroke="none" />
+    </ControlIcon>
+  )
+}
+
+function NextIcon() {
+  return (
+    <ControlIcon label="Next" isFilled>
+      <rect x="16.5" y="6" width="2.5" height="12" rx="1" stroke="none" />
+      <polygon points="7,6 15.5,12 7,18" stroke="none" />
+    </ControlIcon>
+  )
+}
+
+function ExpandIcon({ isFullscreen }: { isFullscreen: boolean }) {
+  return isFullscreen ? (
+    <ControlIcon label="Collapse">
+      <polyline points="10,14 10,10 14,10" />
+      <line x1="10" y1="10" x2="16" y2="4" />
+      <polyline points="14,10 14,14 10,14" />
+      <polyline points="14,10 18,10 18,6" />
+      <polyline points="14,14 10,14 10,18" />
+      <line x1="14" y1="14" x2="8" y2="20" />
+    </ControlIcon>
+  ) : (
+    <ControlIcon label="Expand">
+      <polyline points="9,3 3,3 3,9" />
+      <line x1="3" y1="3" x2="10" y2="10" />
+      <polyline points="15,21 21,21 21,15" />
+      <line x1="14" y1="14" x2="21" y2="21" />
+      <polyline points="15,3 21,3 21,9" />
+      <line x1="14" y1="10" x2="21" y2="3" />
+      <polyline points="9,21 3,21 3,15" />
+      <line x1="10" y1="14" x2="3" y2="21" />
+    </ControlIcon>
+  )
 }
 
 export function PlayerScreen({
@@ -34,55 +131,53 @@ export function PlayerScreen({
   onVideoEnd,
   onPrevVideo,
   onNextVideo,
+  onSelectVideo,
   onTimeUpdate,
   onDurationUpdate,
 }: PlayerScreenProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [playerKey, setPlayerKey] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)   // user intent only
-  const [isBuffering, setIsBuffering] = useState(false) // YouTube buffering state
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isBuffering, setIsBuffering] = useState(false)
   const [displaySeconds, setDisplaySeconds] = useState(0)
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const videoEndedRef = useRef(false)
+  const isPlayingRef = useRef(false)
 
-  // Send play/pause command to YouTube iframe via postMessage
   useEffect(() => {
-    if (isLoading) return
-    const iframe = iframeRef.current
-    if (!iframe?.contentWindow) return
-    iframe.contentWindow.postMessage(
+    isPlayingRef.current = isPlaying
+  }, [isPlaying])
+
+  const sendPlayerCommand = useCallback((func: string, args: unknown[] = []) => {
+    iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({
         event: 'command',
-        func: isPlaying ? 'playVideo' : 'pauseVideo',
-        args: [],
+        func,
+        args,
       }),
       '*',
     )
-  }, [isPlaying, isLoading])
+  }, [])
 
-  // Subscribe to YouTube infoDelivery events — drives scrubber, buffering pause, and auto-advance
+  // Subscribe to YouTube events and keep UI in sync with actual playback state
   useEffect(() => {
     if (isLoading) return
-    const iframe = iframeRef.current
-    if (!iframe?.contentWindow) return
 
-    // Ask YouTube to start sending infoDelivery messages
-    iframe.contentWindow.postMessage(
-      JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }),
-      '*',
-    )
-    iframe.contentWindow.postMessage(
-      JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
-      '*',
-    )
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*')
+    sendPlayerCommand('addEventListener', ['onStateChange'])
+    sendPlayerCommand('addEventListener', ['onReady'])
 
     const handleYTMessage = (e: MessageEvent) => {
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+        if (data?.event === 'onReady') {
+          sendPlayerCommand('playVideo')
+          return
+        }
         if (data?.event !== 'infoDelivery' || !data.info) return
         const info = data.info as Record<string, unknown>
 
@@ -95,9 +190,12 @@ export function PlayerScreen({
           onDurationUpdate?.(info.duration)
         }
         if (typeof info.playerState === 'number') {
-          // 3 = buffering (show spinner but don't touch isPlaying — that's user intent)
           setIsBuffering(info.playerState === 3)
-          // 0 = ended
+          if (info.playerState === 1) {
+            setIsPlaying(true)
+          } else if (info.playerState === 0 || info.playerState === 2 || info.playerState === 5 || info.playerState === -1) {
+            setIsPlaying(false)
+          }
           if (info.playerState === 0 && !videoEndedRef.current) {
             videoEndedRef.current = true
             onVideoEnd?.()
@@ -110,24 +208,60 @@ export function PlayerScreen({
 
     window.addEventListener('message', handleYTMessage)
     return () => window.removeEventListener('message', handleYTMessage)
-  }, [isLoading, onVideoEnd, onTimeUpdate, onDurationUpdate])
+  }, [isLoading, onDurationUpdate, onTimeUpdate, onVideoEnd, sendPlayerCommand])
+
+  // Retry autoplay after the iframe loads so navigation between videos works reliably on mobile browsers.
+  useEffect(() => {
+    if (isLoading) return
+
+    let attempts = 0
+    let timeoutId: number | undefined
+
+    const tryPlay = () => {
+      sendPlayerCommand('playVideo')
+      attempts += 1
+      if (!isPlayingRef.current && attempts < 4) {
+        timeoutId = window.setTimeout(tryPlay, 350)
+      }
+    }
+
+    tryPlay()
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId)
+    }
+  }, [isLoading, playerKey, sendPlayerCommand, youtubeVideoId])
 
   // Sync fullscreen state when user presses Esc
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement)
+    const fullDoc = document as FullscreenCapableDocument
+    const handler = () => setIsFullscreen(Boolean(document.fullscreenElement || fullDoc.webkitFullscreenElement))
     document.addEventListener('fullscreenchange', handler)
-    return () => document.removeEventListener('fullscreenchange', handler)
+    document.addEventListener('webkitfullscreenchange', handler as EventListener)
+    return () => {
+      document.removeEventListener('fullscreenchange', handler)
+      document.removeEventListener('webkitfullscreenchange', handler as EventListener)
+    }
   }, [])
 
-  const handleLoad = useCallback(() => setIsLoading(false), [])
+  const handleLoad = useCallback(() => {
+    setHasError(false)
+    setIsLoading(false)
+  }, [])
 
   const handleRetry = useCallback(() => {
     setHasError(false)
     setIsLoading(true)
+    setIsPlaying(false)
+    setIsBuffering(false)
     setPlayerKey((k) => k + 1)
   }, [])
 
-  const handlePlayPause = useCallback(() => setIsPlaying((p) => !p), [])
+  const handlePlayPause = useCallback(() => {
+    const shouldPlay = !isPlayingRef.current
+    setIsPlaying(shouldPlay)
+    setIsBuffering(false)
+    sendPlayerCommand(shouldPlay ? 'playVideo' : 'pauseVideo')
+  }, [sendPlayerCommand])
 
   const handleBack = useCallback(async () => {
     try { await flushSession() } catch { /* best-effort flush */ }
@@ -135,20 +269,24 @@ export function PlayerScreen({
   }, [flushSession, onBack])
 
   const handleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen()
+    const fullDoc = document as FullscreenCapableDocument
+    const fullscreenTarget =
+      (containerRef.current as FullscreenCapableElement | null) ??
+      (iframeRef.current as unknown as FullscreenCapableElement | null)
+
+    if (!document.fullscreenElement && !fullDoc.webkitFullscreenElement) {
+      fullscreenTarget?.requestFullscreen?.()
+      fullscreenTarget?.webkitRequestFullscreen?.()
     } else {
-      document.exitFullscreen()
+      document.exitFullscreen?.()
+      fullDoc.webkitExitFullscreen?.()
     }
   }, [])
 
-  const handleScrub = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScrub = (e: ChangeEvent<HTMLInputElement>) => {
     const seconds = Number(e.target.value)
     setDisplaySeconds(seconds)
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
-      '*',
-    )
+    sendPlayerCommand('seekTo', [seconds, true])
   }
 
   // Expose test hooks
@@ -166,7 +304,7 @@ export function PlayerScreen({
     }
   }, [onVideoEnd])
 
-  const iframeSrc = `https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&controls=0&autoplay=1&enablejsapi=1`
+  const iframeSrc = `https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&controls=0&autoplay=1&enablejsapi=1&playsinline=1`
 
   // Up Next: videos after current, wrapping around
   const currentIdx = videos.findIndex((v) => v.videoId === currentVideoId)
@@ -184,9 +322,9 @@ export function PlayerScreen({
 
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
 
-  const btnStyle = (large = false, primary = false): React.CSSProperties => ({
-    width: large ? '56px' : '44px',
-    height: large ? '56px' : '44px',
+  const btnStyle = (large = false, primary = false): CSSProperties => ({
+    width: large ? '68px' : '52px',
+    height: large ? '68px' : '52px',
     borderRadius: '50%',
     background: primary ? '#F43F5E' : 'rgba(255,255,255,0.1)',
     border: 'none',
@@ -198,6 +336,7 @@ export function PlayerScreen({
     justifyContent: 'center',
     flexShrink: 0,
     boxShadow: primary ? '0 4px 20px rgba(244,63,94,0.45)' : 'none',
+    padding: 0,
   })
 
   return (
@@ -335,17 +474,24 @@ export function PlayerScreen({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-          <button style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>⏮</button>
+          <button type="button" style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>
+            <PreviousIcon />
+          </button>
           <button
+            type="button"
             data-testid="play-pause-btn"
             aria-label={isPlaying ? 'Pause' : 'Play'}
             onClick={handlePlayPause}
             style={btnStyle(true, true)}
           >
-            {isBuffering ? <span className="player-spinner" style={{ width: 20, height: 20 }} /> : isPlaying ? '⏸' : '▶'}
+            {isBuffering ? <span className="player-spinner" style={{ width: 20, height: 20 }} /> : isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <button style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>⏭</button>
-          <button style={btnStyle()} aria-label="Fullscreen" onClick={handleFullscreen}>{isFullscreen ? '⤡' : '⤢'}</button>
+          <button type="button" style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>
+            <NextIcon />
+          </button>
+          <button type="button" style={btnStyle()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} onClick={handleFullscreen}>
+            <ExpandIcon isFullscreen={isFullscreen} />
+          </button>
         </div>
       </div>
 
@@ -362,7 +508,14 @@ export function PlayerScreen({
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {upNext.map((v) => (
-              <div key={v.videoId} className="ckd-mini-card">
+              <button
+                key={v.videoId}
+                type="button"
+                className="ckd-mini-card"
+                data-testid={`up-next-${v.videoId}`}
+                onClick={() => onSelectVideo?.(v.videoId)}
+                style={{ border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+              >
                 <div className="ckd-mini-thumb" style={{ overflow: 'hidden' }}>
                   {v.thumbnailUrl ? (
                     <img
@@ -401,7 +554,7 @@ export function PlayerScreen({
                           : v.category}
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

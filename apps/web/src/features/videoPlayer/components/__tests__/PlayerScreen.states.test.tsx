@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { makeVideo } from '../../../../test/factories/video'
 
 vi.mock('@ckd/shared/firebase/config', () => ({ db: {} }))
 vi.mock('../../services/watchSessionService', () => ({
@@ -104,5 +105,71 @@ describe('PlayerScreen — states', () => {
       fireEvent.change(scrubber, { target: { value: '75' } })
     })
     expect(scrubber).toHaveValue('75')
+  })
+
+  it('keeps play button label in sync with YouTube playback state', async () => {
+    const { PlayerScreen } = await import('../PlayerScreen')
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="dQw4w9WgXcQ"
+          flushSession={vi.fn()}
+          onBack={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+
+    const iframe = screen.getByTestId('youtube-player')
+    act(() => {
+      fireEvent.load(iframe)
+    })
+
+    const playPause = screen.getByTestId('play-pause-btn')
+    expect(playPause).toHaveAttribute('aria-label', 'Play')
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: JSON.stringify({ event: 'infoDelivery', info: { playerState: 1 } }),
+        }),
+      )
+    })
+    expect(playPause).toHaveAttribute('aria-label', 'Pause')
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: JSON.stringify({ event: 'infoDelivery', info: { playerState: 2 } }),
+        }),
+      )
+    })
+    expect(playPause).toHaveAttribute('aria-label', 'Play')
+  })
+
+  it('clicking an up-next card calls onSelectVideo with the tapped video id', async () => {
+    const { PlayerScreen } = await import('../PlayerScreen')
+    const onSelectVideo = vi.fn()
+
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="yt-1"
+          currentVideoId="video-1"
+          videos={[
+            makeVideo({ videoId: 'video-1', youtubeVideoId: 'yt-1', title: 'Video One', category: 'Colours' }),
+            makeVideo({ videoId: 'video-2', youtubeVideoId: 'yt-2', title: 'Video Two', category: 'Rhymes' }),
+          ]}
+          flushSession={vi.fn()}
+          onBack={vi.fn()}
+          onSelectVideo={onSelectVideo}
+        />
+      </MemoryRouter>,
+    )
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('up-next-video-2'))
+    })
+
+    expect(onSelectVideo).toHaveBeenCalledWith('video-2')
   })
 })

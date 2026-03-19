@@ -38,6 +38,7 @@ describe('PlayerScreen — embed params', () => {
     expect(iframe.src).toContain('modestbranding=1')
     expect(iframe.src).toContain('controls=0')
     expect(iframe.src).toContain('autoplay=1')
+    expect(iframe.src).toContain('playsinline=1')
     expect(iframe.src).toContain('dQw4w9WgXcQ')
   })
 

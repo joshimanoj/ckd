@@ -94,6 +94,12 @@ export function WatchPage() {
     navigate(`/watch/${videos[prevIdx].videoId}`)
   }, [currentIdx, videos, flushSession, navigate])
 
+  const handleSelectVideo = useCallback(async (selectedVideoId: string) => {
+    if (!selectedVideoId || selectedVideoId === video?.videoId) return
+    await flushSession()
+    navigate(`/watch/${selectedVideoId}`)
+  }, [flushSession, navigate, video?.videoId])
+
   const handleBack = useCallback(() => navigate('/library'), [navigate])
 
   // Keep a ref to latest flushSession so the unmount effect never re-fires on dep changes
@@ -126,6 +132,7 @@ export function WatchPage() {
         onVideoEnd={handleVideoEnd}
         onNextVideo={handleNextVideo}
         onPrevVideo={handlePrevVideo}
+        onSelectVideo={handleSelectVideo}
         onTimeUpdate={handleTimeUpdate}
         onDurationUpdate={handleDurationUpdate}
       />
