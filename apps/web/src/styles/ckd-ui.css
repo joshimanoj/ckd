@@ -1701,24 +1701,25 @@ body {
 }
 
 .ckd-back-button {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(28, 25, 71, 0.88);
   color: #fff;
-  font-size: 18px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
 }
 
 .ckd-player-controls {
   background: #12103a;
   padding: 16px 20px;
   flex-shrink: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .ckd-player-controls--expanded {
@@ -1732,6 +1733,18 @@ body {
 
 .ckd-player-controls--rotated {
   padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+.ckd-player-controls--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.ckd-player-controls--hidden {
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
 }
 
 .ckd-player-body {

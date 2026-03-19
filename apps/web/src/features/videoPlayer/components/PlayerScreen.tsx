@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, type ChangeEvent, type CSSProperties, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useRef, type ChangeEvent, type CSSProperties, type MouseEvent, type ReactNode } from 'react'
 import type { Video } from '@ckd/shared/types/video'
 
 function toMMSS(seconds: number): string {
@@ -99,6 +99,15 @@ function PreviousIcon() {
   )
 }
 
+function BackIcon() {
+  return (
+    <ControlIcon label="Back">
+      <line x1="18" y1="12" x2="7" y2="12" />
+      <polyline points="11,8 7,12 11,16" />
+    </ControlIcon>
+  )
+}
+
 function NextIcon() {
   return (
     <ControlIcon label="Next" isFilled>
@@ -111,12 +120,14 @@ function NextIcon() {
 function ExpandIcon({ isFullscreen }: { isFullscreen: boolean }) {
   return isFullscreen ? (
     <ControlIcon label="Collapse">
-      <polyline points="10,14 10,10 14,10" />
-      <line x1="10" y1="10" x2="16" y2="4" />
-      <polyline points="14,10 14,14 10,14" />
-      <polyline points="14,10 18,10 18,6" />
-      <polyline points="14,14 10,14 10,18" />
-      <line x1="14" y1="14" x2="8" y2="20" />
+      <polyline points="8,4 8,8 4,8" />
+      <line x1="8" y1="8" x2="4" y2="4" />
+      <polyline points="16,20 16,16 20,16" />
+      <line x1="16" y1="16" x2="20" y2="20" />
+      <polyline points="16,4 16,8 20,8" />
+      <line x1="16" y1="8" x2="20" y2="4" />
+      <polyline points="8,20 8,16 4,16" />
+      <line x1="8" y1="16" x2="4" y2="20" />
     </ControlIcon>
   ) : (
     <ControlIcon label="Expand">
@@ -156,6 +167,7 @@ export function PlayerScreen({
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isInlineExpanded, setIsInlineExpanded] = useState(false)
+  const [expandedControlsVisible, setExpandedControlsVisible] = useState(false)
   const [autoplayBlocked, setAutoplayBlocked] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -165,6 +177,9 @@ export function PlayerScreen({
   const autoplayDeadlineRef = useRef(Date.now() + 4000)
   const mobileSafariRef = useRef(isMobileSafari())
   const mobileChromeRef = useRef(isMobileChrome())
+  const controlsHideTimeoutRef = useRef<number | undefined>(undefined)
+  const isExpanded = isFullscreen || isInlineExpanded
+  const useRotatedLandscape = isInlineExpanded && mobileSafariRef.current
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -189,6 +204,31 @@ export function PlayerScreen({
     setIsBuffering(false)
     sendPlayerCommand('playVideo')
   }, [sendPlayerCommand])
+
+  const clearControlsHideTimeout = useCallback(() => {
+    if (controlsHideTimeoutRef.current !== undefined) {
+      window.clearTimeout(controlsHideTimeoutRef.current)
+      controlsHideTimeoutRef.current = undefined
+    }
+  }, [])
+
+  const scheduleControlsHide = useCallback(() => {
+    clearControlsHideTimeout()
+    controlsHideTimeoutRef.current = window.setTimeout(() => {
+      setExpandedControlsVisible(false)
+    }, 2200)
+  }, [clearControlsHideTimeout])
+
+  useEffect(() => () => clearControlsHideTimeout(), [clearControlsHideTimeout])
+
+  useEffect(() => {
+    if (isExpanded) {
+      setExpandedControlsVisible(false)
+      clearControlsHideTimeout()
+      return
+    }
+    setExpandedControlsVisible(true)
+  }, [clearControlsHideTimeout, isExpanded])
 
   // Subscribe to YouTube events and keep UI in sync with actual playback state
   useEffect(() => {
@@ -340,6 +380,8 @@ export function PlayerScreen({
 
     if (isInlineExpanded && !document.fullscreenElement && !fullDoc.webkitFullscreenElement) {
       setIsInlineExpanded(false)
+      setExpandedControlsVisible(false)
+      clearControlsHideTimeout()
       return
     }
 
@@ -363,8 +405,10 @@ export function PlayerScreen({
     }
 
     setIsInlineExpanded(true)
+    setExpandedControlsVisible(false)
+    clearControlsHideTimeout()
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [isInlineExpanded])
+  }, [clearControlsHideTimeout, isInlineExpanded])
 
   const handleScrub = (e: ChangeEvent<HTMLInputElement>) => {
     const seconds = Number(e.target.value)
@@ -404,6 +448,7 @@ export function PlayerScreen({
       setIsPlaying(true)
       setIsBuffering(false)
       setIsInlineExpanded(false)
+      setExpandedControlsVisible(false)
       setAutoplayBlocked(false)
       desiredPlayingRef.current = true
       autoplayDeadlineRef.current = Date.now() + 4000
@@ -412,12 +457,31 @@ export function PlayerScreen({
   }, [youtubeVideoId, videoDuration])
 
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
-  const isExpanded = isFullscreen || isInlineExpanded
-  const useRotatedLandscape = isInlineExpanded && mobileSafariRef.current
+  const controlsVisible = !isExpanded || expandedControlsVisible
+
+  const handleExpandedSurfaceTap = useCallback(() => {
+    if (!isExpanded) return
+    setExpandedControlsVisible((visible) => {
+      const next = !visible
+      if (next) {
+        scheduleControlsHide()
+      } else {
+        clearControlsHideTimeout()
+      }
+      return next
+    })
+  }, [clearControlsHideTimeout, isExpanded, scheduleControlsHide])
+
+  const handleControlsInteraction = useCallback((e: MouseEvent<HTMLElement>) => {
+    e.stopPropagation()
+    if (!isExpanded) return
+    setExpandedControlsVisible(true)
+    scheduleControlsHide()
+  }, [isExpanded, scheduleControlsHide])
 
   const btnStyle = (large = false, primary = false): CSSProperties => ({
-    width: large ? '68px' : '52px',
-    height: large ? '68px' : '52px',
+    width: large ? '68px' : '56px',
+    height: large ? '68px' : '56px',
     borderRadius: '50%',
     background: primary ? '#F43F5E' : 'rgba(255,255,255,0.1)',
     border: 'none',
@@ -438,7 +502,10 @@ export function PlayerScreen({
       data-testid="player-screen"
       className={`ckd-player-shell${isExpanded ? ' ckd-player-shell--expanded' : ''}${useRotatedLandscape ? ' ckd-player-shell--rotated' : ''}`}
     >
-      <div className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}${useRotatedLandscape ? ' ckd-player-video--rotated' : ''}`}>
+      <div
+        className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}${useRotatedLandscape ? ' ckd-player-video--rotated' : ''}`}
+        onClick={handleExpandedSurfaceTap}
+      >
         {isLoading && (
           <div
             data-testid="player-loading"
@@ -461,7 +528,10 @@ export function PlayerScreen({
             type="button"
             data-testid="tap-to-play-btn"
             aria-label="Tap to play"
-            onClick={requestPlayback}
+            onClick={(e) => {
+              e.stopPropagation()
+              requestPlayback()
+            }}
             style={{
               position: 'absolute',
               inset: 'auto 16px 16px',
@@ -544,15 +614,29 @@ export function PlayerScreen({
         <button
           data-testid="back-btn"
           aria-label="Back to Library"
-          onClick={handleBack}
-          style={{ position: 'absolute', top: 12, left: 12, zIndex: 5 }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleBack()
+          }}
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            zIndex: 21,
+            opacity: controlsVisible ? 1 : 0,
+            pointerEvents: controlsVisible ? 'auto' : 'none',
+            transition: 'opacity 0.2s ease',
+          }}
           className="ckd-back-button"
         >
-          ←
+          <BackIcon />
         </button>
       </div>
 
-      <div className={`ckd-player-controls${isExpanded ? ' ckd-player-controls--expanded' : ''}${useRotatedLandscape ? ' ckd-player-controls--rotated' : ''}`}>
+      <div
+        className={`ckd-player-controls${isExpanded ? ' ckd-player-controls--expanded' : ''}${useRotatedLandscape ? ' ckd-player-controls--rotated' : ''}${controlsVisible ? ' ckd-player-controls--visible' : ' ckd-player-controls--hidden'}`}
+        onClick={handleControlsInteraction}
+      >
         <p
           style={{
             margin: 0,
@@ -599,8 +683,17 @@ export function PlayerScreen({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 12 }}>
-          <button type="button" data-testid="row-back-btn" style={btnStyle()} aria-label="Back to Library" onClick={handleBack}>
-            ←
+          <button
+            type="button"
+            data-testid="row-back-btn"
+            style={btnStyle()}
+            aria-label="Back to Library"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleBack()
+            }}
+          >
+            <BackIcon />
           </button>
           <button type="button" style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>
             <PreviousIcon />
