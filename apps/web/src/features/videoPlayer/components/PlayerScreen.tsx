@@ -506,6 +506,27 @@ export function PlayerScreen({
         className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}${useRotatedLandscape ? ' ckd-player-video--rotated' : ''}`}
         onClick={handleExpandedSurfaceTap}
       >
+        {isExpanded && (
+          <button
+            type="button"
+            data-testid="expanded-tap-target"
+            aria-label="Show player controls"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleExpandedSurfaceTap()
+            }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 9,
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+          />
+        )}
+
         {isLoading && (
           <div
             data-testid="player-loading"
@@ -606,6 +627,7 @@ export function PlayerScreen({
               border: 'none',
               display: 'block',
               opacity: isLoading ? 0 : 1,
+              pointerEvents: isExpanded && !controlsVisible ? 'none' : 'auto',
             }}
           />
         )}
