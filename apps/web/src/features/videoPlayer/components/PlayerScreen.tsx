@@ -183,7 +183,7 @@ export function PlayerScreen({
   const mobileChromeRef = useRef(isMobileChrome())
   const controlsHideTimeoutRef = useRef<number | undefined>(undefined)
   const isExpanded = isFullscreen || isInlineExpanded
-  const useRotatedLandscape = isInlineExpanded && mobileSafariRef.current
+  const useRotatedLandscape = false
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
