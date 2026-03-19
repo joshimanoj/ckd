@@ -8,6 +8,12 @@ function toMMSS(seconds: number): string {
   return `${m}:${rem.toString().padStart(2, '0')}`
 }
 
+function isMobileSafari(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /iPhone|iPad|iPod/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua)
+}
+
 interface PlayerScreenProps {
   youtubeVideoId: string
   videoTitle?: string
@@ -144,12 +150,14 @@ export function PlayerScreen({
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isInlineExpanded, setIsInlineExpanded] = useState(false)
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const videoEndedRef = useRef(false)
   const isPlayingRef = useRef(true)
   const desiredPlayingRef = useRef(true)
   const autoplayDeadlineRef = useRef(Date.now() + 4000)
+  const mobileSafariRef = useRef(isMobileSafari())
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -166,6 +174,15 @@ export function PlayerScreen({
     )
   }, [])
 
+  const requestPlayback = useCallback(() => {
+    desiredPlayingRef.current = true
+    autoplayDeadlineRef.current = Date.now() + 4000
+    setAutoplayBlocked(false)
+    setIsPlaying(true)
+    setIsBuffering(false)
+    sendPlayerCommand('playVideo')
+  }, [sendPlayerCommand])
+
   // Subscribe to YouTube events and keep UI in sync with actual playback state
   useEffect(() => {
     if (isLoading) return
@@ -178,7 +195,12 @@ export function PlayerScreen({
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
         if (data?.event === 'onReady') {
-          sendPlayerCommand('playVideo')
+          requestPlayback()
+          return
+        }
+        if (data?.event === 'onAutoplayBlocked') {
+          setAutoplayBlocked(true)
+          setIsPlaying(false)
           return
         }
         if (data?.event !== 'infoDelivery' || !data.info) return
@@ -197,6 +219,7 @@ export function PlayerScreen({
           if (info.playerState === 1) {
             setIsPlaying(true)
             desiredPlayingRef.current = true
+            setAutoplayBlocked(false)
           } else if (info.playerState === 0 || info.playerState === 2 || info.playerState === 5 || info.playerState === -1) {
             setIsPlaying(false)
           }
@@ -220,7 +243,7 @@ export function PlayerScreen({
 
     window.addEventListener('message', handleYTMessage)
     return () => window.removeEventListener('message', handleYTMessage)
-  }, [isLoading, onDurationUpdate, onTimeUpdate, onVideoEnd, sendPlayerCommand])
+  }, [isLoading, onDurationUpdate, onTimeUpdate, onVideoEnd, requestPlayback, sendPlayerCommand])
 
   // Retry autoplay after the iframe loads so navigation between videos works reliably on mobile browsers.
   useEffect(() => {
@@ -230,8 +253,7 @@ export function PlayerScreen({
     let timeoutId: number | undefined
 
     const tryPlay = () => {
-      desiredPlayingRef.current = true
-      sendPlayerCommand('playVideo')
+      requestPlayback()
       attempts += 1
       if (!isPlayingRef.current && attempts < 4) {
         timeoutId = window.setTimeout(tryPlay, 350)
@@ -242,7 +264,19 @@ export function PlayerScreen({
     return () => {
       if (timeoutId) window.clearTimeout(timeoutId)
     }
-  }, [isLoading, playerKey, sendPlayerCommand, youtubeVideoId])
+  }, [isLoading, playerKey, requestPlayback, youtubeVideoId])
+
+  useEffect(() => {
+    if (isLoading || isPlaying || isBuffering || !desiredPlayingRef.current) return
+
+    const timeoutId = window.setTimeout(() => {
+      if (!isPlayingRef.current && desiredPlayingRef.current && mobileSafariRef.current) {
+        setAutoplayBlocked(true)
+      }
+    }, 900)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [isBuffering, isLoading, isPlaying])
 
   // Sync fullscreen state when user presses Esc
   useEffect(() => {
@@ -260,6 +294,7 @@ export function PlayerScreen({
     setHasError(false)
     autoplayDeadlineRef.current = Date.now() + 4000
     desiredPlayingRef.current = true
+    setAutoplayBlocked(false)
     setIsPlaying(true)
     setIsLoading(false)
   }, [])
@@ -269,6 +304,7 @@ export function PlayerScreen({
     setIsLoading(true)
     setIsPlaying(true)
     setIsBuffering(false)
+    setAutoplayBlocked(false)
     desiredPlayingRef.current = true
     autoplayDeadlineRef.current = Date.now() + 4000
     setPlayerKey((k) => k + 1)
@@ -280,6 +316,7 @@ export function PlayerScreen({
     setIsBuffering(false)
     desiredPlayingRef.current = shouldPlay
     autoplayDeadlineRef.current = shouldPlay ? Date.now() + 2000 : 0
+    setAutoplayBlocked(false)
     sendPlayerCommand(shouldPlay ? 'playVideo' : 'pauseVideo')
   }, [sendPlayerCommand])
 
@@ -360,6 +397,7 @@ export function PlayerScreen({
       setIsPlaying(true)
       setIsBuffering(false)
       setIsInlineExpanded(false)
+      setAutoplayBlocked(false)
       desiredPlayingRef.current = true
       autoplayDeadlineRef.current = Date.now() + 4000
     }, 0)
@@ -368,6 +406,7 @@ export function PlayerScreen({
 
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
   const isExpanded = isFullscreen || isInlineExpanded
+  const useRotatedLandscape = isInlineExpanded && mobileSafariRef.current
 
   const btnStyle = (large = false, primary = false): CSSProperties => ({
     width: large ? '68px' : '52px',
@@ -390,9 +429,9 @@ export function PlayerScreen({
     <div
       ref={containerRef}
       data-testid="player-screen"
-      className={`ckd-player-shell${isExpanded ? ' ckd-player-shell--expanded' : ''}`}
+      className={`ckd-player-shell${isExpanded ? ' ckd-player-shell--expanded' : ''}${useRotatedLandscape ? ' ckd-player-shell--rotated' : ''}`}
     >
-      <div className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}`}>
+      <div className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}${useRotatedLandscape ? ' ckd-player-video--rotated' : ''}`}>
         {isLoading && (
           <div
             data-testid="player-loading"
@@ -408,6 +447,33 @@ export function PlayerScreen({
           >
             <div className="player-spinner" />
           </div>
+        )}
+
+        {autoplayBlocked && (
+          <button
+            type="button"
+            data-testid="tap-to-play-btn"
+            aria-label="Tap to play"
+            onClick={requestPlayback}
+            style={{
+              position: 'absolute',
+              inset: 'auto 16px 16px',
+              zIndex: 21,
+              minHeight: 48,
+              borderRadius: 999,
+              border: 'none',
+              background: 'rgba(0, 0, 0, 0.72)',
+              color: '#fff',
+              font: "700 14px 'Nunito', sans-serif",
+              padding: '0 18px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            Tap to play
+          </button>
         )}
 
         {hasError ? (
@@ -479,7 +545,7 @@ export function PlayerScreen({
         </button>
       </div>
 
-      <div className={`ckd-player-controls${isExpanded ? ' ckd-player-controls--expanded' : ''}`}>
+      <div className={`ckd-player-controls${isExpanded ? ' ckd-player-controls--expanded' : ''}${useRotatedLandscape ? ' ckd-player-controls--rotated' : ''}`}>
         <p
           style={{
             margin: 0,

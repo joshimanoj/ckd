@@ -188,6 +188,39 @@ describe('PlayerScreen — states', () => {
     expect(screen.getByTestId('player-screen')).toHaveClass('ckd-player-shell--expanded')
   })
 
+  it('shows a tap-to-play prompt when autoplay is blocked', async () => {
+    Object.defineProperty(window.navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      configurable: true,
+    })
+
+    const { PlayerScreen } = await import('../PlayerScreen')
+
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="dQw4w9WgXcQ"
+          flushSession={vi.fn()}
+          onBack={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+
+    act(() => {
+      fireEvent.load(screen.getByTestId('youtube-player'))
+    })
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: JSON.stringify({ event: 'onAutoplayBlocked' }),
+        }),
+      )
+    })
+
+    expect(screen.getByTestId('tap-to-play-btn')).toBeInTheDocument()
+  })
+
   it('clicking an up-next card calls onSelectVideo with the tapped video id', async () => {
     const { PlayerScreen } = await import('../PlayerScreen')
     const onSelectVideo = vi.fn()

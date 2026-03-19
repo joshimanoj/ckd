@@ -1673,6 +1673,15 @@ body {
   background: #000;
 }
 
+.ckd-player-shell--rotated {
+  width: 100dvh;
+  height: 100dvw;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center;
+  overflow: hidden;
+}
+
 .ckd-player-video {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -1685,6 +1694,10 @@ body {
   aspect-ratio: auto;
   flex: 1;
   min-height: 100svh;
+}
+
+.ckd-player-video--rotated {
+  min-height: 100dvw;
 }
 
 .ckd-back-button {
@@ -1714,6 +1727,10 @@ body {
   z-index: 12;
   background: linear-gradient(180deg, rgba(18, 16, 58, 0) 0%, rgba(18, 16, 58, 0.92) 30%, rgba(18, 16, 58, 0.98) 100%);
   padding-top: 40px;
+}
+
+.ckd-player-controls--rotated {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 .ckd-player-body {
