@@ -15,7 +15,6 @@ interface AddChildScreenProps {
 
 export function AddChildScreen({ onSave, saving = false, error = null }: AddChildScreenProps) {
   const [name, setName] = useState('')
-  const [dob, setDob] = useState('')
   const [selectedAge, setSelectedAge] = useState<AgeRange | null>(null)
 
   const isValid = name.trim().length > 0 && selectedAge !== null
@@ -55,20 +54,6 @@ export function AddChildScreen({ onSave, saving = false, error = null }: AddChil
               value={name}
               onChange={handleNameChange}
               placeholder="e.g. Arjun"
-            />
-          </div>
-
-          <div className="ckd-input-group">
-            <label className="ckd-input-label" htmlFor="child-dob">
-              Date of birth *
-            </label>
-            <input
-              id="child-dob"
-              className="ckd-input"
-              type="text"
-              value={dob}
-              onChange={(e) => setDob(e.target.value.slice(0, 14))}
-              placeholder="DD / MM / YYYY"
             />
           </div>
 

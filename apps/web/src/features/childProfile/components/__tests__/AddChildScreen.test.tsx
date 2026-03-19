@@ -15,6 +15,7 @@ describe('AddChildScreen', () => {
     expect(screen.getByText("Add your child's profile")).toBeInTheDocument()
     expect(screen.getByText("We'll personalise the experience for them")).toBeInTheDocument()
     expect(screen.getByTestId('name-input')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/Date of birth/i)).not.toBeInTheDocument()
     expect(screen.getByTestId('pill-under-3')).toBeInTheDocument()
     expect(screen.getByTestId('pill-3-4')).toBeInTheDocument()
     expect(screen.getByTestId('pill-5-6')).toBeInTheDocument()
