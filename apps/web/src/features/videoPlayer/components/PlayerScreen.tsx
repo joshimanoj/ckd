@@ -143,10 +143,13 @@ export function PlayerScreen({
   const [displaySeconds, setDisplaySeconds] = useState(0)
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isInlineExpanded, setIsInlineExpanded] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const videoEndedRef = useRef(false)
-  const isPlayingRef = useRef(false)
+  const isPlayingRef = useRef(true)
+  const desiredPlayingRef = useRef(true)
+  const autoplayDeadlineRef = useRef(Date.now() + 4000)
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -193,8 +196,17 @@ export function PlayerScreen({
           setIsBuffering(info.playerState === 3)
           if (info.playerState === 1) {
             setIsPlaying(true)
+            desiredPlayingRef.current = true
           } else if (info.playerState === 0 || info.playerState === 2 || info.playerState === 5 || info.playerState === -1) {
             setIsPlaying(false)
+          }
+          if (
+            desiredPlayingRef.current &&
+            info.playerState !== 1 &&
+            info.playerState !== 3 &&
+            Date.now() < autoplayDeadlineRef.current
+          ) {
+            window.setTimeout(() => sendPlayerCommand('playVideo'), 80)
           }
           if (info.playerState === 0 && !videoEndedRef.current) {
             videoEndedRef.current = true
@@ -218,6 +230,7 @@ export function PlayerScreen({
     let timeoutId: number | undefined
 
     const tryPlay = () => {
+      desiredPlayingRef.current = true
       sendPlayerCommand('playVideo')
       attempts += 1
       if (!isPlayingRef.current && attempts < 4) {
@@ -245,14 +258,19 @@ export function PlayerScreen({
 
   const handleLoad = useCallback(() => {
     setHasError(false)
+    autoplayDeadlineRef.current = Date.now() + 4000
+    desiredPlayingRef.current = true
+    setIsPlaying(true)
     setIsLoading(false)
   }, [])
 
   const handleRetry = useCallback(() => {
     setHasError(false)
     setIsLoading(true)
-    setIsPlaying(false)
+    setIsPlaying(true)
     setIsBuffering(false)
+    desiredPlayingRef.current = true
+    autoplayDeadlineRef.current = Date.now() + 4000
     setPlayerKey((k) => k + 1)
   }, [])
 
@@ -260,6 +278,8 @@ export function PlayerScreen({
     const shouldPlay = !isPlayingRef.current
     setIsPlaying(shouldPlay)
     setIsBuffering(false)
+    desiredPlayingRef.current = shouldPlay
+    autoplayDeadlineRef.current = shouldPlay ? Date.now() + 2000 : 0
     sendPlayerCommand(shouldPlay ? 'playVideo' : 'pauseVideo')
   }, [sendPlayerCommand])
 
@@ -268,20 +288,39 @@ export function PlayerScreen({
     onBack()
   }, [flushSession, onBack])
 
-  const handleFullscreen = useCallback(() => {
+  const handleFullscreen = useCallback(async () => {
     const fullDoc = document as FullscreenCapableDocument
     const fullscreenTarget =
-      (containerRef.current as FullscreenCapableElement | null) ??
-      (iframeRef.current as unknown as FullscreenCapableElement | null)
+      (iframeRef.current as unknown as FullscreenCapableElement | null) ??
+      (containerRef.current as FullscreenCapableElement | null)
 
-    if (!document.fullscreenElement && !fullDoc.webkitFullscreenElement) {
-      fullscreenTarget?.requestFullscreen?.()
-      fullscreenTarget?.webkitRequestFullscreen?.()
-    } else {
+    if (isInlineExpanded && !document.fullscreenElement && !fullDoc.webkitFullscreenElement) {
+      setIsInlineExpanded(false)
+      return
+    }
+
+    if (document.fullscreenElement || fullDoc.webkitFullscreenElement) {
       document.exitFullscreen?.()
       fullDoc.webkitExitFullscreen?.()
+      return
     }
-  }, [])
+
+    try {
+      if (fullscreenTarget?.requestFullscreen) {
+        await fullscreenTarget.requestFullscreen()
+        return
+      }
+      if (fullscreenTarget?.webkitRequestFullscreen) {
+        await fullscreenTarget.webkitRequestFullscreen()
+        return
+      }
+    } catch {
+      // Fall back to in-app expanded mode below
+    }
+
+    setIsInlineExpanded(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [isInlineExpanded])
 
   const handleScrub = (e: ChangeEvent<HTMLInputElement>) => {
     const seconds = Number(e.target.value)
@@ -304,7 +343,9 @@ export function PlayerScreen({
     }
   }, [onVideoEnd])
 
-  const iframeSrc = `https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&controls=0&autoplay=1&enablejsapi=1&playsinline=1`
+  const originParam =
+    typeof window !== 'undefined' ? `&origin=${encodeURIComponent(window.location.origin)}` : ''
+  const iframeSrc = `https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1&controls=0&autoplay=1&enablejsapi=1&playsinline=1&fs=1${originParam}`
 
   // Up Next: videos after current, wrapping around
   const currentIdx = videos.findIndex((v) => v.videoId === currentVideoId)
@@ -316,11 +357,17 @@ export function PlayerScreen({
       videoEndedRef.current = false
       setDisplaySeconds(0)
       setYtDuration(videoDuration)
+      setIsPlaying(true)
+      setIsBuffering(false)
+      setIsInlineExpanded(false)
+      desiredPlayingRef.current = true
+      autoplayDeadlineRef.current = Date.now() + 4000
     }, 0)
     return () => clearTimeout(t)
   }, [youtubeVideoId, videoDuration])
 
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
+  const isExpanded = isFullscreen || isInlineExpanded
 
   const btnStyle = (large = false, primary = false): CSSProperties => ({
     width: large ? '68px' : '52px',
@@ -340,8 +387,12 @@ export function PlayerScreen({
   })
 
   return (
-    <div ref={containerRef} data-testid="player-screen" className="ckd-player-shell">
-      <div className="ckd-player-video">
+    <div
+      ref={containerRef}
+      data-testid="player-screen"
+      className={`ckd-player-shell${isExpanded ? ' ckd-player-shell--expanded' : ''}`}
+    >
+      <div className={`ckd-player-video${isExpanded ? ' ckd-player-video--expanded' : ''}`}>
         {isLoading && (
           <div
             data-testid="player-loading"
@@ -402,6 +453,7 @@ export function PlayerScreen({
             data-testid="youtube-player"
             src={iframeSrc}
             allow="autoplay; fullscreen"
+            allowFullScreen
             onLoad={handleLoad}
             style={{
               position: 'absolute',
@@ -427,7 +479,7 @@ export function PlayerScreen({
         </button>
       </div>
 
-      <div className="ckd-player-controls">
+      <div className={`ckd-player-controls${isExpanded ? ' ckd-player-controls--expanded' : ''}`}>
         <p
           style={{
             margin: 0,
@@ -473,7 +525,10 @@ export function PlayerScreen({
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 12 }}>
+          <button type="button" data-testid="row-back-btn" style={btnStyle()} aria-label="Back to Library" onClick={handleBack}>
+            ←
+          </button>
           <button type="button" style={btnStyle()} aria-label="Previous video" onClick={onPrevVideo}>
             <PreviousIcon />
           </button>
@@ -489,13 +544,19 @@ export function PlayerScreen({
           <button type="button" style={btnStyle()} aria-label="Next video" onClick={onNextVideo}>
             <NextIcon />
           </button>
-          <button type="button" style={btnStyle()} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} onClick={handleFullscreen}>
-            <ExpandIcon isFullscreen={isFullscreen} />
+          <button
+            type="button"
+            data-testid="expand-btn"
+            style={btnStyle()}
+            aria-label={isExpanded ? 'Exit fullscreen' : 'Enter fullscreen'}
+            onClick={handleFullscreen}
+          >
+            <ExpandIcon isFullscreen={isExpanded} />
           </button>
         </div>
       </div>
 
-      {upNext.length > 0 && (
+      {upNext.length > 0 && !isExpanded && (
         <div className="ckd-player-body">
           <p
             style={{

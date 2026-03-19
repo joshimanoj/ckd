@@ -12,6 +12,7 @@ describe('PlayerScreen — states', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
   })
 
   it('shows loading overlay on initial render', async () => {
@@ -107,7 +108,7 @@ describe('PlayerScreen — states', () => {
     expect(scrubber).toHaveValue('75')
   })
 
-  it('keeps play button label in sync with YouTube playback state', async () => {
+  it('starts in playing intent state and stays in sync with YouTube playback state', async () => {
     const { PlayerScreen } = await import('../PlayerScreen')
     render(
       <MemoryRouter>
@@ -125,7 +126,7 @@ describe('PlayerScreen — states', () => {
     })
 
     const playPause = screen.getByTestId('play-pause-btn')
-    expect(playPause).toHaveAttribute('aria-label', 'Play')
+    expect(playPause).toHaveAttribute('aria-label', 'Pause')
 
     act(() => {
       window.dispatchEvent(
@@ -144,6 +145,47 @@ describe('PlayerScreen — states', () => {
       )
     })
     expect(playPause).toHaveAttribute('aria-label', 'Play')
+  })
+
+  it('clicking the control-row back button calls onBack', async () => {
+    const { PlayerScreen } = await import('../PlayerScreen')
+    const onBack = vi.fn()
+
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="dQw4w9WgXcQ"
+          flushSession={vi.fn().mockResolvedValue(undefined)}
+          onBack={onBack}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('row-back-btn'))
+    })
+
+    expect(onBack).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to inline expanded mode when fullscreen api is unavailable', async () => {
+    const { PlayerScreen } = await import('../PlayerScreen')
+
+    render(
+      <MemoryRouter>
+        <PlayerScreen
+          youtubeVideoId="dQw4w9WgXcQ"
+          flushSession={vi.fn()}
+          onBack={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('expand-btn'))
+    })
+
+    expect(screen.getByTestId('player-screen')).toHaveClass('ckd-player-shell--expanded')
   })
 
   it('clicking an up-next card calls onSelectVideo with the tapped video id', async () => {
