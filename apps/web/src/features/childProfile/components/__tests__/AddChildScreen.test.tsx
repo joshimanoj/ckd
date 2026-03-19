@@ -88,4 +88,20 @@ describe('AddChildScreen', () => {
     render(<AddChildScreen error={null} />)
     expect(screen.queryByTestId('error-toast')).not.toBeInTheDocument()
   })
+
+  it('prefills child details in edit mode', () => {
+    render(
+      <AddChildScreen
+        initialName="Aarav"
+        initialAgeRange="3-4"
+        title="Edit your child's profile"
+        submitLabel="Save Changes"
+      />,
+    )
+
+    expect(screen.getByDisplayValue('Aarav')).toBeInTheDocument()
+    expect(screen.getByText("Edit your child's profile")).toBeInTheDocument()
+    expect(screen.getByTestId('pill-3-4')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('start-watching-btn')).toHaveTextContent('Save Changes')
+  })
 })

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Timestamp } from 'firebase/firestore'
 import { useNotifications } from '../hooks/useNotifications'
 import { ParentalGate } from '../../parentalGate/components/ParentalGate'
@@ -24,6 +25,7 @@ function calcAge(dob: Timestamp): number {
 }
 
 export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
+  const navigate = useNavigate()
   const { notificationsEnabled, setEnabled } = useNotifications(uid)
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const [shaking, setShaking] = useState(false)
@@ -84,7 +86,13 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
       {activeProfile ? (
         <section className="ckd-settings__section">
           <p className="ckd-section-label">Child Profile</p>
-          <div className="ckd-settings__item">
+          <button
+            type="button"
+            data-testid="edit-child-details-btn"
+            className="ckd-settings__item"
+            onClick={() => navigate('/profile', { state: { mode: 'edit', returnTo: 'settings' } })}
+            style={{ width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer', background: '#fff' }}
+          >
             <div className="ckd-settings__item-left">
               <div className="ckd-settings__icon">🧒</div>
               <div>
@@ -93,7 +101,7 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
               </div>
             </div>
             <span className="ckd-settings__value">Edit</span>
-          </div>
+          </button>
         </section>
       ) : null}
 

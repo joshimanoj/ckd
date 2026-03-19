@@ -8,41 +8,22 @@ interface ParentalGateProps {
   shaking: boolean
 }
 
-type GateMode = 'sum' | 'pin'
-
-function solveQuestion(question: string): string {
-  const match = question.match(/(\d+)\s*\+\s*(\d+)/)
-  if (!match) return ''
-  return String(Number(match[1]) + Number(match[2]))
-}
-
 export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking }: ParentalGateProps) {
-  const [mode, setMode] = useState<GateMode>('sum')
   const [answer, setAnswer] = useState('')
   const [prevQuestion, setPrevQuestion] = useState(question)
 
   if (prevQuestion !== question) {
     setPrevQuestion(question)
     setAnswer('')
-    setMode('sum')
   }
 
   if (!visible) return null
 
   function appendDigit(value: string) {
-    const next = mode === 'pin' ? answer.slice(0, 3) + value : answer + value
-    setAnswer(next)
+    setAnswer(answer + value)
   }
 
   function handleConfirm() {
-    if (mode === 'pin') {
-      if (answer === '1234') {
-        onConfirm(solveQuestion(question))
-      } else {
-        onConfirm(answer)
-      }
-      return
-    }
     onConfirm(answer)
   }
 
@@ -60,56 +41,37 @@ export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking 
         >
           Parent Check
         </p>
-
-        <div className="ckd-tab-strip" style={{ marginBottom: 16 }}>
-          <button className={`ckd-tab ${mode === 'sum' ? 'ckd-tab--active' : ''}`} onClick={() => setMode('sum')}>
-            🧮 Quick Sum
-          </button>
-          <button className={`ckd-tab ${mode === 'pin' ? 'ckd-tab--active' : ''}`} onClick={() => setMode('pin')}>
-            🔢 4-Digit PIN
-          </button>
-        </div>
-
         <p
           style={{
             margin: '0 0 12px',
             textAlign: 'center',
             color: '#6B7280',
             font: "400 14px 'Nunito', sans-serif",
-            whiteSpace: 'pre-line',
           }}
         >
-          {mode === 'sum'
-            ? 'Solve this to access parent settings'
-            : 'Enter your 4-digit parent PIN\n(Default PIN: 1234 - change in Settings)'}
+          Solve this to access parent settings
         </p>
 
-        {mode === 'sum' ? (
-          <div
+        <div
+          style={{
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 20,
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)',
+          }}
+        >
+          <p
+            data-testid="gate-question"
             style={{
-              borderRadius: 16,
-              padding: 20,
-              marginBottom: 20,
-              textAlign: 'center',
-              background: 'linear-gradient(135deg, #F43F5E 0%, #9333EA 50%, #EC4899 100%)',
+              margin: 0,
+              color: '#FFFFFF',
+              font: "800 26px 'Baloo 2', cursive",
             }}
           >
-            <p
-              data-testid="gate-question"
-              style={{
-                margin: 0,
-                color: '#FFFFFF',
-                font: "800 26px 'Baloo 2', cursive",
-              }}
-            >
-              {question}
-            </p>
-          </div>
-        ) : (
-          <div data-testid="gate-question" style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
             {question}
-          </div>
-        )}
+          </p>
+        </div>
 
         <div
           data-testid="gate-input-wrapper"
@@ -125,43 +87,23 @@ export function ParentalGate({ visible, question, onConfirm, onDismiss, shaking 
             animation: shaking ? 'gate-shake 0.3s' : undefined,
           }}
         >
-          {mode === 'pin' ? (
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              {[0, 1, 2, 3].map((index) => (
-                <span
-                  key={index}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    border: `2px solid ${index < answer.length ? '#9333EA' : '#D1D5DB'}`,
-                    background: index < answer.length ? '#9333EA' : 'transparent',
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <input
-              data-testid="gate-answer-input"
-              type="number"
-              inputMode="numeric"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              style={{
-                width: '100%',
-                border: 'none',
-                outline: 'none',
-                textAlign: 'center',
-                background: 'transparent',
-                color: shaking ? '#EF4444' : '#1E1B4B',
-                font: "700 28px 'Baloo 2', cursive",
-                letterSpacing: 4,
-              }}
-            />
-          )}
-          {mode === 'pin' ? (
-            <input data-testid="gate-answer-input" value={answer} readOnly style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
-          ) : null}
+          <input
+            data-testid="gate-answer-input"
+            type="number"
+            inputMode="numeric"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            style={{
+              width: '100%',
+              border: 'none',
+              outline: 'none',
+              textAlign: 'center',
+              background: 'transparent',
+              color: shaking ? '#EF4444' : '#1E1B4B',
+              font: "700 28px 'Baloo 2', cursive",
+              letterSpacing: 4,
+            }}
+          />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>

@@ -72,6 +72,17 @@ function renderInRouter(ui: React.ReactElement) {
   )
 }
 
+function renderInRouterAt(path: string, ui: React.ReactElement) {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/library" element={ui} />
+        <Route path="/watch/:videoId" element={<div data-testid="watch-page" />} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
 describe('LibraryPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -159,6 +170,11 @@ describe('LibraryPage', () => {
     mockUseVideoLibrary.mockReturnValue({ ...mockVideoLibraryReturn, error: 'Network error' })
     renderInRouter(<LibraryPage />)
     expect(screen.getByTestId('error-state')).toBeInTheDocument()
+  })
+
+  it('reopens parent panel on settings tab when returning from child edit flow', () => {
+    renderInRouterAt('/library?panel=settings', <LibraryPage />)
+    expect(screen.getByTestId('parent-panel')).toBeInTheDocument()
   })
 })
 

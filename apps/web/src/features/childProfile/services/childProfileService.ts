@@ -1,4 +1,4 @@
-import { addDoc, getDocs, getDoc, serverTimestamp, Timestamp, type Firestore } from 'firebase/firestore'
+import { addDoc, doc, getDocs, getDoc, serverTimestamp, Timestamp, updateDoc, type Firestore } from 'firebase/firestore'
 import { db as defaultDb } from '@ckd/shared/firebase/config'
 import { childProfilesCollection } from '@ckd/shared/firebase/collections'
 import { dobFromAgeRange, type AgeRange } from '@ckd/shared/utils/ageRange'
@@ -37,4 +37,22 @@ export async function createChildProfile(
 export async function getChildProfiles(uid: string): Promise<ChildProfile[]> {
   const snap = await getDocs(childProfilesCollection(_db, uid))
   return snap.docs.map((d) => ({ ...d.data(), id: d.id }))
+}
+
+export async function updateChildProfile(
+  uid: string,
+  profileId: string,
+  name: string,
+  ageRange: AgeRange,
+): Promise<ChildProfile> {
+  const ref = doc(_db, 'users', uid, 'childProfiles', profileId)
+
+  await updateDoc(ref, {
+    name: name.trim(),
+    dateOfBirth: Timestamp.fromDate(dobFromAgeRange(ageRange)),
+  })
+
+  const snap = await getDoc(ref)
+  const data = snap.data() as Omit<ChildProfile, 'id'>
+  return { ...data, id: snap.id }
 }

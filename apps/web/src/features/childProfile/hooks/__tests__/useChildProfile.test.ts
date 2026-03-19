@@ -10,6 +10,7 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
 
 vi.mock('../../services/childProfileService', () => ({
   createChildProfile: vi.fn(),
+  updateChildProfile: vi.fn(),
 }))
 
 const mockProfile = {
@@ -53,5 +54,20 @@ describe('useChildProfile', () => {
     expect(mockNavigate).not.toHaveBeenCalled()
     expect(result.current.error).toBe("Couldn't save profile. Try again.")
     expect(result.current.saving).toBe(false)
+  })
+
+  it('updates an existing profile and returns to settings route when configured', async () => {
+    vi.mocked(childProfileService.updateChildProfile).mockResolvedValue(mockProfile)
+
+    const { result } = renderHook(() =>
+      useChildProfile('uid-1', { existingProfileId: 'p1', redirectTo: '/library?panel=settings' }),
+    )
+
+    await act(async () => {
+      await result.current.saveProfile('Arjun', '3-4')
+    })
+
+    expect(childProfileService.updateChildProfile).toHaveBeenCalledWith('uid-1', 'p1', 'Arjun', '3-4')
+    expect(mockNavigate).toHaveBeenCalledWith('/library?panel=settings')
   })
 })

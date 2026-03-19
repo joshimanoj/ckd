@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }))
+
 // ── Mocks ──────────────────────────────────────────────────────────────────
 const mockSetEnabled = vi.fn().mockResolvedValue(undefined)
 let mockNotificationsEnabled = false
@@ -13,8 +16,13 @@ vi.mock('../../hooks/useNotifications', () => ({
 }))
 
 vi.mock('../../../../shared/store/childProfileStore', () => ({
-  useChildProfileStore: vi.fn((selector: (s: { activeProfile: null }) => unknown) =>
-    selector({ activeProfile: null }),
+  useChildProfileStore: vi.fn((selector: (s: { activeProfile: { name: string; dateOfBirth: { toDate: () => Date } } | null }) => unknown) =>
+    selector({
+      activeProfile: {
+        name: 'Arjun',
+        dateOfBirth: { toDate: () => new Date('2022-09-16T00:00:00Z') },
+      },
+    }),
   ),
 }))
 
@@ -70,6 +78,12 @@ describe('SettingsScreen', () => {
     mockNotificationsEnabled = false
     mockGateVisible = false
     mockCheckAnswer.mockReturnValue(false)
+  })
+
+  it('navigates to child profile edit flow when Edit is tapped', () => {
+    render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
+    fireEvent.click(screen.getByTestId('edit-child-details-btn'))
+    expect(mockNavigate).toHaveBeenCalledWith('/profile', { state: { mode: 'edit', returnTo: 'settings' } })
   })
 
   it('should render notification toggle matching notificationsEnabled state', () => {

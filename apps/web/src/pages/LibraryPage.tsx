@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { db } from '@ckd/shared/firebase/config'
 import creatorPhoto from '../assets/creator-photo.jpg'
 import { ParentPanel } from '../features/dashboard/components/ParentPanel'
@@ -14,10 +14,18 @@ export function LibraryPage() {
   const { isVisible, currentQuestion, showGate, hideGate, checkAnswer } = useParentalGate()
   const { videos, allVideos, loading, error, selectedCategory, selectCategory, refresh } = useVideoLibrary(db)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [panelVisible, setPanelVisible] = useState(false)
   const user = useAuthStore((s) => s.user)
   const activeProfile = useChildProfileStore((s) => s.activeProfile)
   const [shaking, setShaking] = useState(false)
+  const panelMode = searchParams.get('panel')
+
+  useEffect(() => {
+    if (panelMode === 'settings') {
+      setPanelVisible(true)
+    }
+  }, [panelMode])
 
   function handleVideoTap(videoId: string) {
     navigate(`/watch/${videoId}`)
@@ -31,6 +39,13 @@ export function LibraryPage() {
     } else {
       setShaking(true)
       setTimeout(() => setShaking(false), 250)
+    }
+  }
+
+  function handleClosePanel() {
+    setPanelVisible(false)
+    if (panelMode === 'settings') {
+      navigate('/library', { replace: true })
     }
   }
 
@@ -77,7 +92,13 @@ export function LibraryPage() {
       />
 
       {panelVisible && user && activeProfile ? (
-        <ParentPanel db={db} uid={user.uid} childProfileId={activeProfile.id} onClose={() => setPanelVisible(false)} />
+        <ParentPanel
+          db={db}
+          uid={user.uid}
+          childProfileId={activeProfile.id}
+          onClose={handleClosePanel}
+          initialTab={panelMode === 'settings' ? 'settings' : 'dashboard'}
+        />
       ) : null}
 
       <ParentalGate

@@ -9,12 +9,13 @@ interface ParentPanelProps {
   uid: string
   childProfileId: string
   onClose: () => void
+  initialTab?: Tab
 }
 
 type Tab = 'dashboard' | 'settings'
 
-export function ParentPanel({ db, uid, childProfileId, onClose }: ParentPanelProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard')
+export function ParentPanel({ db, uid, childProfileId, onClose, initialTab = 'dashboard' }: ParentPanelProps) {
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab)
   const { signOut } = useAuth()
 
   useEffect(() => {

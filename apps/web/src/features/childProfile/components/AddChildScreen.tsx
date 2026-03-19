@@ -11,11 +11,25 @@ interface AddChildScreenProps {
   onSave?: (name: string, ageRange: AgeRange) => Promise<void>
   saving?: boolean
   error?: string | null
+  initialName?: string
+  initialAgeRange?: AgeRange | null
+  title?: string
+  subtitle?: string
+  submitLabel?: string
 }
 
-export function AddChildScreen({ onSave, saving = false, error = null }: AddChildScreenProps) {
-  const [name, setName] = useState('')
-  const [selectedAge, setSelectedAge] = useState<AgeRange | null>(null)
+export function AddChildScreen({
+  onSave,
+  saving = false,
+  error = null,
+  initialName = '',
+  initialAgeRange = null,
+  title = "Add your child's profile",
+  subtitle = "We'll personalise the experience for them",
+  submitLabel = 'Start Watching 🎬',
+}: AddChildScreenProps) {
+  const [name, setName] = useState(initialName)
+  const [selectedAge, setSelectedAge] = useState<AgeRange | null>(initialAgeRange)
 
   const isValid = name.trim().length > 0 && selectedAge !== null
 
@@ -36,8 +50,8 @@ export function AddChildScreen({ onSave, saving = false, error = null }: AddChil
         <div className="ckd-blob" style={{ top: 34, right: -32, opacity: 0.22 }} />
         <div data-testid="top-nav" />
         <div className="ckd-avatar-hero">🧒</div>
-        <h1 className="ckd-screen-title">Add your child&apos;s profile</h1>
-        <p className="ckd-screen-subtitle">We&apos;ll personalise the experience for them</p>
+        <h1 className="ckd-screen-title">{title}</h1>
+        <p className="ckd-screen-subtitle">{subtitle}</p>
       </header>
 
       <div className="ckd-profile-body">
@@ -105,7 +119,7 @@ export function AddChildScreen({ onSave, saving = false, error = null }: AddChil
             className="ckd-btn-primary"
             style={{ width: '100%', marginTop: 24, opacity: isValid && !saving ? 1 : 0.45 }}
           >
-            {saving ? 'Saving...' : 'Start Watching 🎬'}
+            {saving ? 'Saving...' : submitLabel}
           </button>
 
           <button type="button" className="ckd-btn-ghost" style={{ width: '100%', marginTop: 12, color: '#6B7280' }}>
