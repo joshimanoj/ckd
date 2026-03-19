@@ -9,6 +9,8 @@ import { PlayerScreen } from '../features/videoPlayer/components/PlayerScreen'
 import { NotificationOptInSheet } from '../features/notifications/components/NotificationOptInSheet'
 import { useNotifications } from '../features/notifications/hooks/useNotifications'
 
+const PLAYER_EXPANDED_STORAGE_KEY = 'ckd_player_expanded'
+
 export function WatchPage() {
   const { videoId } = useParams<{ videoId: string }>()
   const navigate = useNavigate()
@@ -45,7 +47,17 @@ export function WatchPage() {
 
   const { notificationsEnabled, optIn } = useNotifications(user?.uid ?? '')
   const [showNotifPrompt, setShowNotifPrompt] = useState(false)
+  const [playerExpanded, setPlayerExpanded] = useState(() => sessionStorage.getItem(PLAYER_EXPANDED_STORAGE_KEY) === '1')
   const nextVideoIdRef = useRef<string | null>(null)
+
+  const persistExpandedState = useCallback((expanded: boolean) => {
+    setPlayerExpanded(expanded)
+    if (expanded) {
+      sessionStorage.setItem(PLAYER_EXPANDED_STORAGE_KEY, '1')
+      return
+    }
+    sessionStorage.removeItem(PLAYER_EXPANDED_STORAGE_KEY)
+  }, [])
 
   // currentIdx is -1 when video is null — handlers guard against that
   const currentIdx = video
@@ -100,7 +112,10 @@ export function WatchPage() {
     navigate(`/watch/${selectedVideoId}`)
   }, [flushSession, navigate, video?.videoId])
 
-  const handleBack = useCallback(() => navigate('/library'), [navigate])
+  const handleBack = useCallback(() => {
+    persistExpandedState(false)
+    navigate('/library')
+  }, [navigate, persistExpandedState])
 
   // Keep a ref to latest flushSession so the unmount effect never re-fires on dep changes
   const flushSessionRef = useRef(flushSession)
@@ -127,12 +142,14 @@ export function WatchPage() {
         videoDuration={video.durationSeconds}
         videos={videos}
         currentVideoId={video.videoId}
+        initialExpanded={playerExpanded}
         flushSession={flushSession}
         onBack={handleBack}
         onVideoEnd={handleVideoEnd}
         onNextVideo={handleNextVideo}
         onPrevVideo={handlePrevVideo}
         onSelectVideo={handleSelectVideo}
+        onExpandedChange={persistExpandedState}
         onTimeUpdate={handleTimeUpdate}
         onDurationUpdate={handleDurationUpdate}
       />

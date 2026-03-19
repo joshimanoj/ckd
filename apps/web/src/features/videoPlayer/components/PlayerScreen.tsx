@@ -26,12 +26,14 @@ interface PlayerScreenProps {
   videoDuration?: number
   videos?: Video[]
   currentVideoId?: string
+  initialExpanded?: boolean
   flushSession: () => Promise<void>
   onBack: () => void
   onVideoEnd?: () => void
   onPrevVideo?: () => void
   onNextVideo?: () => void
   onSelectVideo?: (videoId: string) => void
+  onExpandedChange?: (expanded: boolean) => void
   onTimeUpdate?: (currentTime: number) => void
   onDurationUpdate?: (duration: number) => void
 }
@@ -149,12 +151,14 @@ export function PlayerScreen({
   videoDuration = 0,
   videos = [],
   currentVideoId = '',
+  initialExpanded = false,
   flushSession,
   onBack,
   onVideoEnd,
   onPrevVideo,
   onNextVideo,
   onSelectVideo,
+  onExpandedChange,
   onTimeUpdate,
   onDurationUpdate,
 }: PlayerScreenProps) {
@@ -166,7 +170,7 @@ export function PlayerScreen({
   const [displaySeconds, setDisplaySeconds] = useState(0)
   const [ytDuration, setYtDuration] = useState(videoDuration)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isInlineExpanded, setIsInlineExpanded] = useState(false)
+  const [isInlineExpanded, setIsInlineExpanded] = useState(initialExpanded)
   const [expandedControlsVisible, setExpandedControlsVisible] = useState(false)
   const [autoplayBlocked, setAutoplayBlocked] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -229,6 +233,14 @@ export function PlayerScreen({
     }
     setExpandedControlsVisible(true)
   }, [clearControlsHideTimeout, isExpanded])
+
+  useEffect(() => {
+    setIsInlineExpanded(initialExpanded)
+  }, [initialExpanded, youtubeVideoId])
+
+  useEffect(() => {
+    onExpandedChange?.(isExpanded)
+  }, [isExpanded, onExpandedChange])
 
   // Subscribe to YouTube events and keep UI in sync with actual playback state
   useEffect(() => {
@@ -447,14 +459,14 @@ export function PlayerScreen({
       setYtDuration(videoDuration)
       setIsPlaying(true)
       setIsBuffering(false)
-      setIsInlineExpanded(false)
+      setIsInlineExpanded(initialExpanded)
       setExpandedControlsVisible(false)
       setAutoplayBlocked(false)
       desiredPlayingRef.current = true
       autoplayDeadlineRef.current = Date.now() + 4000
     }, 0)
     return () => clearTimeout(t)
-  }, [youtubeVideoId, videoDuration])
+  }, [initialExpanded, youtubeVideoId, videoDuration])
 
   const progressPct = ytDuration > 0 ? Math.min(100, (displaySeconds / ytDuration) * 100) : 0
   const controlsVisible = !isExpanded || expandedControlsVisible
