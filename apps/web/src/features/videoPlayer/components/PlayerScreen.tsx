@@ -14,6 +14,12 @@ function isMobileSafari(): boolean {
   return /iPhone|iPad|iPod/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua)
 }
 
+function isMobileChrome(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /Android|iPhone|iPad|iPod/i.test(ua) && /CriOS|Chrome/i.test(ua) && !/EdgiOS|FxiOS/i.test(ua)
+}
+
 interface PlayerScreenProps {
   youtubeVideoId: string
   videoTitle?: string
@@ -158,6 +164,7 @@ export function PlayerScreen({
   const desiredPlayingRef = useRef(true)
   const autoplayDeadlineRef = useRef(Date.now() + 4000)
   const mobileSafariRef = useRef(isMobileSafari())
+  const mobileChromeRef = useRef(isMobileChrome())
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -327,9 +334,9 @@ export function PlayerScreen({
 
   const handleFullscreen = useCallback(async () => {
     const fullDoc = document as FullscreenCapableDocument
-    const fullscreenTarget =
-      (iframeRef.current as unknown as FullscreenCapableElement | null) ??
-      (containerRef.current as FullscreenCapableElement | null)
+    const fullscreenTarget = mobileChromeRef.current
+      ? (containerRef.current as FullscreenCapableElement | null) ?? (iframeRef.current as unknown as FullscreenCapableElement | null)
+      : (iframeRef.current as unknown as FullscreenCapableElement | null) ?? (containerRef.current as FullscreenCapableElement | null)
 
     if (isInlineExpanded && !document.fullscreenElement && !fullDoc.webkitFullscreenElement) {
       setIsInlineExpanded(false)
