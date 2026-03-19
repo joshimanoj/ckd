@@ -83,7 +83,7 @@ describe('SettingsScreen', () => {
   it('navigates to child profile edit flow when Edit is tapped', () => {
     render(<SettingsScreen uid="uid-1" onSignOut={() => Promise.resolve()} />)
     fireEvent.click(screen.getByTestId('edit-child-details-btn'))
-    expect(mockNavigate).toHaveBeenCalledWith('/profile', { state: { mode: 'edit', returnTo: 'settings' } })
+    expect(mockNavigate).toHaveBeenCalledWith('/profile/edit', { state: { mode: 'edit', returnTo: 'settings' } })
   })
 
   it('should render notification toggle matching notificationsEnabled state', () => {

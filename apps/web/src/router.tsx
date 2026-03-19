@@ -34,6 +34,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/profile/edit',
+    element: (
+      <AuthGuard>
+        <ChildProfilePage />
+      </AuthGuard>
+    ),
+  },
+  {
     path: '/library',
     element: (
       <AuthGuard>

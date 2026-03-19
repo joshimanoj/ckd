@@ -90,7 +90,7 @@ export function SettingsScreen({ uid, onSignOut }: SettingsScreenProps) {
             type="button"
             data-testid="edit-child-details-btn"
             className="ckd-settings__item"
-            onClick={() => navigate('/profile', { state: { mode: 'edit', returnTo: 'settings' } })}
+            onClick={() => navigate('/profile/edit', { state: { mode: 'edit', returnTo: 'settings' } })}
             style={{ width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer', background: '#fff' }}
           >
             <div className="ckd-settings__item-left">
