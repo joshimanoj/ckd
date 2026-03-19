@@ -136,7 +136,6 @@ export function WatchPage() {
   return (
     <>
       <PlayerScreen
-        key={video.videoId}
         youtubeVideoId={video.youtubeVideoId}
         videoTitle={video.title}
         videoDuration={video.durationSeconds}
